@@ -1,0 +1,384 @@
+﻿/* =========================================================
+   MODAL REGISTRAR INGRESO – ULTRA COMPACTO
+   ========================================================= */
+
+/* Contenedor principal del tile */
+.pnp-form .control-tile {
+    margin-bottom: .5rem;
+    /* 🔹 3D suave */
+    background: linear-gradient(145deg, #ffffff, #f5f7f6);
+    border-radius: .5rem;
+    border: 1px solid rgba(220, 227, 223, .95);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, .14), 0 0 0 1px rgba(255, 255, 255, .9) inset;
+}
+
+/* --- Controles en columna --- */
+.pnp-form .inline-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .35rem; /* menos espacio */
+}
+
+    /* ================================
+   INPUT BUSCAR POR CIP CON ICONO
+   ================================ */
+
+    .pnp-form .inline-controls .input-ico {
+        position: relative;
+        width: 60%;
+    }
+
+        .pnp-form .inline-controls .input-ico i {
+            position: absolute;
+            left: .45rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: .7rem; /* icono más pequeño */
+            color: #6b7280;
+            pointer-events: none;
+        }
+
+        /* campo CIP: más chico y solo 1 línea */
+        .pnp-form .inline-controls .input-ico input.form-control {
+            padding-left: 1.6rem !important;
+            padding-top: .12rem;
+            padding-bottom: .12rem;
+            font-size: .72rem; /* 🔴 fuente más pequeña */
+            height: 26px; /* aprox. la mitad */
+            border-radius: .4rem;
+            /* 🔹 3D suave */
+            border: 1px solid #d1d9d4;
+            background: linear-gradient(145deg, #ffffff, #eef3f0);
+            box-shadow: 0 4px 10px rgba(148, 163, 184, .35), 0 0 0 1px rgba(255, 255, 255, .95) inset;
+            transition: box-shadow .15s ease, border-color .15s ease, transform .12s ease;
+        }
+
+            .pnp-form .inline-controls .input-ico input.form-control:focus {
+                border-color: var(--pnp-green, #00471B);
+                box-shadow: 0 6px 14px rgba(22, 163, 74, .45), 0 0 0 1px rgba(255, 255, 255, .95) inset;
+                transform: translateY(-1px);
+            }
+
+/* ================================
+   COMBO PERSONAL (debajo del CIP)
+   ================================ */
+
+.pnp-form .input-group.input-group-sm.soft {
+    width: 60%;
+    /* 🔹 contenedor combo con leve 3D */
+    background: linear-gradient(135deg, #fbfdfc, #eef5f1);
+    border-radius: .4rem;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, .16), 0 0 0 1px rgba(230, 238, 233, 1);
+}
+
+/* Icono de usuario del combo */
+.pnp-form .input-group-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: .4rem 0 0 .4rem;
+    border-color: var(--line, #dce3df);
+    border-right: 0;
+    background: radial-gradient(circle at 30% 30%, #ffffff 0, #e5efe8 65%);
+    color: var(--pnp-green, #00471B);
+    font-size: .7rem;
+    padding-inline: .45rem;
+}
+
+/* Cuerpo del combo */
+.pnp-form .combo-wrap {
+    position: relative;
+    flex: 1 1 auto;
+    display: flex;
+    align-items: stretch;
+    border-radius: 0 .4rem .4rem 0;
+    border: 1px solid var(--line, #dce3df);
+    border-left: 0;
+    background: #fff;
+    overflow: hidden;
+    transition: border-color .12s ease, box-shadow .12s ease, background-color .12s ease;
+}
+
+/* Botón del combo: MUY COMPACTO */
+.pnp-form .combo-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .25rem;
+    padding: .12rem .45rem; /* mucho más bajo */
+    border: 0;
+    background: linear-gradient(145deg, #ffffff, #f3f6f4);
+    cursor: pointer;
+    font-size: .7rem; /* 🔴 texto del combo pequeño */
+    color: var(--ink, #0f1a14);
+    min-height: 24px;
+}
+
+    .pnp-form .combo-btn .combo-value {
+        flex: 1 1 auto;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    .pnp-form .combo-btn i {
+        font-size: .65rem;
+        color: #9ca3af;
+    }
+
+.pnp-form .combo-wrap:hover {
+    border-color: var(--pnp-green, #00471B);
+    background: #f9fafb;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, .12), 0 0 0 1px rgba(255, 255, 255, .95) inset;
+}
+
+.pnp-form .combo-wrap:focus-within {
+    border-color: var(--pnp-green, #00471B);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.95) inset, 0 0 0 3px rgba(0, 71, 27, .18);
+}
+
+/* Select real oculto */
+.pnp-form .sr-only-select {
+    position: absolute !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0;
+    height: 0;
+}
+
+/* ================================
+   PANEL DESPLEGABLE DEL COMBO
+   ================================ */
+
+.combo-panel {
+    background: #ffffff;
+    border-radius: .55rem;
+    border: 1px solid var(--line, #dce3df);
+    box-shadow: 0 18px 32px rgba(15, 26, 20, .28), 0 0 0 1px rgba(255, 255, 255, .95) inset;
+    max-height: 260px; /* más bajo */
+    overflow: hidden;
+    z-index: 2000;
+    display: none;
+}
+
+    .combo-panel.open {
+        display: block;
+    }
+
+/* Buscador interno del combo */
+.combo-search {
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid #e5e7eb;
+    padding: .25rem .45rem;
+    font-size: .7rem;
+    background: #f9fafb;
+}
+
+    .combo-search::placeholder {
+        color: #9ca3af;
+    }
+
+/* Lista opciones */
+.combo-list {
+    max-height: 220px;
+    overflow-y: auto;
+    list-style: none;
+    margin: 0;
+    padding: .15rem 0;
+}
+
+    .combo-list::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .combo-list::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 999px;
+    }
+
+/* Cada opción – también más pequeña */
+.combo-item {
+    padding: .18rem .5rem;
+    font-size: .7rem; /* 🔴 texto más pequeño */
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    cursor: pointer;
+    color: #111827;
+    transition: background-color .12s ease, color .12s ease, transform .08s ease;
+}
+
+    .combo-item[aria-selected="true"] {
+        background: #eef5ff;
+        font-weight: 600;
+        color: var(--pnp-green, #00471B);
+    }
+
+    .combo-item:hover {
+        background: #f3f4f6;
+        transform: translateX(1px);
+    }
+
+/* Mensaje “Sin coincidencias” */
+.combo-empty {
+    padding: .35rem .6rem;
+    font-size: .7rem;
+    color: #6b7280;
+}
+
+/* ================================
+   TIRA DE MENSAJES EN LA PARTE SUPERIOR
+   ================================ */
+
+.pnp-form .status-strip {
+    margin-bottom: .4rem;
+}
+
+    .pnp-form .status-strip .alert {
+        margin-bottom: .25rem;
+        padding-top: .15rem;
+        padding-bottom: .15rem;
+        font-size: .7rem;
+        /* 🔹 Chips más “levantadas” */
+        border-radius: 999px;
+        border: 0;
+        box-shadow: 0 4px 10px rgba(15, 23, 42, .16), 0 0 0 1px rgba(255, 255, 255, .9) inset;
+    }
+
+/* ================================
+   BOTÓN REGISTRAR
+   ================================ */
+
+.pnp-form .actions-inline {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: .25rem;
+}
+
+.pnp-form #btnRegistrarIngreso {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: .2rem;
+    font-size: .76rem;
+    border-radius: .45rem;
+    padding: .15rem .75rem;
+    /* 🔹 3D PNP */
+    border: 0;
+    background-image: linear-gradient(135deg, #059669, #16a34a);
+    color: #ffffff;
+    box-shadow: 0 7px 18px rgba(5, 150, 105, .6), 0 0 0 1px rgba(255,255,255,.9) inset;
+    transform: translateY(0);
+    transition: transform .12s ease, box-shadow .14s ease, filter .12s ease;
+}
+
+    .pnp-form #btnRegistrarIngreso:disabled {
+        opacity: .6;
+        filter: grayscale(.1);
+        box-shadow: 0 4px 10px rgba(148,163,184,.45), 0 0 0 1px rgba(255,255,255,.9) inset;
+        cursor: not-allowed;
+    }
+
+    .pnp-form #btnRegistrarIngreso:not(:disabled):hover {
+        filter: brightness(1.06);
+        transform: translateY(-1px);
+        box-shadow: 0 10px 22px rgba(5,150,105,.75), 0 0 0 1px rgba(255,255,255,.9) inset;
+    }
+
+    .pnp-form #btnRegistrarIngreso:not(:disabled):active {
+        transform: translateY(1px);
+        box-shadow: 0 4px 10px rgba(5,150,105,.7), 0 0 0 1px rgba(230,244,236,1) inset;
+    }
+
+/* Responsive: botón al centro en móvil */
+@media (max-width: 480px) {
+    .pnp-form .actions-inline {
+        justify-content: center;
+    }
+}
+/* ===== CIP y combo con el mismo grosor ===== */
+
+/* Campo CIP */
+.pnp-form .inline-controls .input-ico input.form-control {
+    height: 30px; /* mismo alto que el combo */
+    padding-top: .12rem;
+    padding-bottom: .12rem;
+    padding-left: 1.6rem !important;
+    font-size: .7rem;
+    border-radius: .4rem;
+}
+
+/* Icono del CIP un poco más pequeño */
+.pnp-form .inline-controls .input-ico i {
+    font-size: .7rem;
+}
+
+/* Icono del combo */
+.pnp-form .input-group-text {
+    font-size: .7rem;
+    padding-top: .12rem;
+    padding-bottom: .12rem;
+}
+
+/* Botón del combo: mismo alto que el CIP */
+.pnp-form .combo-btn {
+    min-height: 30px; /* 🔴 igual que el input CIP */
+    padding: .12rem .45rem;
+    font-size: .65rem; /* bien pequeñito */
+}
+
+/* Ítems de la lista del combo aún más pequeños */
+.combo-item {
+    font-size: .65rem;
+    line-height: 1.1;
+    padding-top: .16rem;
+    padding-bottom: .16rem;
+}
+
+/* Buscador interno del combo */
+.combo-search {
+    font-size: .65rem;
+    padding-top: .2rem;
+    padding-bottom: .2rem;
+}
+/* ================================
+   FUENTE UNIFICADA PARA TODO EL COMBO
+   ================================ */
+
+/* Tamaño único para el valor seleccionado */
+.pnp-form .combo-btn,
+.pnp-form .combo-btn .combo-value {
+    font-size: 0.70rem !important; /* 🔴 Ajusta aquí si quieres más pequeño */
+    line-height: 1.2;
+}
+
+/* Tamaño único para la lista desplegada */
+.combo-item {
+    font-size: 0.70rem !important; /* 🔴 MISMO TAMAÑO QUE EL COMBO */
+    line-height: 1.2;
+}
+
+/* Tamaño del buscador interno del combo */
+.combo-search {
+    font-size: 0.70rem !important; /* 🔴 MISMA FUENTE */
+    line-height: 1.2;
+}
+
+/* ===== Registrar Asistencia: modal compacto y adaptable ===== */
+.modal-crud-registro .modal-dialog {
+    max-width: 520px; /* ancho máximo en escritorio */
+    width: 95vw; /* usa el 95% del ancho en pantallas pequeñas */
+    margin: 1.25rem auto;
+}
+
+@media (min-width: 992px) {
+    .modal-crud-registro .modal-dialog {
+        /* Alinear botón "Registrar ingreso" a la derecha */
+        .btn-registrar-inline
+
+{
+    margin-left: auto !important; /* 🔥 ESTO LO EMPUJA A LA DERECHA */
+}

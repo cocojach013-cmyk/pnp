@@ -1,0 +1,632 @@
+﻿@model SistemaControlPNP.Models.Asistencia
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    Layout = null;
+
+    var personales = ViewBag.PersonalList as List<SelectListItem> ?? new List<SelectListItem>();
+
+    TimeZoneInfo limaTz = null;
+    try { limaTz = TimeZoneInfo.FindSystemTimeZoneById("America/Lima"); }
+    catch { limaTz = TimeZoneInfo.FindSystemTimeZoneById("SA Pacific Standard Time"); }
+
+    var ingresoUtc = Model?.FechaIngreso ?? DateTime.UtcNow;
+    var ingresoLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(ingresoUtc, DateTimeKind.Utc), limaTz);
+
+    DateTime? salidaLocal = null;
+    if (Model?.FechaSalida != null)
+    {
+        var sUtc = DateTime.SpecifyKind(Model.FechaSalida.Value, DateTimeKind.Utc);
+        salidaLocal = TimeZoneInfo.ConvertTimeFromUtc(sUtc, limaTz);
+    }
+
+    string ingresoFecha = ingresoLocal.ToString("yyyy-MM-dd");
+    string ingresoHora = ingresoLocal.ToString("HH:mm");
+    string salidaFecha = salidaLocal?.ToString("yyyy-MM-dd") ?? "";
+    string salidaHora = salidaLocal?.ToString("HH:mm") ?? "";
+
+    var hoyLima = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, limaTz).Date;
+    string hoyIso = hoyLima.ToString("yyyy-MM-dd");
+
+    bool tieneSalida = Model?.FechaSalida.HasValue ?? false;
+}
+
+<link rel="stylesheet" href="~/Style/modales-styles.css" asp-append-version="true" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<div class="pnp-form modal-edit-asistencia">
+    <div class="pnp-body">
+        <form id="editarAsistenciaForm" method="post" autocomplete="off" novalidate>
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" id="IdAsistencia" value="@Model.IdAsistencia" />
+            <input type="hidden" id="Control_Asistencia" value="@Model.Control_Asistencia" />
+
+            <!-- Mensajería -->
+            <div id="msgBox" class="alert msg-box-soft" style="display:none;" role="alert" aria-live="assertive"></div>
+
+            <!-- ===== Datos ===== -->
+            <div class="row g-2">
+
+                <!-- Personal -->
+                <div class="col-12">
+                    <div class="control-tile tile-compact">
+                        <label class="form-label" for="IdPersonal">
+                            Personal <span class="req">*</span>
+                        </label>
+
+                        <div class="input-group input-group-sm soft input-group-icon group-personal">
+                            <span class="input-group-text icon-pill icon-personal">
+                                <i class="fas fa-user-tie"></i>
+                            </span>
+                            @Html.DropDownListFor(m => m.IdPersonal, personales,
+                            new
+                            {
+                                @class = "form-select form-select-sm readonly-field flex-fill",
+                                @id = "IdPersonal",
+                                @disabled = "disabled"
+                            })
+                        </div>
+
+                        <small class="text-muted tiny-hint">
+                            Este registro está asociado a este efectivo policial.
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Ingreso -->
+                <div class="col-12">
+                    <div class="control-tile tile-compact">
+                        <label class="form-label">
+                            Ingreso <span class="req">*</span>
+                        </label>
+
+                        <div class="row g-2 align-items-center row-datetime">
+                            <div class="col-6">
+                                <div class="input-group input-group-sm soft input-group-icon">
+                                    <span class="input-group-text icon-pill">
+                                        <i class="fas fa-calendar-day"></i>
+                                    </span>
+                                    <input type="date"
+                                           id="IngresoFecha"
+                                           class="form-control"
+                                           required
+                                           value="@ingresoFecha"
+                                           max="@hoyIso" />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="input-group input-group-sm soft input-group-icon">
+                                    <span class="input-group-text icon-pill">
+                                        <i class="fas fa-clock"></i>
+                                    </span>
+                                    <input type="time"
+                                           id="IngresoHora"
+                                           class="form-control"
+                                           required
+                                           value="@ingresoHora" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salida -->
+                <div class="col-12">
+                    <div class="control-tile tile-compact">
+                        <label class="form-label">Salida</label>
+
+                        <div class="row g-2 align-items-center row-datetime">
+                            <div class="col-6">
+                                <div class="input-group input-group-sm soft input-group-icon">
+                                    <span class="input-group-text icon-pill">
+                                        <i class="fas fa-calendar-check"></i>
+                                    </span>
+                                    <input type="date"
+                                           id="SalidaFecha"
+                                           class="form-control"
+                                           value="@salidaFecha"
+                                           max="@hoyIso" />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="input-group input-group-sm soft input-group-icon">
+                                    <span class="input-group-text icon-pill">
+                                        <i class="fas fa-clock"></i>
+                                    </span>
+                                    <input type="time"
+                                           id="SalidaHora"
+                                           class="form-control"
+                                           value="@salidaHora" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <small class="text-muted tiny-hint">
+                            La salida no puede ser anterior al ingreso.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Acciones ===== -->
+            <div class="footer-actions mt-3">
+                <div class="footer-hint text-muted small" id="lastHint"></div>
+
+                <div class="footer-buttons">
+                    @if (!tieneSalida)
+                    {
+                        <button type="button" id="btnCerrarAhora" class="btn btn-outline-success btn-sm btn-flat">
+                            <i class="fas fa-door-open"></i> Marcar salida ahora
+                        </button>
+                    }
+
+                    <a class="btn btn-back btn-sm" data-dismiss="modal">
+                        <i class="fas fa-arrow-circle-left"></i> Atrás
+                    </a>
+
+                    <button type="button" id="btnGuardarAsis" class="btn btn-save btn-sm">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal éxito -->
+<div id="modalEdicionExitosa"
+     class="modal fade modal-center modal-xs"
+     tabindex="-1"
+     role="dialog"
+     aria-hidden="true"
+     data-backdrop="static"
+     data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content modal-success-soft" role="status" aria-live="polite">
+            <div class="modal-body text-center py-4">
+                <div class="mb-2 icon-success-wrap">
+                    <i class="fas fa-check-circle" aria-hidden="true"></i>
+                </div>
+                <h5 class="mb-1">¡Cambios guardados exitosamente!</h5>
+                <p class="mb-0 small text-muted">
+                    Esta ventana se cerrará automáticamente.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+      function csrf(){ return $('input[name="__RequestVerificationToken"]').first().val(); }
+      function $msg(){ return $('#msgBox'); }
+
+      function showMsg(text,type){
+        const $b=$msg();
+        $b.removeClass('alert-danger alert-warning alert-info alert-success')
+          .addClass('alert-'+(type||'info'))
+          .text(text||'')
+          .fadeIn(120);
+      }
+
+      // Mantengo tu lógica, solo está esta función así para que no se "coma" mensajes al reintentar
+      function hideMsg(){
+        const $b = $msg();
+        $b.stop(true, true)
+          .hide()
+          .text('')
+          .attr('class','alert msg-box-soft');
+      }
+
+      function getDTO(){
+        return {
+          IdAsistencia: parseInt($('#IdAsistencia').val()||'0'),
+          IdPersonal:   parseInt($('#IdPersonal').val()||'0'),
+          IngresoFecha: ($('#IngresoFecha').val()||'').trim(),
+          IngresoHora:  ($('#IngresoHora').val()||'').trim(),
+          SalidaFecha:  ($('#SalidaFecha').val()||'').trim(),
+          SalidaHora:   ($('#SalidaHora').val()||'').trim(),
+          Control_Asistencia: ($('#Control_Asistencia').val()||'').trim()
+        };
+      }
+
+      function shallow(o){ return JSON.parse(JSON.stringify(o)); }
+      function same(a,b){ for(const k in a){ if(a[k]!==b[k]) return false; } return true; }
+
+      let initial = null;
+      function snapshot(){ initial = shallow(getDTO()); }
+
+      function isValidDateStr(s){ return /^\d{4}-\d{2}-\d{2}$/.test(s); }
+      function isValidTimeStr(s){ return /^\d{2}:\d{2}$/.test(s); }
+      function compareDateTimes(fA,hA,fB,hB){
+        const a = new Date(fA+'T'+hA+':00');
+        const b = new Date(fB+'T'+hB+':00');
+        if(a>b) return 1; if(a<b) return -1; return 0;
+      }
+
+      function validateClient(dto){
+        if(!dto.IdAsistencia || !dto.IdPersonal || !dto.IngresoFecha || !dto.IngresoHora){
+          showMsg('Completa los campos obligatorios: Personal, Fecha y Hora de ingreso.','warning');
+          return false;
+        }
+        if(!isValidDateStr(dto.IngresoFecha) || !isValidTimeStr(dto.IngresoHora)){
+          showMsg('Formato de ingreso inválido.','warning');
+          return false;
+        }
+        if((dto.SalidaFecha && !dto.SalidaHora) || (!dto.SalidaFecha && dto.SalidaHora)){
+          showMsg('Para registrar salida debes completar fecha y hora.','warning');
+          return false;
+        }
+        if(dto.SalidaFecha){
+          if(!isValidDateStr(dto.SalidaFecha) || !isValidTimeStr(dto.SalidaHora)){
+            showMsg('Formato de salida inválido.','warning');
+            return false;
+          }
+          if(compareDateTimes(dto.SalidaFecha,dto.SalidaHora,dto.IngresoFecha,dto.IngresoHora)<0){
+            showMsg('La salida no puede ser anterior al ingreso.','warning');
+            return false;
+          }
+        }
+        hideMsg();
+        return true;
+      }
+
+      $('#btnGuardarAsis').on('click', function(e){
+        e.preventDefault();
+        hideMsg();
+        const dto = getDTO();
+
+        // 🔴 CAMBIO SOLO AQUÍ: ahora este mensaje se marca como 'warning' para que salga en rojo
+        if(initial && same(initial, dto)){
+          showMsg('No se realizaron modificaciones.','warning');
+          return;
+        }
+
+        if(!validateClient(dto)) return;
+
+        const $btn=$(this).prop('disabled', true);
+        $.ajax({
+          url: '@Url.Action("ActualizarAsistencia", "Asistencia")',
+          type:'POST',
+          headers:{ 'RequestVerificationToken': csrf() },
+          contentType:'application/json; charset=utf-8',
+          data: JSON.stringify(dto)
+        })
+        .done(function(resp){
+          if(resp && resp.success){
+            const $m = $('#modalEdicionExitosa');
+            $m.find('h5').text('¡Cambios guardados exitosamente!');
+            $m.modal({backdrop:'static', keyboard:false, show:true});
+            setTimeout(function(){
+              $m.modal('hide');
+              $('#editarModal').modal('hide');
+              location.reload();
+            }, 1100);
+          } else {
+            showMsg((resp && resp.message) || 'No se pudo guardar.','danger');
+          }
+        })
+        .fail(function(){
+          showMsg('Error del servidor.','danger');
+        })
+        .always(function(){
+          $btn.prop('disabled',false);
+        });
+      });
+
+      $('#btnCerrarAhora').on('click', function(e){
+        e.preventDefault();
+        hideMsg();
+        const id = parseInt($('#IdAsistencia').val()||'0');
+        if(!id){
+          showMsg('IdAsistencia inválido.','danger');
+          return;
+        }
+
+        const $btn=$(this).prop('disabled', true);
+        $.ajax({
+          url: '@Url.Action("CerrarAsistenciaAhora", "Asistencia")',
+          type:'POST',
+          headers:{ 'RequestVerificationToken': csrf() },
+          contentType:'application/json; charset=utf-8',
+          data: JSON.stringify({ IdAsistencia: id })
+        })
+        .done(function(resp){
+          if(resp && resp.success){
+            const $m = $('#modalEdicionExitosa');
+            $m.find('h5').text('¡Salida registrada exitosamente!');
+            $m.modal({backdrop:'static', keyboard:false, show:true});
+            setTimeout(function(){
+              $m.modal('hide');
+              $('#editarModal').modal('hide');
+              location.reload();
+            }, 1100);
+          } else {
+            showMsg((resp && resp.message) || 'No se pudo marcar la salida.','danger');
+          }
+        })
+        .fail(function(){
+          showMsg('Error del servidor.','danger');
+        })
+        .always(function(){
+          $btn.prop('disabled',false);
+        });
+      });
+
+      $(function(){ snapshot(); });
+    })();
+</script>
+
+<style>
+    /* ===== BASE MODAL ===== */
+    .modal-edit-asistencia {
+        max-width: 100%;
+        overflow-x: hidden !important;
+    }
+
+        .modal-edit-asistencia * {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .modal-edit-asistencia .control-tile {
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1px solid var(--line, #dce3df);
+            padding: .6rem .75rem;
+            margin-bottom: .35rem;
+            box-shadow: 0 2px 4px rgba(15,26,20,.04);
+        }
+
+        .modal-edit-asistencia .tile-compact {
+            padding-bottom: .5rem;
+        }
+
+        .modal-edit-asistencia .form-label {
+            font-size: .8rem;
+            font-weight: 600;
+            color: var(--pnp-green, #00471B);
+            margin-bottom: .2rem;
+        }
+
+        /* ===== PERSONAL: icono + combo ===== */
+        .modal-edit-asistencia .group-personal {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            align-items: stretch;
+            width: 100%;
+        }
+
+            .modal-edit-asistencia .group-personal .icon-pill {
+                flex: 0 0 auto;
+                margin: 0;
+                min-width: 34px;
+            }
+
+        /* 🔴 Combo: lo más ancho posible + fuente muy pequeña y responsive */
+        .modal-edit-asistencia .readonly-field {
+            background-color: #f5f7fb;
+            border-left: 0;
+            cursor: not-allowed;
+            flex: 1 1 auto;
+            width: 100%;
+            min-width: 0;
+            font-size: 0.70rem !important; /* escritorio */
+            padding-top: .12rem;
+            padding-bottom: .12rem;
+            padding-left: .45rem;
+            padding-right: 1.2rem;
+        }
+
+            .modal-edit-asistencia .readonly-field.form-select {
+                height: 58px;
+                line-height: 1.2;
+            }
+
+            /* tamaño de fuente dentro de las opciones */
+            .modal-edit-asistencia .readonly-field option {
+                font-size: 0.90rem;
+            }
+
+        /* ===== Input group con icono ===== */
+        .modal-edit-asistencia .input-group-icon .icon-pill {
+            border-radius: .75rem 0 0 .75rem;
+            background: #ffffff;
+            border-color: var(--line, #dce3df);
+            color: var(--pnp-green, #00471B);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-edit-asistencia .input-group-icon .form-control,
+        .modal-edit-asistencia .input-group-icon .form-select {
+            border-radius: 0 .75rem .75rem 0;
+            font-size: .8rem;
+            padding-top: .15rem;
+            padding-bottom: .15rem;
+        }
+
+        /* Hints y mensajes */
+        .modal-edit-asistencia .tiny-hint {
+            display: block;
+            margin-top: .15rem;
+            font-size: .68rem;
+        }
+
+        .modal-edit-asistencia .msg-box-soft {
+            border-radius: 999px;
+            padding: .35rem .75rem;
+            font-size: .78rem;
+            margin-bottom: .45rem;
+        }
+
+    /* 🔴 Mensajes de error en rojo (warning / danger) */
+    #msgBox.alert-danger,
+    #msgBox.alert-warning {
+        background-color: #fee2e2 !important;
+        color: #b91c1c !important;
+        border: 1px solid #fca5a5 !important;
+    }
+
+    #msgBox.alert-info {
+        background-color: #dbeafe !important;
+        color: #1e40af !important;
+    }
+
+    #msgBox.alert-success {
+        background-color: #dcfce7 !important;
+        color: #166534 !important;
+    }
+
+    /* ===== Footer / Botones ===== */
+    .modal-edit-asistencia .footer-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end !important;
+        gap: .45rem;
+        flex-wrap: wrap;
+    }
+
+    .modal-edit-asistencia .footer-hint {
+        margin-right: auto;
+    }
+
+    .modal-edit-asistencia .footer-buttons {
+        display: flex;
+        justify-content: flex-end !important;
+        align-items: center;
+        gap: .45rem;
+        flex-wrap: wrap;
+    }
+
+        .modal-edit-asistencia .footer-buttons .btn {
+            border-radius: 999px !important;
+            padding: .28rem .9rem;
+            font-size: .78rem;
+        }
+
+    .modal-edit-asistencia .btn-flat {
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        gap: .25rem;
+        font-size: .78rem;
+    }
+
+    .modal-edit-asistencia .btn-back {
+        background: #e5e7eb !important;
+        color: #374151 !important;
+        border: 1px solid #d1d5db !important;
+    }
+
+        .modal-edit-asistencia .btn-back i {
+            margin-right: 3px;
+        }
+
+        .modal-edit-asistencia .btn-back:hover {
+            background: #d7d9dc !important;
+        }
+
+    .modal-edit-asistencia .btn-save {
+        background: #007bff !important;
+        color: #fff !important;
+        border: none !important;
+    }
+
+        .modal-edit-asistencia .btn-save:hover {
+            background: #0069d9 !important;
+        }
+
+    /* Modal éxito */
+    .modal-success-soft {
+        border-radius: 18px;
+        border: 1px solid var(--line, #dce3df);
+        box-shadow: 0 14px 36px rgba(0,0,0,.25);
+    }
+
+        .modal-success-soft .icon-success-wrap {
+            font-size: 3rem;
+            line-height: 1;
+            color: #16a34a;
+        }
+
+    /* Anti-scroll */
+    .modal-edit-asistencia .row {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+    }
+
+    .modal-edit-asistencia .col-6,
+    .modal-edit-asistencia .col-12 {
+        max-width: 100% !important;
+    }
+
+    .modal-edit-asistencia .input-group {
+        max-width: 100% !important;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    /* Modal éxito: evitar que se vea gigante antes y luego se reduzca */
+    #modalEdicionExitosa .modal-dialog {
+        max-width: 320px;
+        margin: 1.25rem auto;
+    }
+
+    /* ===== RESPONSIVE: bajar aún más fuente del combo ===== */
+    @@media (max-width: 768px) {
+        .modal-edit-asistencia .readonly-field {
+            font-size: 0.62rem !important;
+            padding-left: .4rem;
+            padding-right: 1rem;
+        }
+
+            .modal-edit-asistencia .readonly-field option {
+                font-size: 0.62rem;
+            }
+    }
+
+    @@media (max-width: 480px) {
+        .modal-edit-asistencia .readonly-field {
+            font-size: 0.55rem !important;
+            padding-left: .35rem;
+            padding-right: .9rem;
+        }
+
+            .modal-edit-asistencia .readonly-field option {
+                font-size: 0.55rem;
+            }
+        /* Fecha / Hora una debajo de otra */
+        .modal-edit-asistencia .row-datetime .col-6 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+    }
+
+
+    /* ===== FIX REAL: evitar que el modal de éxito aparezca grande ===== */
+
+    /* Antes de que Bootstrap lo muestre, el dialog DEBE YA tener tamaño pequeño */
+    #modalEdicionExitosa .modal-dialog {
+        max-width: 310px !important;
+        width: 100% !important;
+        margin: 1.25rem auto !important;
+        transform: translateY(0) !important; /* evita animación rara */
+    }
+
+    /* Evita expansión previa del contenido */
+    #modalEdicionExitosa .modal-content {
+        width: 100% !important;
+        transform: none !important;
+        transition: none !important; /* sin reflow visual */
+        animation: none !important;
+    }
+
+    /* Evita la animación fade inicial que causa el “salto” */
+    #modalEdicionExitosa.modal.fade .modal-dialog {
+        transition: none !important;
+        transform: none !important;
+    }
+
+</style>

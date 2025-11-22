@@ -1,0 +1,1162 @@
+﻿@model SistemaControlPNP.Models.Personal
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+	Layout = null;
+
+	// Fecha/hora actual del servidor (se envía como hidden)
+	var now = DateTime.Now;
+	var nowIso = now.ToString("o"); // ISO 8601
+	var maxDate = DateTime.UtcNow.ToString("yyyy-MM-dd");
+
+	var placeholder = Url.Content("~/Imagenes/sin-perfil.jpg");
+	var fotoActual = string.IsNullOrWhiteSpace(Model?.Foto) ? placeholder : Model.Foto;
+}
+
+<link rel="stylesheet" href="~/Style/modales-styles.css" asp-append-version="true" />
+<style>
+    /* =========================================================
+       EDITAR PERSONAL – CONTENEDOR PRINCIPAL
+       ========================================================= */
+    .pnp-form {
+        --pnp-green: #00471b;
+        --pnp-gold: #b8963b;
+        --pnp-soft: #f3f6f8;
+        --tile-border: rgba(10, 24, 18, 0.06);
+        background: radial-gradient(circle at top left, #f7fafc 0, #e4edf3 28%, #dde7ec 55%, #d4e0e7 100%);
+        border-radius: 16px;
+        padding: 0.65rem 0.75rem 0.75rem;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+        border: 1px solid rgba(15, 26, 20, 0.16);
+        position: relative;
+        overflow: hidden;
+        max-width: 100%;
+    }
+
+        .pnp-form::before {
+            content: "";
+            position: absolute;
+            inset: -40%;
+            background: radial-gradient(circle at 0 0, rgba(185, 150, 59, 0.15) 0, transparent 55%), radial-gradient(circle at 100% 0, rgba(0, 71, 27, 0.14) 0, transparent 60%);
+            opacity: 0.9;
+            pointer-events: none;
+        }
+
+        .pnp-form .pnp-body {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Quitar espacios laterales internos (uso de g-0) */
+        .pnp-form .row.g-0 > [class*="col"] {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        .pnp-form .row.g-0 {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+
+        /* =========================================================
+       TILES 3D COMPACTOS
+       ========================================================= */
+        .pnp-form .control-tile {
+            background: linear-gradient(145deg, #ffffff, #ecf2f4);
+            border-radius: 12px;
+            border: 1px solid var(--tile-border);
+            padding: .35rem .55rem .45rem;
+            margin-bottom: .28rem;
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .pnp-form .control-tile::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: linear-gradient( 120deg, rgba(148, 163, 184, 0.25), transparent 40%, transparent 60%, rgba(148, 163, 184, 0.12) );
+                mix-blend-mode: soft-light;
+                opacity: 0;
+                transition: opacity .18s ease-out;
+                pointer-events: none;
+            }
+
+            .pnp-form .control-tile:hover::before {
+                opacity: .55;
+            }
+
+        .pnp-form .form-label {
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--pnp-green);
+            margin-bottom: .15rem;
+            letter-spacing: .02em;
+            text-transform: uppercase;
+        }
+
+        .pnp-form .req {
+            color: #b91c1c;
+            margin-left: 2px;
+            font-weight: 700;
+        }
+
+        /* =========================================================
+       INPUTS + ICONOS (ULTRA COMPACTOS)
+       ========================================================= */
+        .pnp-form .input-group.soft {
+            background: #f9fafb;
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            height: 30px;
+        }
+
+        .pnp-form .input-group-text {
+            border: none;
+            background: linear-gradient(135deg, #ffffff, #e5e7eb);
+            color: var(--pnp-green);
+            border-right: 1px solid rgba(148, 163, 184, 0.45);
+            min-width: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: .1rem .35rem;
+            font-size: .7rem;
+        }
+
+        .pnp-form .form-control,
+        .pnp-form .form-select {
+            border: none;
+            background: transparent;
+            font-size: .73rem;
+            padding-top: .05rem;
+            padding-bottom: .05rem;
+            padding-left: .3rem;
+            padding-right: .45rem;
+            box-shadow: none !important;
+            min-height: 26px;
+        }
+
+            .pnp-form .form-control:focus,
+            .pnp-form .form-select:focus {
+                background: #f1f5f9;
+                box-shadow: none;
+            }
+
+        /* =========================================================
+       FOTO / AVATAR 3D
+       ========================================================= */
+        .pnp-form .photo-tile {
+            min-height: 100%;
+        }
+
+        .pnp-form .photo-uploader {
+            display: flex;
+            flex-direction: column;
+            gap: .35rem;
+        }
+
+        .pnp-form .photo-dropzone {
+            border-radius: 14px;
+            border: 1px dashed rgba(148, 163, 184, 0.9);
+            background: radial-gradient(circle at top, #f9fafb 0, #eef2f7 55%, #e5edf5 100%);
+            padding: .5rem .45rem;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.16);
+            transition: transform .12s ease-out, box-shadow .12s ease-out, border-color .12s;
+        }
+
+            .pnp-form .photo-dropzone:hover,
+            .pnp-form .photo-dropzone.dragover {
+                transform: translateY(-1px);
+                box-shadow: 0 12px 26px rgba(15, 23, 42, 0.2);
+                border-color: var(--pnp-green);
+            }
+
+        .pnp-form .dz-ico {
+            font-size: 1.25rem;
+            color: var(--pnp-green);
+            margin-bottom: .1rem;
+        }
+
+        .pnp-form .dz-sub {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .45rem;
+            margin-bottom: .05rem;
+        }
+
+        .pnp-form .linklike {
+            background: transparent;
+            border: none;
+            color: var(--pnp-green);
+            font-size: .76rem;
+            text-decoration: underline;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .pnp-form .dz-hint {
+            font-size: .66rem;
+            color: #6b7280;
+        }
+
+        /* Avatar doble (actual / nueva) */
+        .pnp-form .photo-preview {
+            display: flex;
+            gap: .45rem;
+            flex-wrap: wrap;
+        }
+
+        .pnp-form .avatar-figure {
+            margin: 0;
+            display: inline-block;
+            border-radius: 14px;
+            padding: .18rem;
+            background: linear-gradient(135deg, #e5e7eb, #ffffff);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.18);
+            position: relative;
+        }
+
+        .pnp-form .avatar-img {
+            display: block;
+            width: 90px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.7);
+        }
+
+        .pnp-form .avatar-cap {
+            margin-top: .15rem;
+            font-size: .62rem;
+            text-align: center;
+            color: #4b5563;
+        }
+
+        .pnp-form .avatar-actions {
+            position: absolute;
+            top: .25rem;
+            right: .25rem;
+            display: flex;
+            flex-direction: column;
+            gap: .16rem;
+        }
+
+        .pnp-form .btn-mini {
+            border-radius: 999px;
+            border: none;
+            padding: .1rem .28rem;
+            font-size: .6rem;
+            box-shadow: 0 4px 9px rgba(15, 23, 42, 0.35);
+            background: rgba(15, 23, 42, 0.85);
+            color: #f9fafb;
+            cursor: pointer;
+        }
+
+            .pnp-form .btn-mini.danger {
+                background: #b91c1c;
+            }
+
+        /* =========================================================
+       HUELLA DIGITAL
+       ========================================================= */
+        .pnp-form .huella-figure {
+            margin: 0;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            padding: .25rem .28rem .3rem;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ffffff, #e5eff5);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.22);
+            border: 1px solid rgba(148, 163, 184, 0.7);
+        }
+
+        .pnp-form .huella-img {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: #f9fafb;
+            padding: .2rem;
+        }
+
+        /* =========================================================
+       BARRA DE BOTONES (Acciones)
+       ========================================================= */
+        .pnp-form .col-actions .btn-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: .45rem;
+            margin-top: .3rem;
+        }
+
+        .pnp-form .col-actions .btn {
+            border-radius: 999px !important;
+            font-size: .85rem !important;
+            padding: .34rem 1rem !important;
+            display: inline-flex;
+            align-items: center;
+            gap: .25rem;
+        }
+
+        /* Botón GUARDAR más 3D */
+        .pnp-form #btnGuardarEdicion {
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.5);
+            transform: translateY(0);
+            transition: transform .1s ease-out, box-shadow .1s ease-out;
+        }
+
+            .pnp-form #btnGuardarEdicion:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 12px 24px rgba(37, 99, 235, 0.65);
+            }
+
+            .pnp-form #btnGuardarEdicion:active {
+                transform: translateY(0);
+                box-shadow: 0 4px 10px rgba(37, 99, 235, 0.6);
+            }
+
+        /* =========================================================
+       MENSAJES DE ERROR (form-error)
+       ========================================================= */
+        .pnp-form .form-error {
+            margin: .3rem 0 .45rem;
+            padding: .22rem .65rem;
+            border-radius: 999px;
+            font-size: .76rem;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            display: none;
+        }
+
+            .pnp-form .form-error.show {
+                display: block;
+            }
+
+    /* =========================================================
+       MODAL ÉXITO EDICIÓN (compacto)
+       ========================================================= */
+    #modalEdicionExitosa .modal-dialog {
+        max-width: 320px;
+        margin: 1.2rem auto;
+    }
+
+    #modalEdicionExitosa .modal-content {
+        border-radius: 16px;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        background: radial-gradient(circle at top, #ecfdf5 0, #e0f2fe 40%, #eff6ff 100%);
+        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.4);
+    }
+
+    #modalEdicionExitosa .modal-body h5 {
+        font-size: .95rem;
+        font-weight: 700;
+        color: #064e3b;
+    }
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+    @@media (max-width: 768px) {
+        .pnp-form {
+            padding: .55rem .55rem .65rem;
+        }
+
+            .pnp-form .avatar-img {
+                width: 80px;
+                height: 80px;
+            }
+
+            .pnp-form .col-actions .btn-bar {
+                justify-content: flex-start;
+            }
+    }
+
+    @@media (max-width: 576px) {
+        .pnp-form .control-tile {
+            padding: .38rem .5rem .4rem;
+        }
+
+        .pnp-form .form-control,
+        .pnp-form .form-select {
+            font-size: .74rem;
+        }
+    }
+
+    /* Evitar desbordes horizontales del modal */
+    .modal {
+        overflow-x: hidden !important;
+    }
+    /* ===== FIX REAL: evitar que el modal de éxito aparezca grande ===== */
+
+    /* Antes de que Bootstrap lo muestre, el dialog DEBE YA tener tamaño pequeño */
+    #modalEdicionExitosa .modal-dialog {
+        max-width: 310px !important;
+        width: 100% !important;
+        margin: 1.25rem auto !important;
+        transform: translateY(0) !important; /* evita animación rara */
+    }
+
+    /* Evita expansión previa del contenido */
+    #modalEdicionExitosa .modal-content {
+        width: 100% !important;
+        transform: none !important;
+        transition: none !important; /* sin reflow visual */
+        animation: none !important;
+    }
+
+    /* Evita la animación fade inicial que causa el “salto” */
+    #modalEdicionExitosa.modal.fade .modal-dialog {
+        transition: none !important;
+        transform: none !important;
+    }
+
+</style>
+
+
+<div class="pnp-form">
+	<div class="pnp-body">
+		<form id="editarPersonalForm"
+			  asp-controller="Personal" asp-action="EditarPersonal"
+			  method="post" enctype="multipart/form-data" autocomplete="off" novalidate>
+			@Html.AntiForgeryToken()
+
+			<input type="hidden" name="IdPersonal" value="@Model.IdPersonal" />
+			<input type="hidden" name="FechaModificacion" value="@nowIso" />
+			<input type="hidden" name="Estado" value="@(Model.Estado ? "true" : "false")" />
+
+			<div id="errorMessagesEditar" class="form-error" role="alert"></div>
+
+			<!-- =========================================
+				 BLOQUE SUPERIOR (Datos + Foto)
+				 ========================================= -->
+			<div class="row g-0 align-items-start pt-0">
+				<!-- Izquierda -->
+				<div class="col-12 col-md-8">
+					<div class="row g-0">
+						<!-- Fila 1 -->
+						<div class="col-12 col-md-6">
+							<div class="control-tile">
+								<label class="form-label" for="Grado">Grado<span class="req" aria-hidden="true">*</span></label>
+								<div class="input-group input-group-sm soft">
+									<span class="input-group-text"><i class="fas fa-medal"></i></span>
+									@Html.DropDownListFor(m => m.Grado,
+									(IEnumerable<SelectListItem>)ViewBag.GradosList,
+																		new { @class = "form-select form-select-sm", required = "required", aria_required = "true" })
+								</div>
+							</div>
+						</div>
+						<div class="col-12 col-md-6">
+							<div class="control-tile">
+								<label class="form-label" for="NumeroCip">CIP<span class="req" aria-hidden="true">*</span></label>
+								<div class="input-group input-group-sm soft">
+									<span class="input-group-text"><i class="fas fa-id-card"></i></span>
+									<input class="form-control" asp-for="NumeroCip" required aria-required="true"
+										   maxlength="8" pattern="^\d{8}$"
+										   title="El CIP debe contener exactamente 8 dígitos."
+										   inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'');" />
+								</div>
+							</div>
+						</div>
+
+						<!-- Fila 2 (ajustada a 6/6 como Grado y CIP) -->
+						<div class="row g-0 align-items-end mt-1">
+							<div class="col-12 col-md-6">
+								<div class="control-tile">
+									<label class="form-label" for="Nombres">Nombres<span class="req" aria-hidden="true">*</span></label>
+									<div class="input-group input-group-sm soft">
+										<span class="input-group-text"><i class="fas fa-user"></i></span>
+										<input class="form-control" asp-for="Nombres" required aria-required="true" />
+									</div>
+								</div>
+							</div>
+							<div class="col-12 col-md-6">
+								<div class="control-tile">
+									<label class="form-label" for="Apellidos">Apellidos<span class="req" aria-hidden="true">*</span></label>
+									<div class="input-group input-group-sm soft">
+										<span class="input-group-text"><i class="fas fa-user"></i></span>
+										<input class="form-control" asp-for="Apellidos" required aria-required="true" />
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Fila 3 -->
+						<div class="row g-0 align-items-end mt-1">
+							<div class="col-12 col-md-6">
+								<div class="control-tile">
+									<label class="form-label" for="Dni">DNI<span class="req" aria-hidden="true">*</span></label>
+									<div class="input-group input-group-sm soft">
+										<span class="input-group-text"><i class="fas fa-id-badge"></i></span>
+										<input class="form-control" asp-for="Dni" required aria-required="true"
+											   maxlength="8" pattern="^\d{8}$"
+											   title="El DNI debe contener exactamente 8 dígitos."
+											   inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'');" />
+									</div>
+								</div>
+							</div>
+							<div class="col-12 col-md-6">
+								<div class="control-tile">
+									<label class="form-label" for="Telefono">Teléfono</label>
+									<div class="input-group input-group-sm soft">
+										<span class="input-group-text"><i class="fas fa-phone"></i></span>
+										<input class="form-control" asp-for="Telefono"
+											   maxlength="15" pattern="^\+?\d{1,14}$"
+											   title="Solo números y, opcionalmente, + (máx. 15)."
+											   inputmode="tel" oninput="this.value=this.value.replace(/[^0-9+]/g,'');" />
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Derecha: FOTO -->
+				<div class="col-12 col-md-4">
+					<div class="control-tile photo-tile">
+						<label class="form-label d-block">Foto</label>
+
+						<div class="photo-uploader" id="photoUploaderEdit">
+							<!-- Igual que registrar: input para explorar, y otro con capture como fallback -->
+							<input type="file" id="fotoFileEditar" name="fotoFile" accept="image/jpeg,image/png,image/webp" hidden />
+							<input type="file" id="fotoCaptureInputEditar" accept="image/*" capture="environment" hidden />
+
+							<div class="photo-dropzone" id="photoDropEdit" tabindex="0" role="button" aria-label="Soltar o seleccionar imagen">
+								<div class="dz-ico"><i class="fas fa-camera-retro"></i></div>
+								<div class="dz-sub">
+									<button type="button" class="linklike" id="btnBrowseEdit">Explorar</button>
+									<button type="button" class="linklike" id="btnCaptureEdit">Tomar foto</button>
+								</div>
+								<div class="dz-hint">JPG/PNG/WEBP · máx 2MB</div>
+							</div>
+
+							<!-- Doble preview: Actual vs Nueva (manteniendo tu Edit) -->
+							<div class="photo-preview mt-2" id="photoPreviewEdit" style="align-items:flex-start;">
+								<figure class="avatar-figure">
+									<img id="imgPreviewEditarOld" alt="Foto actual" class="avatar-img"
+										 src="@fotoActual" onerror="this.onerror=null;this.src='@placeholder';" />
+									<figcaption class="avatar-cap">Actual</figcaption>
+								</figure>
+
+								<figure class="avatar-figure" id="newPhotoFigure" style="display:none;">
+									<img id="imgPreviewEditarNew" alt="Nueva foto" class="avatar-img" />
+									<figcaption class="avatar-cap">Nueva</figcaption>
+									<div class="avatar-actions">
+										<button type="button" class="btn-mini" id="btnChangeEdit" title="Cambiar" aria-label="Cambiar">
+											<i class="fas fa-sync"></i>
+										</button>
+										<button type="button" class="btn-mini danger" id="btnFotoClearEditar" title="Quitar" aria-label="Quitar">
+											<i class="fas fa-times"></i>
+										</button>
+									</div>
+								</figure>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- FIN BLOQUE SUPERIOR -->
+			<!-- Fila: Sexo | Fecha | Unidad -->
+			<div class="row g-0 align-items-end mt-1">
+				<div class="col-12 col-md-4">
+					<div class="control-tile">
+						<label class="form-label" for="Sexo">Sexo<span class="req" aria-hidden="true">*</span></label>
+						<div class="input-group input-group-sm soft">
+							<span class="input-group-text"><i class="fas fa-venus-mars"></i></span>
+							@Html.DropDownListFor(m => m.Sexo,
+														new List<SelectListItem> {
+														new SelectListItem { Text = "Masculino", Value = "M" },
+														new SelectListItem { Text = "Femenino", Value = "F" }
+														},
+														"Seleccionar",
+														new { @class = "form-select form-select-sm", required = "required", aria_required = "true" })
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-md-4">
+					<div class="control-tile">
+						<label class="form-label" for="FechaNacimiento">Fecha de nacimiento<span class="req" aria-hidden="true">*</span></label>
+						<div class="input-group input-group-sm soft">
+							<span class="input-group-text"><i class="fas fa-cake-candles"></i></span>
+							<input class="form-control" asp-for="FechaNacimiento" type="date" required aria-required="true"
+								   min="1900-01-01" max="@maxDate" />
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-md-4">
+					<div class="control-tile">
+						<label class="form-label" for="Unidad">Unidad</label>
+						<div class="input-group input-group-sm soft">
+							<span class="input-group-text"><i class="fas fa-building"></i></span>
+							<input class="form-control" asp-for="Unidad" />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Fila: Dirección | Correo -->
+			<div class="row g-0 align-items-end mt-1">
+				<div class="col-12 col-md-6">
+					<div class="control-tile">
+						<label class="form-label" for="Direccion">Dirección</label>
+						<div class="input-group input-group-sm soft">
+							<span class="input-group-text"><i class="fas fa-location-dot"></i></span>
+							<input class="form-control" asp-for="Direccion" />
+						</div>
+					</div>
+				</div>
+
+				<div class="col-12 col-md-6">
+					<div class="control-tile">
+						<label class="form-label" for="CorreoInstitucional">Correo institucional</label>
+						<div class="input-group input-group-sm soft">
+							<span class="input-group-text"><i class="fas fa-envelope"></i></span>
+							@* Input SIN asp-for para evitar value="" cuando está vacío *@
+							<!-- En Razor escribe @@; el navegador verá un solo @@ -->
+							@{
+								var correo = Model?.CorreoInstitucional;
+								var attrValue = string.IsNullOrWhiteSpace(correo) ? "" : $"value=\"{correo}\"";
+							}
+							<input class="form-control" id="CorreoInstitucional" name="CorreoInstitucional" type="email"
+								   required
+								   title="El correo debe ser del dominio @@policia.gob.pe"
+								   inputmode="email" autocomplete="off" @Html.Raw(attrValue) />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Fila: Huella | Acciones -->
+			<div class="row g-0 align-items-start mt-2">
+				<!-- Huella -->
+				<div class="col-12 col-md-6">
+					<div class="control-tile">
+						<label class="form-label d-block">Huella digital</label>
+						<div class="d-flex gap-2 align-items-center flex-wrap">
+							<button type="button" id="btnCapturarHuellaEditar" class="btn btn-outline-primary btn-sm" title="Capturar">
+								<i class="fas fa-fingerprint"></i> Capturar
+							</button>
+							<span id="huellaStatusEditar" class="text-muted small">
+								@(Model?.Huella != null && Model.Huella.Length > 0 ? "Cargada" : "Sin capturar")
+							</span>
+						</div>
+						<input type="hidden" name="HuellaBase64" id="HuellaBase64Editar" />
+						<div class="huella-preview" id="huellaPreviewEditar" style="@(Model?.Huella != null && Model.Huella.Length > 0 ? "" : "display:none;")">
+							<figure class="huella-figure">
+								<img id="huellaPreviewImgEditar" alt="Vista previa de huella" class="huella-img" />
+								<figcaption class="avatar-cap">Huella escaneada</figcaption>
+							</figure>
+						</div>
+					</div>
+				</div>
+
+				<!-- Acciones (columna derecha) -->
+				<div class="col-12 col-md-6 col-actions">
+					<!-- si quieres, aquí arriba puedes poner más contenido de la columna -->
+
+					<div class="btn-bar">
+						<a class="btn btn-warning btn-sm mr-2" data-dismiss="modal">
+							<i class="fas fa-arrow-circle-left"></i> Atrás
+						</a>
+						<button type="button" id="btnGuardarEdicion" class="btn btn-primary btn-sm" title="Guardar">
+							<i class="fas fa-save"></i> Guardar
+						</button>
+					</div>
+				</div>
+
+
+
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- ===== MODAL CÁMARA (MISMO FORMATO QUE REGISTRAR) ===== -->
+<div class="modal fade" id="cameraModalEditar" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+	<div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+		<div class="modal-content">
+			<div class="modal-header py-2">
+				<h5 class="modal-title mb-0" style="font-size:1rem;"><i class="fas fa-camera"></i> Tomar foto</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Cerrar" id="btnCamCloseXEditar"><span aria-hidden="true">&times;</span></button>
+			</div>
+			<div class="modal-body p-2">
+				<div class="cam-wrap">
+					<video id="camVideoEditar" autoplay playsinline></video>
+					<canvas id="camCanvasEditar" style="display:none;"></canvas>
+				</div>
+				<div class="small text-muted mt-1">Permite acceso a la cámara si el navegador lo solicita.</div>
+			</div>
+			<div class="modal-footer justify-content-between py-2">
+				<div>
+					<button type="button" class="btn btn-outline-secondary btn-sm" id="btnCamCancelEditar">Cancelar</button>
+				</div>
+				<div>
+					<button type="button" class="btn btn-outline-primary btn-sm" id="btnCamShotEditar">
+						<i class="fas fa-dot-circle"></i> Capturar
+					</button>
+					<button type="button" class="btn btn-primary btn-sm" id="btnCamUseEditar" disabled>
+						<i class="fas fa-check"></i> Usar foto
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- ===== MODAL ÉXITO ===== -->
+<div id="modalEdicionExitosa" class="modal fade modal-center modal-xs" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+	<div class="modal-dialog">
+		<div class="modal-content" role="status" aria-live="polite">
+			<div class="modal-body text-center py-4">
+				<div class="mb-2" style="font-size:3rem; line-height:1;">
+					<i class="fas fa-check-circle text-success" aria-hidden="true"></i>
+				</div>
+				<h5 class="mb-1">¡Cambios guardados!</h5>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // Esperamos DOM ready para enganchar todo
+  function ready(fn) {
+    if (document.readyState !== 'loading') return fn();
+    document.addEventListener('DOMContentLoaded', fn);
+  }
+
+  ready(function () {
+    // --- Dependencias ---
+    if (typeof jQuery === 'undefined') {
+      console.error('jQuery no está cargado. El formulario AJAX y algunos controles dependen de jQuery.');
+      // No abortamos — algunos comportamientos nativos seguirán funcionando.
+    }
+
+    // Elementos y constantes
+    const maxBytes = 2 * 1024 * 1024;
+    const $err = document.getElementById('errorMessagesEditar');
+
+    function showErr(m) {
+      if ($err) {
+        $err.textContent = m || 'Se produjo un error.';
+        $err.classList.add('show');
+      } else {
+        console.warn('Error container no encontrado:', m);
+      }
+    }
+    function hideErr() {
+      if ($err) { $err.classList.remove('show'); $err.textContent = ''; }
+    }
+
+    // Correo institucional
+    const EMAIL_DOMAIN = '@@policia.gob.pe';
+    const MSG = 'El correo debe ser del dominio ' + EMAIL_DOMAIN;
+    function normalizeToDomain(value) {
+      if (!value) return '';
+      let v = value.trim().toLowerCase();
+      if (!v.includes('@@')) return v;
+      const local = v.split('@@')[0] || '';
+      return local ? (local + EMAIL_DOMAIN) : '';
+    }
+    const RE_EMAIL = new RegExp('^[A-Za-z0-9._%+-]+' + '@@' + 'policia\\.gob\\.pe$', 'i');
+
+    const emailInput = document.querySelector('input[name="CorreoInstitucional"]');
+    if (emailInput) {
+      emailInput.addEventListener('invalid', function () { this.setCustomValidity(MSG); });
+      emailInput.addEventListener('input', function () { this.setCustomValidity(''); });
+      emailInput.addEventListener('keydown', (e) => {
+        if (e.key === '@@') { // algunos navegadores envían una sola @@ en key
+          setTimeout(() => {
+            const before = emailInput.value.length;
+            emailInput.value = normalizeToDomain(emailInput.value);
+            if (emailInput.value.length !== before) {
+              emailInput.setSelectionRange(emailInput.value.length, emailInput.value.length);
+            }
+          }, 0);
+        }
+      });
+      emailInput.addEventListener('input', function () {
+        const before = this.value.length;
+        const newVal = normalizeToDomain(this.value);
+        this.value = newVal || this.value.trim().toLowerCase();
+        if (this.value.length !== before) {
+          this.setSelectionRange(this.value.length, this.value.length);
+        }
+      });
+      emailInput.addEventListener('blur', function () {
+        this.value = normalizeToDomain(this.value) || this.value.trim().toLowerCase();
+      });
+    }
+
+    // --- Uppercase robusto: conserva caret y respeta composición IME ---
+    function bindUppercaseByName(fieldName) {
+      const el = document.querySelector('[name="' + fieldName + '"]');
+      if (!el) return;
+      let composing = false;
+
+      // Durante composición (IME) no forzamos la conversión hasta compositionend
+      el.addEventListener('compositionstart', () => { composing = true; });
+      el.addEventListener('compositionend', () => { composing = false; transform(); });
+
+      function transform() {
+        // record caret positions (si el input los soporta)
+        let start = el.selectionStart, end = el.selectionEnd;
+        const old = el.value || '';
+        const nw = old.toUpperCase();
+        if (old === nw) return;
+        el.value = nw;
+        // restaurar caret si es posible
+        try {
+          if (typeof start === 'number' && typeof end === 'number') {
+            const L = el.value.length;
+            start = Math.min(start, L);
+            end = Math.min(end, L);
+            el.setSelectionRange(start, end);
+          }
+        } catch (e) { /* algunos inputs no permiten setSelectionRange */ }
+      }
+
+      // Input: aplicar transformación solo si NO estamos en composición
+      el.addEventListener('input', () => {
+        if (!composing) transform();
+      });
+
+      // Blur: asegurar uppercase final
+      el.addEventListener('blur', transform);
+
+      // También permitir transformación manual (opcional)
+      el.transformToUpper = transform;
+    }
+    // Bindea los campos requeridos (no tocar nombres si tus name son distintos)
+    ['Nombres', 'Apellidos', 'Unidad', 'Direccion'].forEach(bindUppercaseByName);
+
+    // ===== FOTO: drag&drop / explorar / capture =====
+    const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+
+    const $drop = document.getElementById('photoDropEdit');
+    const $file = document.getElementById('fotoFileEditar');
+    const $cap = document.getElementById('fotoCaptureInputEditar');
+
+    const $newFig = document.getElementById('newPhotoFigure');
+    const $newImg = document.getElementById('imgPreviewEditarNew');
+
+    const $btnBrowse = document.getElementById('btnBrowseEdit');
+    const $btnCapture = document.getElementById('btnCaptureEdit');
+    const $btnChange = document.getElementById('btnChangeEdit');
+    const $btnClear = document.getElementById('btnFotoClearEditar');
+
+    let _u = null;
+    function revoke() { if (_u) { URL.revokeObjectURL(_u); _u = null; } }
+    function showNew(on) { if ($newFig) { $newFig.style.display = on ? '' : 'none'; } }
+    function setNewPreview(file) {
+      revoke();
+      _u = URL.createObjectURL(file);
+      if ($newImg) { $newImg.src = _u; }
+      showNew(true);
+      hideErr();
+    }
+    function clearNew() {
+      revoke();
+      if ($file) $file.value = '';
+      if ($cap) $cap.value = '';
+      if ($newImg) $newImg.removeAttribute('src');
+      showNew(false);
+      if ($drop) { $drop.style.display = ''; $drop.classList.remove('dragover'); }
+    }
+    function validateAndSet(file) {
+      if (!file) return;
+      if (!allowed.includes(file.type)) { showErr('Formato no permitido. Solo JPG/PNG/WEBP.'); clearNew(); return; }
+      if (file.size > maxBytes) { showErr('La foto supera 2MB.'); clearNew(); return; }
+      setNewPreview(file);
+    }
+
+            // ===== CAPTURA DE HUELLA (EDITAR) =====
+        const btnHuellaEdit = document.getElementById('btnCapturarHuellaEditar');
+        const statusHuellaEdit = document.getElementById('huellaStatusEditar');
+        const inputHuellaEdit = document.getElementById('HuellaBase64Editar');
+        const previewHuellaEdit = document.getElementById('huellaPreviewEditar');
+        const imgHuellaEdit = document.getElementById('huellaPreviewImgEditar');
+
+        async function capturarHuellaEditar() {
+            if (!btnHuellaEdit || !inputHuellaEdit || !statusHuellaEdit)
+                return;
+
+            hideErr();
+            statusHuellaEdit.textContent = 'Capturando...';
+
+            // Antiforgery token
+            const tokenField = document.querySelector('#editarPersonalForm input[name="__RequestVerificationToken"]');
+            const token = tokenField ? tokenField.value : null;
+
+            try {
+                const resp = await fetch('/Biometria/CapturarKiosco', {
+                    method: 'POST',
+                    headers: token ? { 'RequestVerificationToken': token } : {}
+                });
+
+                if (!resp.ok) {
+                    throw new Error('HTTP ' + resp.status);
+                }
+
+                const data = await resp.json();
+
+                if (!data || !data.success) {
+                    inputHuellaEdit.value = '';
+                    statusHuellaEdit.textContent = (data && data.message) || 'No se pudo capturar la huella (modo kiosco).';
+                    if (previewHuellaEdit) previewHuellaEdit.style.display = 'none';
+                    return;
+                }
+
+                // Guardamos nuevo template
+                inputHuellaEdit.value = data.huellaBase64 || '';
+                statusHuellaEdit.textContent = 'Huella actualizada.';
+
+                // Igual que en registrar: cuando devuelvas imagen, podrás mostrarla:
+                // if (data.huellaBase64 && imgHuellaEdit) {
+                //     imgHuellaEdit.src = 'data:image/png;base64,' + data.huellaBase64;
+                //     previewHuellaEdit.style.display = '';
+                // }
+            }
+            catch (e) {
+                console.error('Error capturando huella (editar):', e);
+                statusHuellaEdit.textContent = 'Error al capturar la huella.';
+                showErr('Error al capturar la huella (modo kiosco).');
+                if (previewHuellaEdit) previewHuellaEdit.style.display = 'none';
+                inputHuellaEdit.value = '';
+            }
+        }
+
+        if (btnHuellaEdit) {
+            btnHuellaEdit.addEventListener('click', function (ev) {
+                ev.preventDefault();
+                capturarHuellaEditar();
+            });
+        }
+
+
+    // Explorar: click -> file input
+    if ($btnBrowse && $file) {
+      $btnBrowse.addEventListener('click', function (e) {
+        e.preventDefault();
+        $file.click();
+      });
+      $file.addEventListener('change', function () { validateAndSet(this.files && this.files[0]); });
+    } else {
+      console.warn('Botón explorar o input file no encontrados:', $btnBrowse, $file);
+    }
+
+    // Fallback capture input
+    if ($cap) {
+      $cap.addEventListener('change', function () { validateAndSet(this.files && this.files[0]); });
+    }
+
+    if ($btnChange) { $btnChange.addEventListener('click', function () { $file && $file.click(); }); }
+    if ($btnClear) { $btnClear.addEventListener('click', function (e) { e.preventDefault(); clearNew(); }); }
+
+    // Drag & Drop
+    if ($drop) {
+      ['dragenter', 'dragover'].forEach(ev => {
+        $drop.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); $drop.classList.add('dragover'); });
+      });
+      ['dragleave', 'dragend', 'mouseout'].forEach(ev => {
+        $drop.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); $drop.classList.remove('dragover'); });
+      });
+      $drop.addEventListener('drop', (e) => {
+        e.preventDefault(); e.stopPropagation(); $drop.classList.remove('dragover');
+        const dt = e.dataTransfer; if (!dt || !dt.files || !dt.files.length) return;
+        validateAndSet(dt.files[0]);
+      });
+      $drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $file && $file.click(); } });
+    }
+
+    // ===== CÁMARA con getUserMedia =====
+    const $camModal = (typeof $ === 'function' && $('#cameraModalEditar')) ? $('#cameraModalEditar') : null;
+    const $camVideo = document.getElementById('camVideoEditar');
+    const $camCanvas = document.getElementById('camCanvasEditar');
+    const $btnCamShot = document.getElementById('btnCamShotEditar');
+    const $btnCamUse = document.getElementById('btnCamUseEditar');
+    const $btnCamCancel = document.getElementById('btnCamCancelEditar');
+    const $btnCamCloseX = document.getElementById('btnCamCloseXEditar');
+
+    let camStream = null;
+    let lastBlob = null;
+
+    function showErrInline(msg) { showErr(msg || 'No se pudo usar la cámara.'); }
+
+    async function startCamera() {
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('getUserMedia no disponible');
+        camStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false
+        });
+        if ($camVideo) {
+          $camVideo.srcObject = camStream;
+          await $camVideo.play();
+        }
+        if ($btnCamUse) $btnCamUse.disabled = true;
+        if ($camCanvas) $camCanvas.style.display = 'none';
+      } catch (err) {
+        console.error('getUserMedia error', err);
+        showErrInline('No se pudo acceder a la cámara. Permite el acceso o usa “Explorar”.');
+        if ($cap) $cap.click();
+        if ($camModal && typeof $camModal.modal === 'function') $camModal.modal('hide');
+      }
+    }
+
+    function stopCamera() {
+      try {
+        if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+        if ($camVideo) $camVideo.srcObject = null;
+      } catch (e) { console.error(e); }
+    }
+    function closeCamModal() {
+      stopCamera();
+      if ($camModal && typeof $camModal.modal === 'function') $camModal.modal('hide');
+      if ($btnCamUse) $btnCamUse.disabled = true;
+      lastBlob = null;
+    }
+
+    // Abrir cámara desde botón "Tomar foto"
+    if ($btnCapture) {
+      $btnCapture.addEventListener('click', function (ev) {
+        ev.preventDefault();
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          if ($camModal && typeof $camModal.modal === 'function') {
+            $camModal.modal({ backdrop: 'static', keyboard: false, show: true });
+          }
+          startCamera();
+        } else {
+          if ($cap) $cap.click();
+        }
+      });
+    } else {
+      console.warn('Botón "Tomar foto" no encontrado (#btnCaptureEdit)');
+    }
+
+    if ($btnCamCancel) $btnCamCancel.addEventListener('click', closeCamModal);
+    if ($btnCamCloseX) $btnCamCloseX.addEventListener('click', closeCamModal);
+    if ($camModal && typeof $camModal.on === 'function') $camModal.on('hidden.bs.modal', closeCamModal);
+
+    if ($btnCamShot) {
+      $btnCamShot.addEventListener('click', function () {
+        try {
+          const vw = $camVideo ? $camVideo.videoWidth || 1280 : 1280;
+          const vh = $camVideo ? $camVideo.videoHeight || 720 : 720;
+          const side = Math.min(vw, vh);
+          const sx = (vw - side) / 2;
+          const sy = (vh - side) / 2;
+
+          if ($camCanvas) {
+            $camCanvas.width = side;
+            $camCanvas.height = side;
+            const ctx = $camCanvas.getContext('2d');
+            ctx.drawImage($camVideo, sx, sy, side, side, 0, 0, side, side);
+            $camCanvas.style.display = 'block';
+            $camCanvas.toBlob((blob) => {
+              lastBlob = blob;
+              if ($btnCamUse) $btnCamUse.disabled = !lastBlob;
+            }, 'image/jpeg', 0.92);
+          }
+        } catch (e) {
+          console.error(e);
+          showErrInline('No se pudo capturar la imagen.');
+        }
+      });
+    }
+
+    if ($btnCamUse) {
+      $btnCamUse.addEventListener('click', function () {
+        if (!lastBlob) return;
+        try {
+          if (lastBlob.size > maxBytes) { showErrInline('La foto capturada supera 2MB.'); return; }
+          const file = new File([lastBlob], 'camera.jpg', { type: 'image/jpeg', lastModified: Date.now() });
+          const dt = new DataTransfer(); dt.items.add(file);
+          if ($file) { $file.files = dt.files; }
+          validateAndSet(file);
+          closeCamModal();
+        } catch (e) { console.error(e); showErrInline('No se pudo aplicar la foto.'); }
+      });
+    }
+
+    // ===== Guardar (AJAX) =====
+    const $btnGuardar = document.getElementById('btnGuardarEdicion');
+    const form = document.getElementById('editarPersonalForm');
+
+    if (!$btnGuardar) console.warn('Botón Guardar no encontrado (#btnGuardarEdicion)');
+    if (!form) console.warn('Formulario no encontrado (#editarPersonalForm)');
+
+    if ($btnGuardar && form) {
+      $btnGuardar.addEventListener('click', function (e) {
+        e.preventDefault();
+        hideErr();
+
+        // Validación nativa del form
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+        if (emailInput) {
+          const val = (emailInput.value || '').trim().toLowerCase();
+          if (!RE_EMAIL.test(val)) {
+            emailInput.setCustomValidity(MSG);
+            emailInput.reportValidity();
+            return;
+          }
+          emailInput.setCustomValidity('');
+        }
+
+        // Confirmamos que jQuery esté disponible para AJAX
+        if (typeof jQuery === 'undefined') {
+          // intentamos enviar el form de forma tradicional como fallback
+          console.warn('jQuery no disponible — se enviará el form de forma clásica.');
+          form.submit();
+          return;
+        }
+
+        const $btn = $(this).prop('disabled', true);
+        const fd = new FormData(form);
+
+        // Si usas antiforgery token en el formulario, FormData ya lo incluye si está en el form.
+        $.ajax({
+          url: $(form).attr('action'),
+          type: 'POST',
+          processData: false,
+          contentType: false,
+          data: fd
+        })
+          .done(function (resp) {
+            if (resp && resp.success) {
+              // modal de éxito y recarga (igual que antes)
+              const $m = $('#modalEdicionExitosa');
+              $m.modal({ backdrop: 'static', keyboard: false, show: true });
+              setTimeout(function () { $m.modal('hide'); try { $('#editarModal').modal('hide'); } catch (e) { } location.reload(); }, 1200);
+            } else {
+              showErr((resp && resp.message) || 'No se pudo guardar los cambios.');
+            }
+          })
+          .fail(function (xhr) {
+            const msg = (xhr && xhr.responseJSON && xhr.responseJSON.message) || 'Error del servidor.';
+            showErr(msg);
+          })
+          .always(function () { $btn.prop('disabled', false); });
+      });
+    }
+
+    // Small visual/logging helpers for debugging
+    console.info('Editar form: eventos inicializados. jQuery:', typeof jQuery !== 'undefined');
+  }); // ready
+})();
+</script>
+
+

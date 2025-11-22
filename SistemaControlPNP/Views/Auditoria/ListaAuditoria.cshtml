@@ -1,0 +1,515 @@
+﻿@using System.Linq
+@model IEnumerable<ControlPNP.ViewModels.AuditoriaViewModel>
+
+@{
+    ViewData["Title"] = "Auditoría";
+
+    var total = Model?.Count() ?? 0;
+
+    var usuariosDistintos = Model?
+        .Select(r => r.UsuarioLogin ?? "(desconocido)")
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .Count() ?? 0;
+
+    var accionesDistintas = Model?
+        .Select(r => r.Accion ?? "")
+        .Where(s => !string.IsNullOrWhiteSpace(s))
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .Count() ?? 0;
+
+    var ahora = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+}
+
+<link rel="stylesheet" href="~/Style/form-styles.css" asp-append-version="true" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+    /* Mantener los dos campos de fecha en la misma fila */
+    #dateRangeWrapAud {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 0.25rem;
+        align-items: center;
+    }
+
+        #dateRangeWrapAud .input-group {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+</style>
+
+<div id="vista-auditoria" class="container page-wrap content-stretch print-scope vista-crud">
+    <!-- ===== Header ===== -->
+    <div class="header-card mb-2">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+                <h4 class="page-title">
+                    <i class="fas fa-shield-halved"></i> Auditoría del sistema
+                </h4>
+                <div class="page-subtle">
+                    Registros detallados de acciones y eventos del sistema.
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <!-- Pills -->
+                <span class="stat-pill" title="Total de registros" data-toggle="tooltip">
+                    <i class="fas fa-database"></i>
+                    <span id="hdrTotal">@total</span>
+                </span>
+                <span class="stat-pill" title="Usuarios distintos" data-toggle="tooltip">
+                    <i class="fas fa-users"></i>
+                    <span id="hdrUsuarios">@usuariosDistintos</span>
+                </span>
+                <span class="stat-pill" title="Acciones distintas" data-toggle="tooltip">
+                    <i class="fas fa-list-check"></i>
+                    <span id="hdrAcciones">@accionesDistintas</span>
+                </span>
+
+                <div id="searchWrapAud" class="search-wrap search-wrap--one-line">
+                    <!-- Buscador con ícono -->
+                    <div class="input-ico" id="searchTextWrapAud">
+                        <i class="fas fa-search"></i>
+                        <input id="busquedaAud" type="text"
+                               class="form-control form-control-sm"
+                               placeholder="Selecciona un filtro..." disabled aria-disabled="true" />
+                    </div>
+
+                    <!-- Filtro -->
+                    <select id="filtroAud" class="form-select form-select-sm">
+                        <option value="" selected>Filtrar</option>
+                        <option value="usuario">Usuario</option>
+                        <option value="accion">Acción</option>
+                        <option value="registro">RegistroID</option>
+                        <option value="descripcion">Descripción</option>
+                        <option value="ip">IP</option>
+                        <option value="fecha">Fecha/Hora</option>
+                        <option value="inicio_sesion">Con inicio de sesión</option>
+                    </select>
+
+                    <!-- Rango de fechas -->
+                    <div class="date-range d-none" id="dateRangeWrapAud">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">Inicio</span>
+                            <input type="date" id="fechaInicioAud" class="form-control form-control-sm" />
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">Fin</span>
+                            <input type="date" id="fechaFinAud" class="form-control form-control-sm" />
+                        </div>
+                    </div>
+
+                    <!-- Exportar / Imprimir -->
+                    <button type="button" id="btnExportCsv" class="btn btn-success btn-sm"
+                            title="Exportar CSV" data-toggle="tooltip">
+                        <i class="fas fa-file-csv"></i> Exportar
+                    </button>
+
+                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                            onclick="window.print()" title="Imprimir" data-toggle="tooltip">
+                        <i class="fas fa-print"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Checkbox Mostrar todos ===== -->
+    <div class="d-flex justify-content-end mb-1">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="chkAllAud"
+                   @(Context.Request.Query["pageSize"].ToString() == "0" ? "checked" : "") />
+            <label class="form-check-label" for="chkAllAud">
+                Mostrar todos
+            </label>
+        </div>
+    </div>
+
+    <!-- ===== Tabla ===== -->
+    <div class="table-card table-fixed-head">
+        <div class="table-scroll table-scroll-x">
+            <table id="auditoriaTable"
+                   class="table table-bordered table-hover table-sm table-ultra-compact table-wide mb-0 tabla-crud">
+                <colgroup>
+                    <col style="width:16%">
+                    <col style="width:12%">
+                    <col style="width:16%">
+                    <col style="width:18%">
+                    <col style="width:30%">
+                    <col style="width:8%">
+                    <col style="width:12%">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="text-center">Fecha/Hora</th>
+                        <th class="text-center">Usuario</th>
+                        <th class="text-center">Acción</th>
+                        <th class="text-center">RegistroID</th>
+                        <th class="text-center">Descripción</th>
+                        <th class="text-center">IP</th>
+                        <th class="text-center">Inicio Sesión</th>
+                    </tr>
+                </thead>
+                <tbody id="auditoriaTableBody">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var r in Model)
+                        {
+                            var desc = r.Descripcion ?? "";
+                            var larga = desc.Length > 120;
+                            <tr>
+                                <td class="text-center">@r.FechaHoraLocal.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                <td class="text-center">@((r.UsuarioLogin ?? "(desconocido)"))</td>
+                                <td class="text-center">@r.Accion</td>
+                                <td class="text-center">@r.RegistroID</td>
+                                <td class="align-top">
+                                    @if (larga)
+                                    {
+                                        <details>
+                                            <summary class="text-primary">
+                                                Ver detalle (@desc.Length caracteres)
+                                            </summary>
+                                            <pre class="mb-0 small text-break" style="white-space:pre-wrap">@desc</pre>
+                                        </details>
+                                    }
+                                    else
+                                    {
+                                        <span class="small text-break">@desc</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @((string.IsNullOrWhiteSpace(r.IpUsuario) ? "—" : r.IpUsuario))
+                                </td>
+                                <td class="text-center">
+                                    @((r.InicioSesionLocal?.ToString("dd/MM/yyyy HH:mm:ss")) ?? "")
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-box text-center text-muted py-3">
+                                    <i class="fas fa-inbox"></i>
+                                    <div>No hay registros de auditoría.</div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===== Footer ===== -->
+        <div class="table-footer">
+            <div aria-live="polite">
+                Mostrando <strong><span id="countVisiblesAud">@total</span></strong>
+                <span id="wordRegsAud">@((total == 1) ? "registro" : "registros")</span>
+                <span id="usuariosWrapAud" style="display:@(usuariosDistintos > 0 ? "inline" : "none")">
+                    · <strong><span id="countUsuariosAud">@usuariosDistintos</span></strong>
+                    usuario@(usuariosDistintos == 1 ? "" : "s")
+                </span>
+                <span id="accionesWrapAud" style="display:@(accionesDistintas > 0 ? "inline" : "none")">
+                    · <strong><span id="countAccionesAud">@accionesDistintas</span></strong>
+                    acción@(accionesDistintas == 1 ? "" : "es")
+                </span>
+            </div>
+            <div>Actualizado: @ahora</div>
+        </div>
+    </div>
+</div>
+
+<form style="display:none;">@Html.AntiForgeryToken()</form>
+
+@section Scripts {
+    <script>
+        (function(){
+          function csrf(){ return $('input[name="__RequestVerificationToken"]').first().val(); }
+          function norm(s){ return (s||'').toString().toLowerCase()
+                               .normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+          function todayStr(){
+            const now=new Date(); const y=now.getFullYear();
+            const m=String(now.getMonth()+1).padStart(2,'0');
+            const d=String(now.getDate()).padStart(2,'0');
+            return `${y}-${m}-${d}`;
+          }
+
+          // Tooltips
+          $(function(){
+            const $tips=$('[data-toggle="tooltip"]');
+            try{$tips.tooltip('dispose');}catch(e){}
+            $tips.tooltip({
+              trigger:'hover',
+              container:'body',
+              boundary:'window',
+              placement:'top'
+            });
+            $(document).on('click focus','[data-toggle="tooltip"]',function(){
+              $(this).tooltip('hide').blur();
+            });
+          });
+
+          // Columnas
+          const headers = Array.from(
+              document.querySelectorAll('#auditoriaTable thead th')
+          ).map(th => (th.textContent||'').trim().toLowerCase());
+
+          const COL = {
+            fecha:   headers.indexOf('fecha/hora'),
+            usuario: headers.indexOf('usuario'),
+            accion:  headers.indexOf('acción'),
+            registro:headers.indexOf('registroid'),
+            descripcion: headers.indexOf('descripción'),
+            ip: headers.indexOf('ip'),
+            inicio: headers.indexOf('inicio sesión')
+          };
+
+          const $filtro = $('#filtroAud');
+          const $busq  = $('#busquedaAud');
+          const $dIni  = $('#fechaInicioAud');
+          const $dFin  = $('#fechaFinAud');
+          const MAX_TODAY = todayStr();
+
+          const placeholderFor=v=>{
+            switch(v){
+              case 'usuario':       return 'Buscar por usuario...';
+              case 'accion':        return 'Buscar por acción...';
+              case 'registro':      return 'Buscar por RegistroID...';
+              case 'descripcion':   return 'Buscar en descripción...';
+              case 'ip':            return 'Buscar por IP...';
+              case 'fecha':         return 'Selecciona inicio y fin...';
+              case 'inicio_sesion': return 'Mostrar solo con inicio de sesión';
+              default:              return 'Selecciona un filtro...';
+            }
+          };
+
+          // Stats según filas visibles
+          function updateHeaderStatsAndFooter(){
+            const $rowsVis = $('#auditoriaTableBody tr:visible');
+            const visibles = $rowsVis.length;
+
+            $('#countVisiblesAud').text(visibles);
+            $('#wordRegsAud').text(visibles===1?'registro':'registros');
+            $('#hdrTotal').text(visibles); // también la pill de total
+
+            const setU=new Set(), setA=new Set();
+            $rowsVis.each(function(){
+              const tds=this.cells;
+              const u=(COL.usuario>-1?(tds[COL.usuario].textContent||'').trim():'').toLowerCase();
+              const a=(COL.accion>-1?(tds[COL.accion].textContent||'').trim():'').toLowerCase();
+              if(u) setU.add(u);
+              if(a) setA.add(a);
+            });
+
+            $('#hdrUsuarios').text(setU.size);
+            $('#hdrAcciones').text(setA.size);
+            $('#countUsuariosAud').text(setU.size);
+            $('#countAccionesAud').text(setA.size);
+            $('#usuariosWrapAud').css('display', setU.size>0?'inline':'none');
+            $('#accionesWrapAud').css('display', setA.size>0?'inline':'none');
+          }
+
+          // Filtros texto / inicio sesión
+          function matchRow(by,q,tr){
+            const tds=tr.cells; if(!by) return true;
+            const nn=x=>norm(x||'');
+
+            if(by==='usuario'   && COL.usuario>-1)   return nn(tds[COL.usuario].textContent).includes(q);
+            if(by==='accion'    && COL.accion>-1)    return nn(tds[COL.accion].textContent).includes(q);
+            if(by==='registro'  && COL.registro>-1)  return nn(tds[COL.registro].textContent).includes(q);
+            if(by==='descripcion'&&COL.descripcion>-1)return nn(tds[COL.descripcion].textContent).includes(q);
+            if(by==='ip'        && COL.ip>-1)        return nn(tds[COL.ip].textContent).includes(q);
+            if(by==='inicio_sesion' && COL.inicio>-1){
+              const txt=(tds[COL.inicio].textContent||'').trim();
+              return !!txt;
+            }
+            return true;
+          }
+
+          function filtrarTexto(){
+            const by=$filtro.val();
+            const q=norm(($busq.val()||'').trim());
+            $('#auditoriaTableBody tr').each(function(){
+              const ok=by?matchRow(by,q,this):true;
+              this.style.display=ok?'':'none';
+            });
+            updateHeaderStatsAndFooter();
+          }
+
+          // 👉 NUEVO: filtro por fecha usando solo la parte de fecha (dd/MM/yyyy)
+          function filtrarRango(){
+            if ($filtro.val() !== 'fecha') {
+              return;
+            }
+
+            const v1 = $dIni.val() || '';
+            const v2 = $dFin.val() || '';
+
+            if (!v1 && !v2) {
+              // Sin fechas -> mostrar todo
+              $('#auditoriaTableBody tr').show();
+              updateHeaderStatsAndFooter();
+              return;
+            }
+
+            // Convertir yyyy-MM-dd -> yyyymmdd numérico
+            const fromNum = v1 ? parseInt(v1.replace(/-/g, ''), 10) : null;
+            const toNum   = v2 ? parseInt(v2.replace(/-/g, ''), 10) : null;
+
+            $('#auditoriaTableBody tr').each(function () {
+              const cell = this.cells[COL.fecha];
+              if (!cell) {
+                this.style.display = 'none';
+                return;
+              }
+
+              const txt = (cell.textContent || '').trim(); // "dd/MM/yyyy HH:mm:ss"
+              const m = txt.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+
+              if (!m) {
+                this.style.display = 'none';
+                return;
+              }
+
+              // dd/mm/aaaa -> yyyymmdd
+              const dd = m[1], mm = m[2], yyyy = m[3];
+              const cellNum = parseInt(yyyy + mm + dd, 10);
+
+              let ok = true;
+              if (fromNum !== null && cellNum < fromNum) ok = false;
+              if (toNum   !== null && cellNum > toNum)   ok = false;
+
+              this.style.display = ok ? '' : 'none';
+            });
+
+            updateHeaderStatsAndFooter();
+          }
+
+          function toggleInputsByFiltro(){
+            const v=$filtro.val();
+            const isFecha=(v==='fecha');
+
+            if(isFecha){
+              $('#searchTextWrapAud').addClass('d-none');
+              $('#dateRangeWrapAud').removeClass('d-none');
+
+              $busq.prop('disabled',true)
+                   .val('')
+                   .attr('placeholder',placeholderFor('fecha'));
+
+              $dIni.attr('max',MAX_TODAY);
+              $dFin.attr('max',MAX_TODAY);
+
+              filtrarRango();
+            }else{
+              $('#searchTextWrapAud').removeClass('d-none');
+              $('#dateRangeWrapAud').addClass('d-none');
+
+              $dIni.val('');
+              $dFin.val('');
+
+              $('#auditoriaTableBody tr').show();
+
+              if(!v || v==='inicio_sesion'){
+                $busq.prop('disabled',true)
+                     .val('')
+                     .attr('placeholder',placeholderFor(v||''));
+              }else{
+                $busq.prop('disabled',false)
+                     .attr('placeholder',placeholderFor(v))
+                     .focus();
+              }
+
+              updateHeaderStatsAndFooter();
+            }
+          }
+
+          // Eventos
+          let t; const debounce=(fn,ms)=>(...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); };
+
+          $filtro.on('change', toggleInputsByFiltro);
+
+          $busq.on('input', debounce(filtrarTexto,120));
+          $busq.on('keydown', function(e){
+            if(e.key==='Escape'){ $(this).val(''); filtrarTexto(); }
+          });
+
+          $dIni.on('change', function(){
+            const v=$(this).val();
+            if(v && v>MAX_TODAY) $(this).val(MAX_TODAY);
+            if(v){
+              const min=v;
+              $dFin.attr('min',min).attr('max',MAX_TODAY);
+              if(!$dFin.val() || $dFin.val()<min) $dFin.val(min);
+            }else{
+              $dFin.removeAttr('min').attr('max',MAX_TODAY);
+            }
+            filtrarRango();
+          });
+
+          $dFin.on('change', function(){
+            const v=$(this).val();
+            if(v && v>MAX_TODAY) $(this).val(MAX_TODAY);
+            const ini=$dIni.val();
+            if(v && ini && v<ini) $(this).val(ini);
+            if(v && !ini){ $dIni.val(v); }
+            filtrarRango();
+          });
+
+          // Selección de filas
+          $(document).on('click','#auditoriaTable tbody tr',function(e){
+            if($(e.target).closest('.btn, .btn-icon-box, a, i, summary').length) return;
+            $(this).toggleClass('row-selected is-selected');
+          });
+
+          // Export CSV respetando filtros (servidor)
+          $('#btnExportCsv').on('click', function(){
+            const by=$filtro.val();
+            const q=($busq.prop('disabled')?'':($busq.val()||'').trim());
+            const d1=$dIni.val()||'';
+            const d2=$dFin.val()||'';
+
+            const params=new URLSearchParams();
+            if(d1) params.set('desde',d1);
+            if(d2) params.set('hasta',d2);
+            if(by==='usuario' && q) params.set('usuario',q);
+            if(by==='accion'  && q) params.set('accion',q);
+            if(by && q && !['usuario','accion','fecha','inicio_sesion'].includes(by)) params.set('q',q);
+            if(by==='inicio_sesion') params.set('soloInicioSesion','true');
+            params.set('top','200000');
+
+            const url='@Url.Action("ExportarCsv", "Auditoria")'
+                     + (params.toString()?('?'+params.toString()):'');
+            window.location.href=url;
+          });
+
+          // Checkbox "Mostrar todos" -> pageSize
+          $('#chkAllAud').on('change', function(){
+            const url = new URL(window.location.href);
+            const params = url.searchParams;
+
+            params.set('page', '1');
+
+            if (this.checked) {
+              params.set('pageSize','0');   // sin límite (controlador ya lo entiende)
+            } else {
+              params.set('pageSize','50');  // tamaño normal
+            }
+
+            url.search = params.toString();
+            window.location.href = url.toString();
+          });
+
+          // Estado inicial
+          $(function(){
+            $busq.prop('disabled',true)
+                 .attr('placeholder','Selecciona un filtro...');
+            $dIni.val('').removeAttr('min').attr('max',MAX_TODAY);
+            $dFin.val('').removeAttr('min').attr('max',MAX_TODAY);
+
+            updateHeaderStatsAndFooter();
+          });
+        })();
+    </script>
+}

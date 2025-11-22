@@ -1,0 +1,207 @@
+﻿/* ==========================================================
+   MODALES PNP - AISLADOS (no afectan otras vistas)
+   ========================================================== */
+
+.pnp-modal {
+    --pnp-green: #0c4227;
+    --pnp-green-600: #145a38;
+    --pnp-gold: #d4af37;
+    --pnp-gold-700: #b8961f;
+    --surface-0: #e9eeec;
+    --surface-2: #e4ebe7;
+    --chip: #e1eae5;
+    --field-bg: #f6faf8;
+    --field-brd: #cfd9d4;
+    --ring: 3px;
+    --req: #b91c1c;
+}
+
+    /* ======= Estructura general del modal ======= */
+    .pnp-modal .modal-dialog,
+    .pnp-modal .modal-content {
+        transition: none !important;
+        transform: none !important;
+    }
+
+    .pnp-modal .modal-content {
+        border-radius: 12px;
+        border: 1px solid rgba(12, 66, 39, .12);
+        box-shadow: 0 12px 40px rgba(2, 6, 23, .24);
+        background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.92)) padding-box, linear-gradient(180deg, #f6faf8, #eef3f1) border-box;
+    }
+
+    /* ======= Header ======= */
+    .pnp-modal .modal-header {
+        border-bottom: 1px solid #e3ebe6;
+        background: linear-gradient(180deg, #f7faf8, #f1f6f3);
+        padding: .6rem .9rem;
+        align-items: center;
+    }
+
+    .pnp-modal .modal-title {
+        font-weight: 800;
+        font-size: 1rem;
+        color: #0b1324;
+    }
+
+    /* ======= Body ======= */
+    .pnp-modal .modal-body {
+        padding: .9rem 1rem;
+    }
+
+    /* ======= Footer ======= */
+    .pnp-modal .modal-footer {
+        border-top: 1px solid #e3ebe6;
+        background: linear-gradient(180deg, #f7faf8, #f1f6f3);
+        padding: .6rem .9rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: .5rem;
+    }
+
+    /* ======= Botones ======= */
+    .pnp-modal .btn-primary {
+        background: linear-gradient(135deg, var(--pnp-green-600), #0f4c30);
+        border: 0;
+        color: #fff;
+        box-shadow: 0 3px 9px rgba(20, 90, 56, .18);
+        font-weight: 600;
+    }
+
+        .pnp-modal .btn-primary:hover {
+            filter: brightness(.98);
+            transform: translateY(-1px);
+        }
+
+    .pnp-modal .btn-secondary {
+        background: #e1eae5;
+        border: 1px solid #cfd8d3;
+        color: #0c4227;
+        font-weight: 600;
+    }
+
+        .pnp-modal .btn-secondary:hover {
+            background: #dbe5e0;
+        }
+
+    /* ======= Botón de cierre ======= */
+    .pnp-modal .btn-close {
+        opacity: .8;
+    }
+
+        .pnp-modal .btn-close:hover {
+            opacity: 1;
+        }
+
+    /* ======= Modal centrado ======= */
+    .pnp-modal.modal-center .modal-dialog.modal-dialog-centered {
+        align-items: center;
+    }
+
+/* ======= Modales específicos de éxito ======= */
+#modalRegistroExitoso.pnp-modal .modal-dialog,
+#modalRegistroExitoso.pnp-modal .modal-content,
+#modalEdicionExitosa.pnp-modal .modal-dialog,
+#modalEdicionExitosa.pnp-modal .modal-content {
+    transition: none !important;
+    transform: none !important;
+}
+
+#modalRegistroExitoso.pnp-modal .modal-dialog,
+#modalEdicionExitosa.pnp-modal .modal-dialog {
+    max-width: 360px;
+    margin: 1.75rem auto;
+}
+
+/* ======= Campos dentro del modal ======= */
+.pnp-modal .input-group.soft {
+    background: var(--field-bg);
+    border: .5px solid var(--field-brd);
+    border-radius: 6px;
+    padding: 1px 3px;
+    display: flex;
+    width: 100%;
+    align-items: center;
+}
+
+    .pnp-modal .input-group.soft:focus-within {
+        border-color: var(--pnp-green-600);
+        box-shadow: 0 0 0 var(--ring) rgba(20, 90, 56, .12);
+    }
+
+    .pnp-modal .input-group.soft .input-group-text {
+        background: var(--chip);
+        color: var(--pnp-green);
+        border: 0;
+        padding: .18rem .4rem;
+        font-size: .86rem;
+        border-radius: 5px;
+        white-space: nowrap;
+    }
+
+    .pnp-modal .input-group.soft .form-control,
+    .pnp-modal .input-group.soft .form-select {
+        background: var(--field-bg);
+        border: 0;
+        box-shadow: none;
+        min-width: 0;
+        font-size: .92rem;
+        padding: .28rem .45rem;
+        line-height: 1.2;
+    }
+
+.pnp-modal .form-control:focus,
+.pnp-modal .form-select:focus {
+    border-color: var(--pnp-green-600) !important;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(20, 90, 56, .18);
+}
+
+/* ======= Mensajes de error ======= */
+.pnp-modal .form-error {
+    display: none;
+    background: #fff2f2;
+    border: 1px solid #f5bfbf;
+    color: #7f1d1d;
+    padding: .5rem .75rem;
+    border-radius: .5rem;
+    margin-bottom: .75rem;
+}
+
+    .pnp-modal .form-error.show {
+        display: block;
+    }
+
+/* ======= Texto y tipografía ======= */
+.pnp-modal label {
+    font-weight: 600;
+    font-size: .9rem;
+    color: #0b1324;
+}
+
+.pnp-modal small {
+    font-size: .8rem;
+    color: #64748b;
+}
+
+/* ======= Iconos pequeños dentro del modal ======= */
+.pnp-modal i {
+    color: var(--pnp-green-600);
+}
+
+/* ======= Responsive ======= */
+@media (max-width: 576px) {
+    .pnp-modal .modal-dialog {
+        margin: 1.25rem auto;
+        max-width: 90%;
+    }
+
+    .pnp-modal .input-group.soft {
+        padding: 1px 3px;
+    }
+
+    .pnp-modal .modal-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

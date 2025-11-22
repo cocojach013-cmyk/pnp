@@ -1,0 +1,886 @@
+﻿@model SistemaControlPNP.Models.Movimiento
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    Layout = null;
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+    /* === EVITAR SCROLL HORIZONTAL CUANDO EL MODAL ESTÁ ABIERTO === */
+    body.modal-open {
+        overflow-x: hidden !important;
+    }
+
+    /* Si tu modal padre se llama #registroModal, lo ajustamos un poco */
+    #registroModal .modal-dialog {
+        max-width: 780px;
+        margin: .75rem auto;
+    }
+
+    #registroModal .modal-content {
+        overflow-x: hidden;
+    }
+
+    /* =========================================================
+                   ESTILO ULTRA COMPACTO SOLO PARA ESTE FORM (MOVIMIENTO)
+           ========================================================= */
+
+    .pnp-form {
+        margin-bottom: 0;
+    }
+
+        .pnp-form .pnp-body {
+            padding-bottom: .4rem;
+            position: relative;
+            overflow-x: hidden; /* clave para que el contenido no haga scroll horizontal */
+            overflow-y: visible;
+        }
+
+    #registrarMovimientoForm {
+        margin-bottom: 0;
+        overflow-x: hidden; /* extra por si acaso */
+    }
+
+        #registrarMovimientoForm .row:last-child {
+            margin-bottom: 0;
+        }
+
+        #registrarMovimientoForm .col-actions .btn-bar {
+            margin-bottom: 0;
+        }
+
+        #registrarMovimientoForm .control-tile {
+            margin-bottom: .5rem;
+            padding: .45rem .7rem .6rem;
+            background: linear-gradient(145deg, #ffffff, #f5f7f6);
+            border-radius: .6rem;
+            border: 1px solid rgba(220, 227, 223, .95);
+            box-shadow: 0 8px 18px rgba(15, 23, 42, .14), 0 0 0 1px rgba(255, 255, 255, .9) inset;
+        }
+
+        #registrarMovimientoForm .form-label {
+            font-size: .8rem;
+            font-weight: 600;
+            margin-bottom: .3rem;
+            color: #111827;
+        }
+
+        #registrarMovimientoForm .text-muted {
+            font-size: .7rem;
+        }
+
+        /* Input-group suave */
+        #registrarMovimientoForm .input-group.soft {
+            background: linear-gradient(135deg, #fbfdfc, #eef5f1);
+            border-radius: .5rem;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, .12), 0 0 0 1px rgba(230, 238, 233, 1);
+            width: 100%;
+            max-width: 100%;
+        }
+
+            #registrarMovimientoForm .input-group.soft .input-group-text {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: .5rem 0 0 .5rem;
+                border-color: var(--line, #dce3df);
+                border-right: 0;
+                background: radial-gradient(circle at 30% 30%, #ffffff 0, #e5efe8 65%);
+                color: var(--pnp-green, #00471B);
+                padding-inline: .5rem;
+                font-size: .75rem;
+            }
+
+        /* Select real oculto */
+        #registrarMovimientoForm .sr-only-select {
+            position: absolute !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            width: 0;
+            height: 0;
+        }
+
+        /* Combo visual Personal */
+        #registrarMovimientoForm .combo-wrap {
+            position: relative; /* panel cuelga aquí */
+            flex: 1 1 auto;
+            display: flex;
+            align-items: stretch;
+            border-radius: 0 .5rem .5rem 0;
+            border: 1px solid var(--line, #dce3df);
+            border-left: 0;
+            background: #ffffff;
+            overflow: visible;
+            transition: border-color .12s ease, box-shadow .12s ease, background-color .12s ease;
+        }
+
+        #registrarMovimientoForm .combo-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .25rem;
+            padding: .12rem .6rem;
+            border: 0;
+            background: linear-gradient(145deg, #ffffff, #f3f6f4);
+            cursor: pointer;
+            font-size: .7rem;
+            color: var(--ink, #0f1a14);
+            min-height: 30px;
+            line-height: 1.2;
+        }
+
+            #registrarMovimientoForm .combo-btn .combo-value {
+                flex: 1 1 auto;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                font-size: .7rem;
+            }
+
+            #registrarMovimientoForm .combo-btn i {
+                font-size: .65rem;
+                color: #9ca3af;
+            }
+
+        #registrarMovimientoForm .combo-wrap:hover {
+            border-color: var(--pnp-green, #00471B);
+            background: #f9fafb;
+            box-shadow: 0 4px 10px rgba(15, 23, 42, .12), 0 0 0 1px rgba(255, 255, 255, .95) inset;
+        }
+
+        #registrarMovimientoForm .combo-wrap:focus-within {
+            border-color: var(--pnp-green, #00471B);
+            box-shadow: 0 0 0 1px rgba(255,255,255,.95) inset, 0 0 0 3px rgba(0, 71, 27, .18);
+        }
+
+        /* Panel del combo PERSONAL – ABSOLUTO (no genera scroll) */
+        #registrarMovimientoForm .combo-panel {
+            position: absolute;
+            left: 0;
+            top: 100%;
+            width: 100%;
+            background: #ffffff;
+            border-radius: .4rem;
+            border: 1px solid #d1d5db;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, .25);
+            max-height: 260px;
+            overflow: hidden;
+            z-index: 2000;
+            display: none;
+        }
+
+            #registrarMovimientoForm .combo-panel.open {
+                display: block;
+            }
+
+        #registrarMovimientoForm .combo-search {
+            width: 100%;
+            border: 0;
+            border-bottom: 1px solid #e5e7eb;
+            padding: .2rem .55rem;
+            font-size: .7rem;
+            background: #ffffff;
+            line-height: 1.2;
+        }
+
+            #registrarMovimientoForm .combo-search::placeholder {
+                color: #9ca3af;
+            }
+
+        #registrarMovimientoForm .combo-list {
+            max-height: 220px;
+            overflow-y: auto;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+            #registrarMovimientoForm .combo-list::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            #registrarMovimientoForm .combo-list::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 999px;
+            }
+
+        #registrarMovimientoForm .combo-item {
+            padding: .18rem .75rem;
+            font-size: .7rem;
+            line-height: 1.3;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: #111827;
+            transition: background-color .12s ease, color .12s ease;
+        }
+
+            #registrarMovimientoForm .combo-item[aria-selected="true"] {
+                background: #e5f0ff;
+                font-weight: 600;
+                color: var(--pnp-green, #00471B);
+            }
+
+            #registrarMovimientoForm .combo-item:hover {
+                background: #f3f4f6;
+            }
+
+        #registrarMovimientoForm .combo-empty {
+            padding: .35rem .6rem;
+            font-size: .7rem;
+            color: #6b7280;
+        }
+
+        /* CIP */
+        #registrarMovimientoForm #buscarCip {
+            height: 30px;
+            font-size: .7rem;
+            padding-top: .12rem;
+            padding-bottom: .12rem;
+        }
+
+        #registrarMovimientoForm #btnBuscarCip {
+            border-left: 0;
+            cursor: pointer;
+            background: radial-gradient(circle at 30% 30%, #ffffff 0, #e5efe8 65%);
+            color: #374151;
+            font-size: .75rem;
+        }
+
+            #registrarMovimientoForm #btnBuscarCip i {
+                font-size: .7rem;
+            }
+
+        /* Input-group de texto */
+        #registrarMovimientoForm .input-group.soft input.form-control {
+            font-size: .75rem;
+            height: 32px;
+            padding-top: .12rem;
+            padding-bottom: .12rem;
+        }
+
+        /* Botones */
+        #registrarMovimientoForm .col-actions .btn-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: .4rem;
+        }
+
+        #registrarMovimientoForm .col-actions .btn {
+            font-size: .76rem;
+            padding: .2rem .75rem;
+            border-radius: .45rem;
+        }
+
+    @@media (max-width: 576px) {
+        #registrarMovimientoForm .col-actions .btn-bar {
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        #registrarMovimientoForm .input-group.soft {
+            min-width: 0;
+        }
+    }
+    /* ===== FIX REAL: evitar que el modal de éxito aparezca grande ===== */
+
+    /* Antes de que Bootstrap lo muestre, el dialog DEBE YA tener tamaño pequeño */
+    #modalRegistroExitosa .modal-dialog {
+        max-width: 310px !important;
+        width: 100% !important;
+        margin: 1.25rem auto !important;
+        transform: translateY(0) !important; /* evita animación rara */
+    }
+
+    /* Evita expansión previa del contenido */
+    #modalRegistroExitosa .modal-content {
+        width: 100% !important;
+        transform: none !important;
+        transition: none !important; /* sin reflow visual */
+        animation: none !important;
+    }
+
+    /* Evita la animación fade inicial que causa el “salto” */
+    #modalRegistroExitosa.modal.fade .modal-dialog {
+        transition: none !important;
+        transform: none !important;
+    }
+
+</style>
+
+<div class="pnp-form">
+    <div class="pnp-body">
+        <form id="registrarMovimientoForm"
+              asp-controller="Movimiento"
+              asp-action="RegistrarMovimiento"
+              method="post"
+              autocomplete="off"
+              novalidate>
+            @Html.AntiForgeryToken()
+
+            <div id="errorMessagesMovimientoReg" class="form-error" role="alert"></div>
+
+            <!-- ========== FILA 1: PERSONAL + BUSCAR CIP ========== -->
+            <div class="row g-3 align-items-start pt-0">
+                <!-- PERSONAL -->
+                <div class="col-12 col-md-8">
+                    <div class="control-tile">
+                        <label class="form-label" for="IdPersonal">Personal <span class="req">*</span></label>
+
+                        <div class="input-group input-group-sm soft align-items-stretch no-wrap">
+                            <span class="input-group-text"><i class="fas fa-users"></i></span>
+
+                            <!-- Select REAL (backend) - oculto -->
+                            <select id="IdPersonal" name="IdPersonal" class="form-select form-select-sm sr-only-select" aria-hidden="true" tabindex="-1" required>
+                                <option value="">Seleccionar...</option>
+                                @foreach (var it in (IEnumerable<SelectListItem>)ViewBag.PersonalList)
+                                {
+                                    var text = it.Text ?? "";
+                                    var start = text.LastIndexOf("CIP");
+                                    string cip = "";
+                                    if (start >= 0)
+                                    {
+                                        var sub = text.Substring(start).Replace("CIP", "").Replace("(", "").Replace(")", "").Trim();
+                                        cip = new string(sub.Where(char.IsDigit).ToArray());
+                                    }
+                                    <option value="@it.Value" data-cip="@cip">@it.Text</option>
+                                }
+                            </select>
+
+                            <!-- Combo VISUAL -->
+                            <div class="combo-wrap" id="comboPersonalMov" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-owns="comboListPersonalMov">
+                                <button type="button" class="combo-btn" id="comboBtnPersonalMov" aria-label="Seleccionar personal activo">
+                                    <span class="combo-value" id="comboValuePersonalMov">Seleccionar...</span>
+                                    <i class="fas fa-angle-down" aria-hidden="true"></i>
+                                </button>
+                                <div class="combo-panel" id="comboPanelPersonalMov">
+                                    <input type="text" class="combo-search" id="comboSearchPersonalMov" placeholder="Escribe nombre o apellidos..." autocomplete="off" />
+                                    <ul class="combo-list" id="comboListPersonalMov" role="listbox" aria-label="Personal con ingreso abierto"></ul>
+                                    <div class="combo-empty" id="comboEmptyPersonalMov" style="display:none;">Sin coincidencias</div>
+                                </div>
+                            </div>
+                        </div>
+                       
+                    </div>
+                </div>
+
+                <!-- BUSCAR POR CIP -->
+                <div class="col-12 col-md-4">
+                    <div class="control-tile">
+                        <label class="form-label" for="buscarCip">Buscar por CIP</label>
+                        <div class="input-group input-group-sm soft mb-1 no-wrap">
+                            <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                            <input type="text" id="buscarCip" class="form-control" placeholder="Ingresar CIP" maxlength="8" />
+                            <button type="button" class="input-group-text" id="btnBuscarCip" title="Buscar por CIP" tabindex="-1">
+                                <i class="fas fa-magnifying-glass"></i>
+                            </button>
+                        </div>
+                      
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== FILA 2: AUTORIZA + DESTINO ========== -->
+            <div class="row g-3 mt-1">
+                <!-- AUTORIZA -->
+                <div class="col-12 col-md-6">
+                    <div class="control-tile">
+                        <label class="form-label" for="AutorizaSelect">Autoriza <span class="req">*</span></label>
+                        <div class="input-group input-group-sm soft mb-1 no-wrap">
+                            <span class="input-group-text"><i class="fas fa-user-check"></i></span>
+                            <select id="AutorizaSelect" class="form-select form-select-sm" title="Seleccione quien autoriza" data-dropup-auto="false">
+                                <option value="">Seleccionar</option>
+                                <option value="ORDEN SUPERIOR">ORDEN SUPERIOR</option>
+                                <option value="OTROS">OTROS</option>
+                            </select>
+                        </div>
+                        <div class="input-group input-group-sm soft d-none no-wrap" id="AutorizaOtrosGroup">
+                            <span class="input-group-text"><i class="fas fa-pen-to-square"></i></span>
+                            <input name="Autoriza" id="Autoriza" class="form-control" autocomplete="off" placeholder="Especifique quién autoriza" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DESTINO -->
+                <div class="col-12 col-md-6">
+                    <div class="control-tile">
+                        <label class="form-label" for="DestinoSelect">Destino</label>
+                        <div class="input-group input-group-sm soft mb-1 no-wrap">
+                            <span class="input-group-text"><i class="fas fa-location-dot"></i></span>
+                            <select id="DestinoSelect" class="form-select form-select-sm" title="Seleccione destino" data-dropup-auto="false">
+                                <option value="">Seleccionar Destino</option>
+                                <option>FISCALIA</option>
+                                <option>FECOR</option>
+                                <option>DIVINCRI CAJAMARCA</option>
+                                <option>FISCALIA DE FAMILIA</option>
+                                <option>COM. SAN JOSE</option>
+                                <option>REGION POLIICAL CAJAMARCA</option>
+                                <option>SECPIRV</option>
+                                <option>ARPOLJUD</option>
+                                <option>PENAL CAJAMARCA</option>
+                                <option>COM. BAÑOS DEL INCA</option>
+                                <option>OFAD</option>
+                                <option>DIVREINT</option>
+                                <option>COM. MOLLEPAMPA</option>
+                                <option>MUNICIPALIDA DE CAJAMARCA</option>
+                                <option>OTROS</option>
+                            </select>
+                        </div>
+                        <div class="input-group input-group-sm soft d-none no-wrap" id="DestinoOtrosGroup">
+                            <span class="input-group-text"><i class="fas fa-pen-to-square"></i></span>
+                            <input name="Destino" id="Destino" class="form-control" autocomplete="off" placeholder="Especificar destino" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== FILA 3: MOTIVO (COMBO + OTRAS) ========== -->
+            <div class="row g-3 mt-1">
+                <div class="col-12 col-md-6">
+                    <div class="control-tile">
+                        <label class="form-label" for="Mov_MotivoSelect">Motivo <span class="req">*</span></label>
+
+                        <div class="input-group input-group-sm soft mb-1 no-wrap">
+                            <span class="input-group-text">
+                                <i class="fas fa-comment-dots"></i>
+                            </span>
+
+                            <!-- Combo Motivo -->
+                            <select id="Mov_MotivoSelect"
+                                    class="form-select form-select-sm"
+                                    title="Seleccione motivo"
+                                    data-dropup-auto="false">
+                                <option value="">Seleccionar motivo</option>
+                                <option value="DILIGENCIAS">DILIGENCIAS</option>
+                                <option value="TRÁMITE DOCUMENTARIO">TRÁMITE DOCUMENTARIO</option>
+                                <option value="SERVICIO">SERVICIO</option>
+                                <option value="REUNIÓN">REUNIÓN</option>
+                                <option value="OTRAS">OTRAS</option>
+                            </select>
+                        </div>
+
+                        <!-- Campo real enviado al backend -->
+                        <input type="hidden" id="Motivo" name="Motivo" required />
+
+                        <!-- Campo adicional si elige "OTRAS" -->
+                        <div class="input-group input-group-sm soft d-none mt-1 no-wrap" id="MotivoOtrosGroup">
+                            <span class="input-group-text">
+                                <i class="fas fa-pen-to-square"></i>
+                            </span>
+                            <input id="MotivoOtros"
+                                   class="form-control"
+                                   placeholder="Especificar motivo"
+                                   autocomplete="off" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="row g-0 align-items-start mt-2">
+                <div class="col-12 col-md-6"></div>
+                <div class="col-12 col-md-6 col-actions">
+                    <div class="btn-bar">
+                        <a class="btn btn-warning btn-sm" data-dismiss="modal">
+                            <i class="fas fa-arrow-circle-left"></i> Atrás
+                        </a>
+                        <button type="button" id="btnGuardarMovimiento" class="btn btn-primary btn-sm">
+                            <i class="fas fa-save"></i> Guardar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="modalRegistroExitosa" class="modal fade modal-center modal-xs" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content" role="status" aria-live="polite">
+            <div class="modal-body text-center py-4">
+                <div class="mb-2" style="font-size:3rem; line-height:1;">
+                    <i class="fas fa-check-circle text-success" aria-hidden="true"></i>
+                </div>
+                <h5 class="mb-1">¡Movimiento Registrado!</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+      'use strict';
+
+      function showSuccessModalById(sel, opts){
+        opts = Object.assign({ parentModalSelector: '#registroModal', reload: true, timeout: 1200 }, opts||{});
+        var $m = $(sel);
+        try { $m.modal({ backdrop:'static', keyboard:false, show:true }); } catch(e){}
+        setTimeout(function(){
+          try{ if(opts.parentModalSelector) $(opts.parentModalSelector).modal('hide'); } catch(e){}
+          try{ $m.modal('hide'); } catch(e){}
+          if(opts.reload) location.reload();
+        }, opts.timeout);
+      }
+
+      function byId(id){ return document.getElementById(id); }
+
+      const $err = byId('errorMessagesMovimientoReg');
+      function showErr(m){ if($err){ $err.textContent = m || 'Se produjo un error.'; $err.classList.add('show'); $err.setAttribute('role','alert'); } }
+      function hideErr(){ if($err){ $err.classList.remove('show'); $err.textContent = ''; } }
+
+      function checkRequired(){
+        const reqs = [
+            { id:'IdPersonal', name:'Personal' },
+            { id:'Motivo',     name:'Motivo'   },
+            { id:'Autoriza',   name:'Autoriza' }
+        ];
+        for(const r of reqs){
+            const el = byId(r.id);
+            if(!el) continue;
+            const v=(el.value||'').toString().trim();
+            if(!v){
+                showErr('Complete el campo: ' + r.name);
+                try{ el.focus(); }catch(e){}
+                return false;
+            }
+        }
+        return true;
+      }
+
+      const btnGuardar = byId('btnGuardarMovimiento');
+      const form = byId('registrarMovimientoForm');
+
+      function onlyDigits(s){ return (s||'').toString().replace(/\D/g,''); }
+
+      const $cip    = byId('buscarCip');
+      const $btnCip = byId('btnBuscarCip');
+      const $sel    = byId('IdPersonal');
+
+      var $combo = byId('comboPersonalMov'),
+          $btn   = byId('comboBtnPersonalMov'),
+          $val   = byId('comboValuePersonalMov'),
+          $panel = byId('comboPanelPersonalMov'),
+          $search= byId('comboSearchPersonalMov'),
+          $list  = byId('comboListPersonalMov'),
+          $empty = byId('comboEmptyPersonalMov');
+
+      if(!$sel || !$combo) return;
+
+      var ALL_OPTS=[];
+      for(var i=0;i<$sel.options.length;i++){
+          var o=$sel.options[i];
+          ALL_OPTS.push({
+              value:o.value||'',
+              text:o.text||'',
+              cip:(o.getAttribute('data-cip')||'').trim()
+          });
+      }
+      var BASE_OPTS = ALL_OPTS.filter(x => x.value);   // solo con valor
+      var CURRENT_OPTS = BASE_OPTS.slice();
+
+      function stripAccents(s){
+          try{ return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+          catch(_){ return s||''; }
+      }
+      function tokenize(s){
+          return stripAccents(String(s).toLowerCase()).split(/\s+/).filter(Boolean);
+      }
+
+      // Render de la lista con primera fila "Seleccionar..."
+      function render(items){
+        $list.innerHTML='';
+        var selectedVal=$sel.value || '';
+
+        var li0=document.createElement('li');
+        li0.className='combo-item';
+        li0.setAttribute('role','option');
+        li0.setAttribute('data-value','');
+        li0.setAttribute('aria-selected', selectedVal === '' ? 'true' : 'false');
+        li0.textContent='Seleccionar...';
+        li0.addEventListener('click', function(){
+            choose('', 'Seleccionar...');
+        });
+        $list.appendChild(li0);
+
+        if(!items.length){
+            $empty.style.display='';
+            return;
+        }
+        $empty.style.display='none';
+
+        items.forEach(function(it){
+            var li=document.createElement('li');
+            li.className='combo-item';
+            li.setAttribute('role','option');
+            li.setAttribute('data-value',it.value);
+            li.setAttribute('aria-selected',(selectedVal===it.value)?'true':'false');
+            li.textContent=it.text;
+            li.addEventListener('click', function(){
+                choose(it.value, it.text);
+            });
+            $list.appendChild(li);
+        });
+      }
+
+      function choose(val,label){
+        $sel.value=val||'';
+        $val.textContent=label||'Seleccionar...';
+        closePanel();
+        $sel.dispatchEvent(new Event('change',{bubbles:true}));
+      }
+
+      function openPanel(){
+        CURRENT_OPTS = BASE_OPTS.slice();
+        render(CURRENT_OPTS);
+        $panel.classList.add('open');
+        $combo.setAttribute('aria-expanded','true');
+
+        setTimeout(function(){
+            try{ $search.focus(); $search.select(); }catch(_){}
+        },0);
+      }
+
+      function closePanel(){
+        $panel.classList.remove('open');
+        $combo.setAttribute('aria-expanded','false');
+      }
+
+      $btn.addEventListener('click', function(){
+        if($panel.classList.contains('open')) closePanel();
+        else openPanel();
+      });
+
+      document.addEventListener('click', function(e){
+        if(!$panel.classList.contains('open')) return;
+        var inside=$combo.contains(e.target)||$panel.contains(e.target);
+        if(!inside) closePanel();
+      });
+
+      document.addEventListener('keydown', function(e){
+        if(e.key==='Escape'&&$panel.classList.contains('open')) closePanel();
+      });
+
+      function applySearch(){
+        var q=($search.value||'').trim();
+        if(!q){
+            CURRENT_OPTS = BASE_OPTS.slice();
+            render(CURRENT_OPTS);
+            return;
+        }
+        var digits=q.replace(/\D+/g,'');
+        if(digits.length){
+            var byCip=CURRENT_OPTS.filter(function(it){
+                return it.cip.includes(digits);
+            });
+            render(byCip);
+            return;
+        }
+        var needles=tokenize(q);
+        var filtered=CURRENT_OPTS.filter(function(it){
+            var haystack=tokenize(it.text).join(' ');
+            return needles.every(function(tok){
+                return haystack.indexOf(tok)!==-1;
+            });
+        });
+        render(filtered);
+      }
+      if($search){
+        $search.addEventListener('input', applySearch);
+      }
+
+      function aplicarPorCipExacto(d8){
+        var filtered=BASE_OPTS.filter(x=>x.cip.includes(d8));
+        if(!filtered.length){
+            CURRENT_OPTS=[];
+            $sel.value='';
+            $val.textContent='Seleccionar...';
+            render([]);
+            return;
+        }
+        CURRENT_OPTS=filtered;
+        var selOpt=CURRENT_OPTS.find(x=>x.value===$sel.value)||CURRENT_OPTS[0];
+        choose(selOpt.value, selOpt.text);
+      }
+
+      function resetearTodo(){
+        CURRENT_OPTS=BASE_OPTS.slice();
+        $sel.value='';
+        $val.textContent='Seleccionar...';
+        render(CURRENT_OPTS);
+      }
+
+      function onCipChanged(){
+        var q=onlyDigits($cip.value);
+        if(q.length===8){
+            aplicarPorCipExacto(q);
+        } else if(q.length===0){
+            resetearTodo();
+        }
+      }
+
+      if($cip){
+        $cip.addEventListener('input', onCipChanged);
+        $cip.addEventListener('change', onCipChanged);
+        $cip.addEventListener('keydown', function(e){
+            if(e.key==='Enter'){
+                e.preventDefault();
+                onCipChanged();
+            }
+        });
+      }
+      if($btnCip){
+        $btnCip.addEventListener('click', function(e){
+            e.preventDefault();
+            onCipChanged();
+        });
+      }
+
+      // AUTORIZA
+      const $autSel   = byId('AutorizaSelect');
+      const $autInput = byId('Autoriza');
+      const $autGrp   = byId('AutorizaOtrosGroup');
+      function syncAutoriza(){
+        if(!$autSel || !$autInput || !$autGrp) return;
+        const v = $autSel.value;
+        if(v === 'OTROS'){
+          $autGrp.classList.remove('d-none');
+          $autInput.removeAttribute('readonly');
+          $autInput.setAttribute('required','required');
+          $autInput.value = $autInput.value || '';
+        }else if(v === 'ORDEN SUPERIOR'){
+          $autGrp.classList.add('d-none');
+          $autInput.value = 'ORDEN SUPERIOR';
+          $autInput.setAttribute('readonly','readonly');
+          $autInput.removeAttribute('required');
+        }else{
+          $autGrp.classList.add('d-none');
+          $autInput.value = '';
+          $autInput.removeAttribute('required');
+          $autInput.removeAttribute('readonly');
+        }
+      }
+      if($autSel){
+        $autSel.addEventListener('change', syncAutoriza);
+        syncAutoriza();
+      }
+
+      // DESTINO
+      const $desSel   = byId('DestinoSelect');
+      const $desInput = byId('Destino');
+      const $desGrp   = byId('DestinoOtrosGroup');
+      function syncDestino(){
+        if(!$desSel || !$desInput || !$desGrp) return;
+        const opt = $desSel.value;
+        if(opt === 'OTROS'){
+          $desGrp.classList.remove('d-none');
+          $desInput.removeAttribute('readonly');
+          if(!$desInput.value){ $desInput.value = ''; }
+        }else if(opt){
+          $desGrp.classList.add('d-none');
+          $desInput.value = opt;
+          $desInput.setAttribute('readonly','readonly');
+        }else{
+          $desGrp.classList.add('d-none');
+          $desInput.value = '';
+          $desInput.removeAttribute('readonly');
+        }
+      }
+      if($desSel){
+        $desSel.addEventListener('change', syncDestino);
+        syncDestino();
+      }
+
+      // MOTIVO (combo + OTRAS)
+      const $motSel    = byId('Mov_MotivoSelect');
+      const $motHidden = byId('Motivo');
+      const $motGrp    = byId('MotivoOtrosGroup');
+      const $motInput  = byId('MotivoOtros');
+
+      function syncMotivo() {
+          if (!$motSel || !$motHidden || !$motGrp || !$motInput) return;
+
+          const v = $motSel.value;
+
+          if (v === 'OTRAS') {
+              $motGrp.classList.remove('d-none');
+              $motInput.removeAttribute('readonly');
+              $motInput.setAttribute('required','required');
+              $motHidden.value = ($motInput.value || '').trim();
+          } else {
+              $motGrp.classList.add('d-none');
+              $motInput.value = '';
+              $motInput.removeAttribute('required');
+              $motInput.setAttribute('readonly','readonly');
+              $motHidden.value = v || '';
+          }
+      }
+
+      if($motSel){
+        $motSel.addEventListener('change', syncMotivo);
+      }
+      if($motInput){
+        $motInput.addEventListener('input', syncMotivo);
+      }
+      syncMotivo();
+
+      // Guardar
+      if(btnGuardar && form){
+        btnGuardar.addEventListener('click', function(e){
+          e.preventDefault();
+          hideErr();
+          syncAutoriza();
+          syncDestino();
+          syncMotivo();
+
+          if(!form.checkValidity()){
+            const firstInvalid=form.querySelector(':invalid');
+            if(firstInvalid) try{ firstInvalid.focus(); }catch(ex){}
+            if(typeof form.reportValidity==='function'){
+              form.reportValidity();
+            } else {
+              showErr('Complete los campos obligatorios.');
+            }
+            return;
+          }
+          if(!checkRequired()) return;
+
+          const $btn = $(this).prop('disabled', true);
+          const fd = new FormData(form);
+
+          $.ajax({
+            url: $(form).attr('action'),
+            type:'POST',
+            processData:false,
+            contentType:false,
+            data:fd,
+            headers:{
+              'RequestVerificationToken': $('input[name="__RequestVerificationToken"]', form).val()
+            }
+          })
+          .done(function(resp){
+            if(resp && resp.success){
+              showSuccessModalById('#modalRegistroExitosa');
+            } else {
+              showErr((resp && resp.message) || 'No se pudo registrar el movimiento.');
+            }
+          })
+          .fail(function(xhr){
+            const msg=(xhr && xhr.responseJSON && xhr.responseJSON.message) || 'Error del servidor.';
+            showErr(msg);
+          })
+          .always(function(){
+            $btn.prop('disabled', false);
+          });
+        });
+      }
+
+      // INIT
+      (function init(){
+        const label = byId('comboValuePersonalMov');
+        if(label) label.textContent = 'Seleccionar...';
+        render(CURRENT_OPTS);
+      })();
+    })();
+</script>

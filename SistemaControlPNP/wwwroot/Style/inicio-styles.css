@@ -1,0 +1,239 @@
+﻿:root {
+    --pnp-green: #155b36;
+    --pnp-green-600: #0f4528;
+    --pnp-gold: #f1c40f;
+    --ink: #0c1d15;
+    --page-bg: #f4faf6;
+    --ctrl-h: 38px;
+    --label-fs: .88rem;
+    --hint-fs: .80rem;
+    --card-pad: 1.1rem;
+    /* acentos para el botón NUEVO (azules) */
+    --accent: #2563eb; /* azul */
+    --accent-2: #0ea5e9; /* celeste */
+    --accent-600: #1e40af; /* azul oscuro */
+    --accent-200: #93c5fd; /* azul claro */
+}
+
+html, body {
+    height: 100%
+}
+
+body {
+    font-family: Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+    color: var(--ink);
+    background: radial-gradient(900px 320px at 110% -20%, rgba(21,91,54,.05), transparent 60%), radial-gradient(700px 260px at -20% -30%, rgba(241,196,15,.05), transparent 55%), var(--page-bg);
+}
+
+/* barra superior */
+.service-bar {
+    height: 5px;
+    background: linear-gradient(90deg,#0f4528, var(--pnp-green), #0f4528);
+}
+
+/* navbar */
+.navbar {
+    background: linear-gradient(90deg,#0f3b25, #135836, #0f3b25) !important;
+    border-bottom: 2px solid var(--pnp-gold);
+    color: #e8f8ef;
+    padding-block: .25rem;
+}
+
+    .navbar .brand small {
+        color: #000 !important;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: .10em;
+        font-size: .80rem;
+        line-height: 1.05;
+    }
+
+    .navbar .brand > div > span:first-child {
+        color: #fff;
+        font-weight: 600;
+    }
+
+/* botones dorados (ovalados) */
+.btn-oval-gold,
+#btnAbrirLogin {
+    --bs-btn-bg: var(--pnp-gold);
+    --bs-btn-color: #1a1f1c;
+    --bs-btn-border-color: #c5a600;
+    --bs-btn-hover-bg: #c5a600;
+    --bs-btn-hover-border-color: #9a7d00;
+    --bs-btn-hover-color: #0a0e0c;
+    --bs-btn-active-bg: #b49300;
+    --bs-btn-active-border-color: #8a7200;
+    --bs-btn-active-color: #0a0e0c;
+    border-width: 2px;
+    font-weight: 900;
+    border-radius: 999px;
+    padding: .35rem .9rem;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+
+    .btn-oval-gold:hover,
+    #btnAbrirLogin:hover {
+        color: var(--bs-btn-hover-color) !important;
+        background-color: var(--bs-btn-hover-bg) !important;
+        border-color: var(--bs-btn-hover-border-color) !important;
+    }
+
+/* layout principal */
+.app-wrap {
+    padding-block: 1.1rem
+}
+
+/* tarjeta */
+.search-card {
+    border-top: 6px solid var(--pnp-green);
+    box-shadow: 0 16px 40px rgba(0,0,0,.06);
+}
+
+    .search-card .card-body {
+        padding: var(--card-pad)
+    }
+
+/* formulario alineado */
+.form-line {
+    row-gap: .5rem
+}
+
+@media (min-width:768px) {
+    .form-line {
+        display: grid !important;
+        grid-template-columns: 260px minmax(280px,1fr) 160px;
+        align-items: end;
+        column-gap: 1rem;
+    }
+}
+
+.form-line .form-label {
+    margin: 0 0 .15rem 0;
+    font-size: var(--label-fs);
+    font-weight: 800;
+}
+
+.form-line .muted-hint {
+    margin: .15rem 0 0 0;
+    font-size: var(--hint-fs);
+    color: #475569 !important;
+    line-height: 1.2;
+}
+
+/* input-group compacto */
+.form-line .input-group {
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: .65rem;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(16,24,40,.05);
+}
+
+.form-line .input-group-text {
+    background: #eaf5ef;
+    color: #0f3e28;
+    border: 0;
+    min-width: 42px;
+    height: var(--ctrl-h);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-line .form-control,
+.form-line .form-select {
+    border: 0;
+    height: var(--ctrl-h);
+    font-size: .95rem;
+}
+
+.form-line .input-group:has(.form-control:focus),
+.form-line .input-group:has(.form-select:focus) {
+    box-shadow: 0 0 0 .18rem rgba(21,91,54,.14),0 2px 8px rgba(16,24,40,.06);
+    border-color: rgba(21,91,54,.45);
+}
+
+/* ancho lógico para 8 dígitos */
+#valor {
+    width: 100%
+}
+
+@media (min-width:768px) {
+    #valor {
+        width: 16ch
+    }
+}
+
+/* ===== Botón NUEVO (rediseño azul con micro-interacciones) ===== */
+#btnNuevo {
+    height: var(--ctrl-h);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    border: 0;
+    border-radius: 999px;
+    padding-inline: 1.1rem;
+    min-width: 160px;
+    font-weight: 900;
+    letter-spacing: .02em;
+    color: #fff !important;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow: 0 6px 16px rgba(37, 99, 235, .28), inset 0 0 0 1px rgba(255,255,255,.22);
+    transition: transform .12s ease, box-shadow .18s ease, filter .18s ease, background-position .18s ease;
+    background-size: 200% 200%;
+    background-position: 0% 50%;
+}
+
+    #btnNuevo:hover {
+        transform: translateY(-1px);
+        background-position: 100% 50%;
+        box-shadow: 0 10px 22px rgba(37, 99, 235, .32), inset 0 0 0 1px rgba(255,255,255,.28);
+        filter: brightness(1.02);
+    }
+
+    #btnNuevo:active {
+        transform: translateY(0);
+        filter: brightness(.98);
+        box-shadow: 0 4px 12px rgba(30, 64, 175, .34), inset 0 0 0 1px rgba(255,255,255,.2);
+    }
+
+    #btnNuevo:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 .18rem rgba(37, 99, 235, .20), 0 8px 20px rgba(37, 99, 235, .30), inset 0 0 0 1px rgba(255,255,255,.30);
+    }
+
+    /* Estado deshabilitado opcional */
+    #btnNuevo:disabled,
+    #btnNuevo[aria-disabled="true"] {
+        opacity: .65;
+        cursor: not-allowed;
+        filter: none;
+        transform: none;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+    }
+
+/* Respeta usuarios con reduce motion */
+@media (prefers-reduced-motion: reduce) {
+    #btnNuevo {
+        transition: none;
+    }
+}
+
+/* foto resultado */
+.result-photo {
+    width: 96px;
+    height: 96px;
+    border-radius: 18px;
+    object-fit: cover;
+    background: #f3f4f6;
+    border: 1px solid rgba(0,0,0,.06);
+}
+
+.footer-note {
+    color: #fff !important;
+    font-weight: 700;
+    margin-top: .8rem;
+}
+

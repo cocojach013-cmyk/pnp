@@ -1,0 +1,607 @@
+﻿@model ControlPNP.ViewModels.UsuarioVM
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    Layout = null;
+    // Espera: ViewBag.PersonalFull = IEnumerable<dynamic> con { IdPersonal, Text, Cip }
+}
+
+<link rel="stylesheet" href="~/Style/modales-styles.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/Style/form-styles.css" asp-append-version="true" />
+<style>
+    /* =========================================================
+       REGISTRAR USUARIO – ESTILO MODERNO 3D (SOLO ESTE MODAL)
+       ========================================================= */
+
+    .modal-crud-registro .pnp-form {
+        --pnp-green: #00471b;
+        --pnp-gold: #b8963b;
+        --pnp-soft: #f3f6f8;
+        --tile-border: rgba(10, 24, 18, 0.06);
+        background: radial-gradient(circle at top left, #f7fafc 0, #e4edf3 28%, #dde7ec 55%, #d4e0e7 100%);
+        border-radius: 16px;
+        padding: 0.65rem 0.75rem 0.8rem;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+        border: 1px solid rgba(15, 26, 20, 0.16);
+        position: relative;
+        overflow: hidden;
+        max-width: 100%;
+    }
+
+        .modal-crud-registro .pnp-form::before {
+            content: "";
+            position: absolute;
+            inset: -40%;
+            background: radial-gradient(circle at 0 0, rgba(185, 150, 59, 0.16) 0, transparent 55%), radial-gradient(circle at 100% 0, rgba(0, 71, 27, 0.16) 0, transparent 60%);
+            opacity: 0.9;
+            pointer-events: none;
+        }
+
+    .modal-crud-registro .pnp-body {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Columnas sin espacios laterales extra */
+    .modal-crud-registro .pnp-form .row.g-0 > [class*="col"] {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    .modal-crud-registro .pnp-form .row.g-0 {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    /* =========================================
+       TILES / CONTROLES 3D
+       ========================================= */
+    .modal-crud-registro .pnp-form .control-tile {
+        background: linear-gradient(145deg, #ffffff, #ecf2f4);
+        border-radius: 12px;
+        border: 1px solid var(--tile-border);
+        padding: .35rem .55rem .45rem;
+        margin-bottom: .3rem;
+        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .modal-crud-registro .pnp-form .control-tile::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient( 120deg, rgba(148, 163, 184, 0.28), transparent 40%, transparent 60%, rgba(148, 163, 184, 0.16) );
+            mix-blend-mode: soft-light;
+            opacity: 0;
+            transition: opacity .18s ease-out;
+            pointer-events: none;
+        }
+
+        .modal-crud-registro .pnp-form .control-tile:hover::before {
+            opacity: 0.55;
+        }
+
+    /* Etiquetas */
+    .modal-crud-registro .pnp-form .form-label {
+        font-size: .72rem;
+        font-weight: 600;
+        color: var(--pnp-green);
+        margin-bottom: .15rem;
+        letter-spacing: .02em;
+        text-transform: uppercase;
+    }
+
+    .modal-crud-registro .pnp-form .req {
+        color: #b91c1c;
+        margin-left: 2px;
+        font-weight: 700;
+    }
+
+    /* =========================================
+       INPUT GROUP / SELECT / PASSWORD
+       ========================================= */
+    .modal-crud-registro .pnp-form .input-group.soft {
+        background: #f9fafb;
+        border-radius: 999px;
+        overflow: hidden;
+        border: 1px solid rgba(148, 163, 184, 0.6);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        height: 30px;
+    }
+
+    .modal-crud-registro .pnp-form .input-group-text {
+        border: none;
+        background: linear-gradient(135deg, #ffffff, #e5e7eb);
+        color: var(--pnp-green);
+        border-right: 1px solid rgba(148, 163, 184, 0.45);
+        min-width: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: .1rem .4rem;
+        font-size: .7rem;
+    }
+
+    /* Botón ojo (password) */
+    .modal-crud-registro .pnp-form .password-container .password-toggle {
+        border-left: 1px solid rgba(148, 163, 184, 0.45);
+        cursor: pointer;
+    }
+
+    .modal-crud-registro .pnp-form .form-control,
+    .modal-crud-registro .pnp-form .form-select {
+        border: none;
+        background: transparent;
+        font-size: .73rem;
+        padding-top: .05rem;
+        padding-bottom: .05rem;
+        padding-left: .3rem;
+        padding-right: .5rem;
+        box-shadow: none !important;
+        min-height: 26px;
+    }
+
+        .modal-crud-registro .pnp-form .form-control:focus,
+        .modal-crud-registro .pnp-form .form-select:focus {
+            background: #f1f5f9;
+            box-shadow: none;
+        }
+
+    /* Texto de ayuda */
+    .modal-crud-registro .pnp-form small.text-muted {
+        font-size: .68rem;
+    }
+
+    /* =========================================
+       1) PERSONAL más grande
+       ========================================= */
+
+    /* El bloque de "Personal" ocupa el 100% del ancho de su columna izquierda */
+    .modal-crud-registro .pnp-form .col-6.col-md-6 > .row.g-0 > .col-10:first-of-type {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    /* El select de Personal con texto más cómodo y permitiendo salto de línea */
+    .modal-crud-registro .pnp-form #IdPersonal {
+        font-size: .8rem;
+        min-height: 32px;
+        white-space: normal; /* muestra nombres largos en 2 líneas si es necesario */
+    }
+
+    /* =========================================
+       2) USUARIO (CIP) más pequeño
+       ========================================= */
+
+    .modal-crud-registro .pnp-form #UsuarioDisplay {
+        flex: 0 0 55%;
+        max-width: 55%;
+        font-size: .73rem;
+    }
+
+        /* el hidden no molesta, solo aseguramos que no estire el input-group */
+        .modal-crud-registro .pnp-form #UsuarioDisplay + #UsuarioHidden {
+            flex: 0 0 auto;
+        }
+
+    /* =========================================
+       SWITCH ESTADO (rojo desactivado, verde activo)
+       ========================================= */
+
+    .modal-crud-registro .pnp-form .switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 22px;
+    }
+
+        .modal-crud-registro .pnp-form .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .modal-crud-registro .pnp-form .switch .slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            /* OFF = rojo */
+            background: linear-gradient(135deg, #f97373, #dc2626);
+            transition: .2s;
+            border-radius: 999px;
+            box-shadow: inset 0 0 0 1px rgba(248, 113, 113, .7);
+        }
+
+            .modal-crud-registro .pnp-form .switch .slider:before {
+                position: absolute;
+                content: "";
+                height: 16px;
+                width: 16px;
+                left: 3px;
+                bottom: 3px;
+                background-color: #ffffff;
+                transition: .2s;
+                border-radius: 50%;
+                box-shadow: 0 2px 5px rgba(15, 23, 42, .35);
+            }
+
+        /* ON = verde */
+        .modal-crud-registro .pnp-form .switch input:checked + .slider {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            box-shadow: inset 0 0 0 1px rgba(34, 197, 94, .7);
+        }
+
+            .modal-crud-registro .pnp-form .switch input:checked + .slider:before {
+                transform: translateX(20px);
+            }
+
+    /* Texto de estado */
+    .modal-crud-registro .pnp-form #estadoText {
+        font-size: .74rem;
+        margin-left: .45rem;
+        font-weight: 600;
+    }
+
+        .modal-crud-registro .pnp-form #estadoText.estado-on {
+            color: #15803d;
+        }
+
+        .modal-crud-registro .pnp-form #estadoText.estado-off {
+            color: #b91c1c;
+        }
+
+    /* =========================================
+       BOTONES BARRA ACCIONES
+       ========================================= */
+    .modal-crud-registro .pnp-form .col-actions .btn-bar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: .45rem;
+        margin-top: .2rem;
+    }
+
+    .modal-crud-registro .pnp-form .btn-bar .btn {
+        border-radius: 999px !important;
+        padding: .22rem .7rem !important;
+        font-size: .78rem !important;
+        display: inline-flex;
+        align-items: center;
+        gap: .28rem;
+    }
+
+    /* Botón Guardar con 3D suave */
+    .modal-crud-registro .pnp-form #btnGuardarUsuario {
+        box-shadow: 0 8px 18px rgba(37, 99, 235, 0.5);
+        transform: translateY(0);
+        transition: transform .1s ease-out, box-shadow .1s ease-out;
+    }
+
+        .modal-crud-registro .pnp-form #btnGuardarUsuario:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.65);
+        }
+
+        .modal-crud-registro .pnp-form #btnGuardarUsuario:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.6);
+        }
+
+    /* =========================================
+       MENSAJE DE ERROR
+       ========================================= */
+    .modal-crud-registro .pnp-form .form-error {
+        margin: .3rem 0 .45rem;
+        padding: .22rem .65rem;
+        border-radius: 999px;
+        font-size: .76rem;
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+        display: none;
+    }
+
+        .modal-crud-registro .pnp-form .form-error.show {
+            display: block;
+        }
+
+    /* =========================================
+       RESPONSIVE
+       ========================================= */
+    @@media (max-width: 768px) {
+        .modal-crud-registro .pnp-form
+
+    {
+        padding: .55rem .55rem .7rem;
+    }
+
+    .modal-crud-registro .pnp-form .btn-bar {
+        justify-content: flex-start;
+    }
+
+    }
+
+    @@media (max-width: 576px) {
+        .modal-crud-registro .pnp-form .control-tile
+
+    {
+        padding: .38rem .5rem .4rem;
+    }
+
+    .modal-crud-registro .pnp-form .form-control,
+    .modal-crud-registro .pnp-form .form-select {
+        font-size: .74rem;
+    }
+
+    }
+</style>
+<div class="pnp-form">
+    <div class="pnp-body">
+        <form id="registrarUsuarioForm"
+              asp-controller="Usuarios"
+              asp-action="RegistrarUsuario"
+              method="post"
+              autocomplete="off"
+              novalidate>
+            @Html.AntiForgeryToken()
+
+            <div id="errorMessagesUsuarioReg" class="form-error" role="alert"></div>
+
+            <div class="row g-0 align-items-start pt-0">
+                <div class="col-6 col-md-6">
+                    <div class="row g-0">
+                        <!-- PERSONAL -->
+                        <div class="col-10">
+                            <div class="control-tile">
+                                <label class="form-label" for="IdPersonal">Personal<span class="req">*</span></label>
+                                <div class="input-group input-group-sm soft">
+                                    <span class="input-group-text"><i class="fas fa-users"></i></span>
+
+                                    <!-- Select manual con data-cip -->
+                                    <select id="IdPersonal" name="IdPersonal" class="form-select form-select-sm" required title="Completa este campo">
+                                        <option value="">Seleccionar Personal</option>
+                                        @foreach (var p in (IEnumerable<dynamic>)ViewBag.PersonalFull)
+                                        {
+                                            <option value="@p.IdPersonal" data-cip="@p.Cip">@p.Text</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CLAVE -->
+                        <div class="col-10 mt-1">
+                            <div class="control-tile">
+                                <label class="form-label" for="Clave">Clave<span class="req">*</span></label>
+                                <div class="input-group input-group-sm soft password-container">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input asp-for="Clave" id="Clave" class="form-control" type="password" required autocomplete="new-password" />
+                                    <button type="button" class="input-group-text password-toggle" id="btnToggleClave" aria-label="Mostrar/ocultar contraseña" title="Mostrar/ocultar">
+                                        <i class="fas fa-eye-slash" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted">Mínimo 6, con mayúscula, minúscula, número y símbolo.</small>
+                            </div>
+                        </div>
+
+                        <!-- ROL -->
+                        <div class="col-8 mt-1">
+                            <div class="control-tile">
+                                <label class="form-label" for="Rol">Rol<span class="req">*</span></label>
+                                <div class="input-group input-group-sm soft">
+                                    <span class="input-group-text"><i class="fas fa-user-shield"></i></span>
+                                    <select asp-for="Rol" class="form-select form-select-sm" required>
+                                        <option value="">Seleccionar Rol</option>
+                                        <option value="Administrador">Administrador</option>
+                                        <option value="Operador">Operador</option>
+                                        <option value="Invitado">Invitado</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLUMNA DERECHA -->
+                <div class="col-10 col-md-6">
+                    <div class="row g-0">
+                        <!-- USUARIO (CIP readonly) -->
+                        <div class="col-12">
+                            <div class="control-tile">
+                                <label class="form-label" for="UsuarioDisplay">Usuario (CIP)</label>
+                                <div class="input-group input-group-sm soft">
+                                    <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                    <!-- visible solo lectura -->
+                                    <input id="UsuarioDisplay" class="form-control" type="text" readonly placeholder="Seleccione personal" />
+                                    <!-- oculto opcional (el servidor NO confía en esto, usa DB) -->
+                                    <input type="hidden" name="Usuario" id="UsuarioHidden" value="" />
+                                </div>
+                                <small class="text-muted">El usuario será el número CIP del personal. No editable.</small>
+                            </div>
+                        </div>
+
+                        <!-- CONFIRMAR CLAVE -->
+                        <div class="col-10 mt-1">
+                            <div class="control-tile">
+                                <label class="form-label" for="ConfirmarClave">Confirmar Clave<span class="req">*</span></label>
+                                <div class="input-group input-group-sm soft password-container">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input asp-for="ConfirmarClave" id="ConfirmarClave" class="form-control" type="password" required autocomplete="new-password" />
+                                    <button type="button" class="input-group-text password-toggle" id="btnToggleConfirm" aria-label="Mostrar/ocultar confirmación" title="Mostrar/ocultar">
+                                        <i class="fas fa-eye-slash" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ESTADO -->
+                        <div class="col-6 mt-1">
+                            <div class="control-tile">
+                                <label class="form-label d-block">Estado</label>
+                                <div class="d-flex align-items-center mt-1">
+                                    <label class="switch mb-0">
+                                        <input asp-for="Estado" type="checkbox" id="chkActivo" class="js-estado" />
+                                        <span class="slider"></span>
+                                    </label>
+                                    <span id="estadoText" class="estado-text ml-2"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-0 align-items-start mt-2">
+                <div class="col-12 col-md-6"></div>
+                <div class="col-12 col-md-6 col-actions">
+                    <div class="btn-bar">
+                        <a class="btn btn-warning btn-sm" data-dismiss="modal"><i class="fas fa-arrow-circle-left"></i> Atrás</a>
+                        <button type="button" id="btnGuardarUsuario" class="btn btn-primary btn-sm">
+                            <i class="fas fa-save"></i> Guardar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal éxito: Registro -->
+<div id="modalRegistroExitosa" class="modal fade modal-center modal-xs" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content" role="status" aria-live="polite">
+            <div class="modal-body text-center py-4">
+                <div class="mb-2" style="font-size:3rem; line-height:1;">
+                    <i class="fas fa-check-circle text-success" aria-hidden="true"></i>
+                </div>
+                <h5 class="mb-1">¡Usuario Registrado!</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+      'use strict';
+
+      // Mostrar/ocultar contraseñas
+      function togglePasswordById(id, btnId){
+        const f = document.getElementById(id);
+        const btn = document.getElementById(btnId);
+        if(!f || !btn) return;
+        const icon = btn.querySelector('i');
+        const isPwd = f.type === 'password';
+        f.type = isPwd ? 'text' : 'password';
+        if(icon){
+          icon.classList.toggle('fa-eye-slash', !isPwd);
+          icon.classList.toggle('fa-eye', isPwd);
+        }
+        try{ f.focus(); }catch(e){}
+      }
+      document.getElementById('btnToggleClave')?.addEventListener('click', function(e){ e.preventDefault(); togglePasswordById('Clave','btnToggleClave'); });
+      document.getElementById('btnToggleConfirm')?.addEventListener('click', function(e){ e.preventDefault(); togglePasswordById('ConfirmarClave','btnToggleConfirm'); });
+
+      // Estado ON/OFF
+      function actualizarEstadoText(){
+        const chk = document.getElementById('chkActivo');
+        const t = document.getElementById('estadoText');
+        const on = !!(chk && chk.checked);
+        if(!t) return;
+        t.textContent = on ? 'Activo' : 'Desactivado';
+        t.classList.remove('estado-on','estado-off');
+        t.classList.add(on ? 'estado-on' : 'estado-off');
+      }
+      document.addEventListener('DOMContentLoaded', actualizarEstadoText);
+      document.getElementById('chkActivo')?.addEventListener('change', actualizarEstadoText);
+
+      // Validación de clave
+      function validaFortalezaClave(){
+        const c = (document.getElementById('Clave')||{}).value || '';
+        const r = (document.getElementById('ConfirmarClave')||{}).value || '';
+        const rx = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/;
+        if(!rx.test(c)){ showErr('La contraseña no cumple los requisitos.'); return false; }
+        if(c !== r){ showErr('Las contraseñas no coinciden.'); return false; }
+        return true;
+      }
+
+      // Error UI
+      const $err = document.getElementById('errorMessagesUsuarioReg');
+      function showErr(m){ if($err){ $err.textContent = m || 'Se produjo un error.'; $err.classList.add('show'); $err.setAttribute('role','alert'); } }
+      function hideErr(){ if($err){ $err.classList.remove('show'); $err.textContent = ''; } }
+
+      // CIP display/hidden sync desde <option data-cip="...">
+      const sel = document.getElementById('IdPersonal');
+      const disp = document.getElementById('UsuarioDisplay');
+      const hid  = document.getElementById('UsuarioHidden');
+
+      function syncCip(){
+        const opt = sel && sel.selectedOptions && sel.selectedOptions[0];
+        const cip = (opt && opt.dataset ? (opt.dataset.cip || '') : '');
+        if(disp) disp.value = cip || '';
+        if(hid)  hid.value  = cip || '';
+      }
+      sel?.addEventListener('change', syncCip);
+      document.addEventListener('DOMContentLoaded', syncCip);
+
+      // Guardar
+      const form = document.getElementById('registrarUsuarioForm');
+      const btn  = document.getElementById('btnGuardarUsuario');
+
+      // Modal éxito util
+      function showSuccessModalById(modalSelector, opts){
+        opts = Object.assign({ parentModalSelector: null, reload: true, timeout: 1200 }, opts || {});
+        var $m = $(modalSelector);
+        if(!$m || !$m.length) { console.warn('Modal no encontrado:', modalSelector); return; }
+        try { $m.modal({ backdrop: 'static', keyboard: false, show: true }); } catch(e){}
+        setTimeout(function(){
+          try{ if(opts.parentModalSelector) $(opts.parentModalSelector).modal('hide'); } catch(e){}
+          try{ $m.modal('hide'); } catch(e){}
+          if(opts.reload) location.reload();
+        }, opts.timeout);
+      }
+
+      function doGuardar(e){
+        e?.preventDefault();
+        hideErr();
+
+        if(!form) return;
+
+        if(!form.checkValidity()){
+          const firstInvalid = form.querySelector(':invalid');
+          try{ firstInvalid?.focus(); }catch(e){}
+          if(typeof form.reportValidity === 'function'){ form.reportValidity(); }
+          else { showErr('Complete los campos obligatorios.'); }
+          return;
+        }
+
+        if(!validaFortalezaClave()) return;
+
+        if(typeof jQuery === 'undefined'){ form.submit(); return; }
+
+        const $btn = $(btn).prop('disabled', true);
+        const fd = new FormData(form);
+        $.ajax({
+          url: $(form).attr('action'),
+          type: 'POST',
+          processData: false,
+          contentType: false,
+          data: fd,
+          headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]', form).val() }
+        }).done(function(resp){
+          if(resp && resp.success){
+            showSuccessModalById('#modalRegistroExitosa', { parentModalSelector: '#registroModal', reload: true, timeout: 1200 });
+          } else {
+            showErr((resp && resp.message) || 'No se pudo guardar los cambios.');
+          }
+        }).fail(function(xhr){
+          const msg = (xhr && xhr.responseJSON && xhr.responseJSON.message) || 'Error del servidor.';
+          showErr(msg);
+        }).always(function(){ $btn.prop('disabled', false); });
+      }
+
+      btn?.addEventListener('click', doGuardar);
+      form?.addEventListener('submit', function(e){ e.preventDefault(); doGuardar(e); });
+
+    })();
+</script>

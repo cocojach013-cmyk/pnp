@@ -1,0 +1,410 @@
+﻿/* =========================================================
+   Reportes PNP – Estilos comunes (Movimientos, Asistencia, etc.)
+   ========================================================= */
+
+/* Paleta base y tipografías pequeñas para reportes */
+:root {
+    --acc: #007A33;
+    --acc-600: #046a2e;
+    --ring: rgba(0,122,51,.22);
+    --page-bg: #f6faf7;
+    --card-bg: #ffffff;
+    --line: #edf3ee;
+    --muted: #6b7280;
+    --fs-xxs: .72rem;
+    --fs-xs: .76rem;
+    --fs-sm: .82rem;
+    --fs-md: .88rem;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+/* Contenedor general de página de reporte */
+.mov-page {
+    background: var(--page-bg);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Encabezado de página (título + acciones) */
+.page-head h5 {
+    font-weight: 800;
+    letter-spacing: .2px;
+    margin: 0;
+    font-size: 1rem;
+}
+
+@media (min-width: 768px) {
+    .page-head h5 {
+        font-size: 1.15rem;
+    }
+}
+
+@media (min-width: 1200px) {
+    .page-head h5 {
+        font-size: 1.25rem;
+    }
+}
+
+/* Toolbar de acciones (Limpiar, Exportar, Imprimir) */
+.actions-toolbar {
+    display: flex;
+    gap: .45rem;
+    flex-wrap: wrap;
+}
+
+    .actions-toolbar .btn {
+        padding: .30rem .75rem !important;
+        font-size: .82rem !important;
+        border-radius: 8px;
+    }
+
+/* Botón éxito en verde PNP coherente */
+.btn-success {
+    background: var(--acc);
+    border-color: var(--acc);
+}
+
+    .btn-success:hover {
+        background: var(--acc-600);
+        border-color: var(--acc-600);
+    }
+
+/* Tarjeta contenedora de filtros / cabeceras */
+.card-like {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .06);
+}
+
+/* ---------------------------------------------------------
+   Filtros: layout en rejilla reutilizable
+   --------------------------------------------------------- */
+.filters-2rows {
+    display: grid;
+    gap: .75rem;
+}
+
+.filters-grid {
+    display: grid;
+    gap: .6rem;
+    align-items: end;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+    .filters-grid .col {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .filters-grid .form-label {
+        font-size: var(--fs-sm);
+        margin-bottom: 2px;
+        white-space: normal;
+        line-height: 1.15;
+    }
+
+    .filters-grid input,
+    .filters-grid select,
+    .filters-grid button {
+        height: 36px;
+        font-size: .86rem;
+        border-radius: 10px;
+        padding: .25rem .55rem;
+    }
+
+        .filters-grid input:focus,
+        .filters-grid select:focus {
+            border-color: var(--acc);
+            box-shadow: 0 0 0 .18rem var(--ring);
+        }
+
+/* ---------------------------------------------------------
+   Multiselect genérico (mdrop) – usado en los reportes
+   --------------------------------------------------------- */
+.mdrop {
+    position: relative;
+    min-width: 0;
+}
+
+.mdrop-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 36px;
+    padding: .25rem .55rem;
+    font-size: .86rem;
+    border: 1px solid #ced4da;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+}
+
+    .mdrop-toggle:focus {
+        outline: none;
+        border-color: var(--acc);
+        box-shadow: 0 0 0 .18rem var(--ring);
+    }
+
+.mdrop-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 6px);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, .10);
+    z-index: 2400;
+    padding: .45rem;
+    display: none;
+}
+
+.mdrop.open .mdrop-panel {
+    display: block;
+}
+
+.mdrop-head {
+    display: flex;
+    gap: .35rem;
+    align-items: center;
+    margin-bottom: .35rem;
+}
+
+    .mdrop-head input[type="text"] {
+        flex: 1;
+        height: 30px;
+        font-size: var(--fs-xs);
+        border-radius: 8px;
+        padding: .12rem .45rem;
+    }
+
+    .mdrop-head .btn-xs {
+        height: 30px;
+        font-size: var(--fs-xxs);
+        padding: .12rem .45rem;
+        border-radius: 8px;
+    }
+
+.mdrop-list {
+    max-height: 220px;
+    overflow: auto;
+    border: 1px solid #eef3ef;
+    border-radius: 8px;
+    font-size: var(--fs-xs);
+}
+
+.mdrop-item {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .25rem .5rem;
+    cursor: pointer;
+}
+
+    .mdrop-item:hover {
+        background: #f7faf8;
+    }
+
+    .mdrop-item input {
+        margin: 0;
+    }
+
+/* ---------------------------------------------------------
+   KPIs – tarjetas pequeñas con métricas
+   --------------------------------------------------------- */
+.kpi {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .05);
+}
+
+    .kpi .small {
+        color: var(--muted);
+        font-size: var(--fs-xs);
+    }
+
+    .kpi .fs-5 {
+        font-size: 1rem !important;
+    }
+
+/* ---------------------------------------------------------
+   Tablas de reporte (lista y resumen)
+   --------------------------------------------------------- */
+.table-wrap {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.table.table-compact {
+    font-size: .85rem;
+    table-layout: fixed;
+    width: 100%;
+}
+
+/* En móvil, forzar scroll horizontal si hay muchas columnas */
+@media (max-width: 768px) {
+    #tbl,
+    #tblResumen {
+        min-width: 980px;
+    }
+}
+
+.table td,
+.table th {
+    padding: .40rem .55rem !important;
+    vertical-align: middle;
+}
+
+/* Cabecera pegajosa */
+.sticky-head thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+/* Header oscuro tipo PNP */
+.table-dark th {
+    background: linear-gradient(180deg, #0b3b24, #08361f) !important;
+    color: #fff !important;
+}
+
+/* Truncar a 2 líneas */
+.wrap-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+}
+
+/* ---------------------------------------------------------
+   Columnas que se ocultan según ancho (reutilizable)
+   --------------------------------------------------------- */
+/* En pantallas medianas, ocultar columnas “secundarias” */
+@media (max-width: 992px) {
+    .col-autoriza,
+    .col-destino,
+    .col-unidad,
+    .col-control {
+        display: none;
+    }
+}
+
+/* En pantallas pequeñas, ocultar aún más detalles */
+@media (max-width: 768px) {
+    .col-edad,
+    .col-sexo,
+    .col-grado {
+        display: none;
+    }
+}
+
+/* Font-size más pequeño en tablas ultra pequeñas */
+@media (max-width: 576px) {
+    .table.table-compact {
+        font-size: .80rem;
+    }
+}
+
+/* ---------------------------------------------------------
+   Print: sólo imprime el área marcada como .print-scope
+   --------------------------------------------------------- */
+@media print {
+    body * {
+        visibility: hidden !important;
+    }
+
+    .print-scope,
+    .print-scope * {
+        visibility: visible !important;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .print-scope {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+
+    /* ✅ Estilo del título que se imprimirá */
+    .print-title {
+        font-weight: 800;
+        font-size: 1.05rem;
+        text-align: center;
+        margin-bottom: .35rem;
+    }
+}
+
+/* ---------------------------------------------------------
+   Badges de estado (tamaño uniforme en las tablas)
+   --------------------------------------------------------- */
+.table .badge {
+    display: inline-block;
+    width: 75px;
+    text-align: center;
+    padding: .35rem 0;
+    font-weight: 700;
+    border-radius: 999px;
+    font-size: .70rem;
+}
+
+/* =========================================================
+   NUEVO: Header responsivo (título centrado en pantallas pequeñas)
+   ========================================================= */
+
+/* Definimos el layout base del header de la página */
+
+
+
+
+
+.page-head {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+
+    /* Los botones siempre empujados hacia la derecha */
+    .page-head .actions-toolbar {
+        margin-left: auto;
+        justify-content: flex-end;
+    }
+
+/* =========================================================
+   Columna CORREO – permitir salto de línea y ancho controlado
+   ========================================================= */
+.table td.col-correo {
+    white-space: normal; /* permite varias líneas */
+    word-break: break-all; /* corta palabras largas tipo correo */
+    max-width: 220px; /* ajusta el ancho como te guste */
+    font-size: var(--fs-xs); /* un poco más pequeño para que quepa mejor */
+}
+
+/* En pantallas pequeñas: el título ocupa toda la fila y se centra;
+   los botones siguen a la derecha en la fila siguiente */
+@media (max-width: 768px) {
+    .page-head h5 {
+        flex: 0 0 100%;
+        text-align: center;
+    }
+
+    .page-head .actions-toolbar {
+        flex: 0 0 100%;
+        justify-content: flex-end;
+    }
+}

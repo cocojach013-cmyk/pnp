@@ -1,0 +1,322 @@
+﻿@model ControlPNP.ViewModels.LoginVM
+@{
+    Layout = null;
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+<style>
+    :root {
+        --pnp-green: #00471B;
+        --pnp-green-600: #007A33;
+        --pnp-green-700: #003715;
+        --pnp-gold: #D4AF37;
+    }
+
+    .auth-wrap {
+        max-width: 360px;
+        margin: 0 auto;
+        padding: .25rem .5rem .75rem;
+        font-family: "Inter", sans-serif;
+    }
+
+    /* ======= BRAND ======= */
+    .brand-badge {
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        margin-bottom: .6rem;
+        justify-content: center;
+    }
+
+        .brand-badge img {
+            width: 46px;
+            height: 46px;
+        }
+
+    .brand-title small {
+        font-weight: 700;
+        font-size: .78rem;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: var(--pnp-green-700);
+    }
+
+    /* ======= HEADER NUEVO CON MARCO ======= */
+    .auth-header {
+        padding: .6rem .85rem;
+        border: 1.5px solid var(--pnp-green);
+        border-radius: 14px;
+        background: #ffffff;
+        box-shadow: 0 2px 5px rgba(0,0,0,.06);
+        margin-bottom: .8rem;
+    }
+
+    .badge-access {
+        background: #ffffff;
+        border: 1.2px solid var(--pnp-green);
+        color: var(--pnp-green);
+        padding: .22rem .7rem;
+        border-radius: 999px;
+        font-size: .75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .header-note {
+        font-size: .8rem;
+        font-weight: 600;
+        color: var(--pnp-green-700);
+    }
+
+    /* ======= CARD ======= */
+    .auth-card {
+        border-radius: 16px;
+        border: 1px solid rgba(0,0,0,.08);
+        overflow: hidden;
+        background: radial-gradient(circle at top left, rgba(0, 122, 51, .10), transparent 50%), radial-gradient(circle at bottom right, rgba(212, 175, 55, .12), transparent 50%), #ffffff;
+        box-shadow: 0 14px 36px rgba(0,0,0,.18);
+    }
+
+        .auth-card .card-body {
+            padding: .9rem .95rem .8rem;
+        }
+
+    /* ======= INPUTS ======= */
+    .form-label {
+        font-size: .78rem;
+        margin-bottom: .15rem;
+        font-weight: 600;
+    }
+
+    .input-group-text {
+        background: #f3f6f4;
+        border-radius: .55rem 0 0 .55rem;
+    }
+
+    .form-control {
+        border-radius: 0 .55rem .55rem 0;
+        font-size: .85rem;
+    }
+
+    .btn-outline-secondary {
+        border-radius: 0 .55rem .55rem 0 !important;
+    }
+
+    /* CAPSLOCK */
+    .caps-indicator {
+        font-size: .75rem;
+        color: #B54708;
+    }
+
+    /* ERROR */
+    #errorText {
+        font-size: .78rem;
+        color: #B42318;
+        margin-top: .25rem;
+        min-height: 1rem;
+        display: none;
+    }
+
+        #errorText:not(:empty) {
+            display: block;
+        }
+
+    /* BOTÓN LOGIN */
+    .btn-pnp {
+        border: none;
+        background: linear-gradient(135deg, #00471B, #007A33);
+        color: #fff;
+        border-radius: .7rem;
+        padding: .55rem 0;
+        font-size: .9rem;
+        box-shadow: 0 10px 22px rgba(0,0,0,.22);
+    }
+
+        .btn-pnp:hover {
+            filter: brightness(1.05);
+            box-shadow: 0 14px 28px rgba(0,0,0,.26);
+        }
+
+    /* FOOTER */
+    .footer-note {
+        font-size: .72rem;
+        padding: .45rem;
+        color: #4b5563;
+        text-align: center;
+    }
+</style>
+
+<div class="auth-wrap">
+
+    <!-- BRAND -->
+    <div class="text-center brand-badge">
+        <img src="~/Imagenes/Escudo.png" />
+        <div class="brand-title">
+            <small>Policía Nacional del Perú</small>
+        </div>
+    </div>
+
+    <!-- HEADER CON MARQUITO -->
+    <div class="auth-header d-flex justify-content-between align-items-center">
+        <span class="badge-access">
+            <i class="fa-solid fa-shield-halved me-1"></i> Acceso
+        </span>
+        <span class="header-note">Uso institucional</span>
+    </div>
+
+    <!-- CARD -->
+    <div class="card auth-card">
+
+        <div class="card-body">
+
+            <form id="loginForm"
+                  asp-controller="Acceso"
+                  asp-action="Login"
+                  method="post"
+                  autocomplete="off">
+
+                @Html.AntiForgeryToken()
+
+                <!-- Usuario -->
+                <div class="mb-3">
+                    <label class="form-label">Usuario</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input asp-for="Usuario"
+                               class="form-control"
+                               type="text"
+                               autocomplete="username"
+                               required
+                               placeholder="Ingrese su usuario" />
+                    </div>
+                </div>
+
+                <!-- Clave -->
+                <div class="mb-2">
+                    <label class="form-label">Clave</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input asp-for="Clave"
+                               id="inputPassword"
+                               class="form-control"
+                               type="password"
+                               autocomplete="current-password"
+                               required
+                               placeholder="Ingrese su clave" />
+
+                        <button type="button"
+                                id="togglePwd"
+                                class="btn btn-outline-secondary">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+
+                    <div id="capsLockHint" class="caps-indicator d-none mt-1">
+                        <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                        Bloq Mayús activo
+                    </div>
+                </div>
+
+                <!-- Error -->
+                <p id="errorText">@ViewData["Mensaje"]</p>
+
+                <!-- Botón -->
+                <div class="d-grid mt-3">
+                    <button class="btn btn-pnp" id="btnSubmit" type="submit">
+                        <i class="fa-solid fa-right-to-bracket me-1"></i> Iniciar sesión
+                        <span class="spinner-border spinner-border-sm ms-2 d-none"></span>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+        <div class="footer-note">
+            © @DateTime.Now.Year • PNP • Seguridad y Disciplina
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===== 0) Intentar crear admin automáticamente al cargar la vista =====
+    (async function ensureAdmin() {
+        try {
+            await fetch('@Url.Action("InitAdmin", "Acceso")', {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "fetch",
+                    "Accept": "application/json"
+                }
+            });
+            // No mostramos nada en UI: es transparente para el usuario
+        } catch (e) {
+            // No romper la pantalla de login si falla
+            console.error("Error al inicializar admin:", e);
+        }
+    })();
+
+    // Mostrar / ocultar contraseña
+    const pwd = document.getElementById("inputPassword");
+    const tgl = document.getElementById("togglePwd");
+
+    if (tgl && pwd) {
+        tgl.addEventListener("click", () => {
+            pwd.type = pwd.type === "password" ? "text" : "password";
+            tgl.querySelector("i").classList.toggle("fa-eye");
+            tgl.querySelector("i").classList.toggle("fa-eye-slash");
+        });
+    }
+
+    // CapsLock
+    if (pwd) {
+        pwd.addEventListener("keyup", (e) => {
+            const on = e.getModifierState("CapsLock");
+            document.getElementById("capsLockHint").classList.toggle("d-none", !on);
+        });
+    }
+
+    // Fetch login
+    const form = document.getElementById("loginForm");
+    const btn = document.getElementById("btnSubmit");
+    const errorLine = document.getElementById("errorText");
+
+    function showError(msg) {
+        errorLine.textContent = msg || "";
+        errorLine.style.display = msg ? "block" : "none";
+    }
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        showError("");
+
+        try {
+            const fd = new FormData(form);
+
+            const resp = await fetch(form.action, {
+                method: "POST",
+                body: fd,
+                headers: {
+                    "X-Requested-With": "fetch",
+                    "Accept": "application/json"
+                }
+            });
+
+            const payload = await resp.json().catch(() => null);
+
+            if (resp.ok && payload?.success) {
+                window.top.location.href = payload.redirect || "/";
+            } else {
+                showError(payload?.message || "Usuario o clave incorrectos.");
+            }
+        } catch {
+            showError("No se pudo procesar la solicitud.");
+        }
+    });
+</script>

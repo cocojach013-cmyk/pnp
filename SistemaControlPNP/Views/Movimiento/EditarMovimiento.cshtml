@@ -1,0 +1,884 @@
+﻿@model SistemaControlPNP.Models.Movimiento
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    Layout = null;
+
+    var fechaSalida = (ViewBag.Fecha as string) ?? "";
+    var horaSalida = (ViewBag.Hora as string) ?? "";
+
+    var fechaRet = (ViewBag.FechaRetorno as string) ?? "";
+    var horaRet = (ViewBag.HoraRetorno as string) ?? "";
+
+    var items = ViewBag.PersonalList as IEnumerable<SelectListItem> ?? Enumerable.Empty<SelectListItem>();
+    var idSel = Model?.IdPersonal.ToString();
+
+    string selectedTextFromModel = "";
+    if (Model?.Personal != null)
+    {
+        var g = Model.Personal.Grado ?? "";
+        var ap = Model.Personal.Apellidos ?? "";
+        var no = Model.Personal.Nombres ?? "";
+        var cip = Model.Personal.NumeroCip ?? "";
+        selectedTextFromModel = $"{g} - {ap} {no} (CIP {cip})".Trim();
+    }
+    var itemEnLista = items.FirstOrDefault(x => x.Value == idSel);
+    var selectedText = !string.IsNullOrWhiteSpace(itemEnLista?.Text) ? itemEnLista.Text : selectedTextFromModel;
+    selectedText = (selectedText ?? "").Replace("(NO DISPONIBLE)", "").Trim();
+
+    var opcionesRender = new List<SelectListItem>();
+    if (!string.IsNullOrWhiteSpace(idSel) && !string.IsNullOrWhiteSpace(selectedText))
+        opcionesRender.Add(new SelectListItem { Value = idSel, Text = selectedText, Selected = true });
+
+    foreach (var it in items)
+    {
+        if (it?.Value == null) continue;
+        if (it.Value == idSel) continue;
+        var txt = (it.Text ?? "").Replace("(NO DISPONIBLE)", "").Trim();
+        if (string.IsNullOrWhiteSpace(txt)) continue;
+        opcionesRender.Add(new SelectListItem { Value = it.Value, Text = txt, Selected = false });
+    }
+
+    var destinosCat = new[]
+    {
+        "FISCALIA","FECOR","DIVINCRI CAJAMARCA","FISCALIA DE FAMILIA","COM. SAN JOSE","REGION POLIICAL CAJAMARCA",
+        "SECPIRV","ARPOLJUD","PENAL CAJAMARCA","COM. BAÑOS DEL INCA","OFAD","DIVREINT","COM. MOLLEPAMPA",
+        "MUNICIPALIDA DE CAJAMARCA"
+    };
+    var destinoSel = (Model?.Destino ?? "").Trim();
+
+    // Motivo: opciones de combo
+    var motivosCat = new[]
+    {
+        "DILIGENCIAS","TRÁMITE DOCUMENTARIO","SERVICIO","REUNIÓN"
+    };
+    var motivoSel = (Model?.Motivo ?? "").Trim();
+    var motivoEnLista = motivosCat.Any(m => m.Equals(motivoSel, StringComparison.OrdinalIgnoreCase));
+    var motivoOtrosSelected = !motivoEnLista && !string.IsNullOrWhiteSpace(motivoSel);
+
+    var autorizaVal = (Model?.Autoriza ?? "").Trim().ToUpperInvariant();
+    var isOrden = autorizaVal == "ORDEN SUPERIOR";
+}
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<div class="pnp-form mov-edit">
+    <div class="pnp-body mov-edit-body">
+        <form id="editarMovimientoForm"
+              asp-controller="Movimiento"
+              asp-action="EditarMovimiento"
+              method="post"
+              autocomplete="off"
+              novalidate>
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="IdMovimiento" value="@Model.IdMovimiento" />
+            <input type="hidden" id="IdPersonal" name="IdPersonal" value="@Model.IdPersonal" />
+
+            <div id="errorMessagesMovimientoEdit" class="form-error" role="alert"></div>
+
+            <!-- FILA 1: SOLO PERSONAL (una fila completa) -->
+            <div class="row g-2 align-items-start pt-0">
+                <div class="col-12">
+                    <div class="control-tile">
+                        <label class="form-label" for="IdPersonal_display">
+                            Personal <span class="req">*</span>
+                        </label>
+                        <div class="input-group input-group-sm soft flex-nowrap align-items-center">
+                            <span class="input-group-text icon-pill">
+                                <i class="fas fa-users"></i>
+                            </span>
+                            @Html.DropDownList("IdPersonal_display", opcionesRender, new {
+                            @class = "form-select form-select-sm select-personal-compact",
+                                                        id = "IdPersonal_display",
+                                                        disabled = "disabled"
+                                                        })
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FILA 2: FECHA / HORA SALIDA -->
+            <div class="row g-2 mt-1">
+                <div class="col-12 col-md-6">
+                    <div class="control-tile">
+                        <label class="form-label" for="Fecha">
+                            Fecha salida <span class="req">*</span>
+                        </label>
+                        <div class="input-group input-group-sm soft flex-nowrap">
+                            <span class="input-group-text icon-pill">
+                                <i class="fas fa-calendar-day"></i>
+                            </span>
+                            <input type="date"
+                                   id="Fecha"
+                                   name="Fecha"
+                                   class="form-control"
+                                   required
+                                   value="@fechaSalida" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="control-tile">
+                        <label class="form-label" for="Hora">
+                            Hora salida <span class="req">*</span>
+                        </label>
+                        <div class="input-group input-group-sm soft flex-nowrap">
+                            <span class="input-group-text icon-pill">
+                                <i class="fas fa-clock"></i>
+                            </span>
+                            <input type="time"
+                                   id="Hora"
+                                   name="Hora"
+                                   class="form-control"
+                                   required
+                                   value="@horaSalida" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FILA 1B: FECHA/HORA RETORNO (opcional) -->
+            <div class="row g-2 mt-1">
+                <div class="col-12 col-md-6">
+                    <div class="control-tile">
+                        <label class="form-label" for="FechaRetorno">Fecha retorno</label>
+                        <div class="input-group input-group-sm soft flex-nowrap">
+                            <span class="input-group-text icon-pill">
+                                <i class="fas fa-calendar-plus"></i>
+                            </span>
+                            <input type="date"
+                                   id="FechaRetorno"
+                                   name="FechaRetorno"
+                                   class="form-control"
+                                   value="@fechaRet" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="control-tile">
+                        <label class="form-label" for="HoraRetorno">Hora retorno</label>
+                        <div class="input-group input-group-sm soft flex-nowrap">
+                            <span class="input-group-text icon-pill">
+                                <i class="fas fa-clock-rotate-left"></i>
+                            </span>
+                            <input type="time"
+                                   id="HoraRetorno"
+                                   name="HoraRetorno"
+                                   class="form-control"
+                                   value="@horaRet" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FILA 3: AUTORIZA + DESTINO -->
+            <div class="row g-2 mt-1">
+                <div class="col-12 col-md-6">
+                    <div class="control-tile">
+                        <label class="form-label" for="AutorizaSelect">
+                            Autoriza <span class="req">*</span>
+                        </label>
+                        <div class="input-group input-group-sm soft mb-1 flex-nowrap">
+                            <span class="input-group-text icon-pill">
+                                <i class="fas fa-user-check"></i>
+                            </span>
+                            <select id="AutorizaSelect"
+                                    class="form-select form-select-sm"
+                                    data-dropup-auto="false"
+                                    required>
+                                @if (string.IsNullOrEmpty(autorizaVal) || (!isOrden && string.IsNullOrEmpty(Model.Autoriza)))
+                                {
+                                    <option value="" selected>Seleccionar</option>
+                                }
+                                else
+                                {
+                                    <option value="">Seleccionar</option>
+                                }
+
+                                @if (isOrden)
+                                {
+                                    <option value="ORDEN SUPERIOR" selected>ORDEN SUPERIOR</option>
+                                }
+                                else
+                                {
+                                    <option value="ORDEN SUPERIOR">ORDEN SUPERIOR</option>
+                                }
+
+                                @if (!isOrden && !string.IsNullOrEmpty(autorizaVal))
+                                {
+                                    <option value="OTROS" selected>OTROS</option>
+                                }
+                                else
+                                {
+                                    <option value="OTROS">OTROS</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="input-group input-group-sm soft @(isOrden ? "d-none" : "") flex-nowrap"
+                             id="AutorizaOtrosGroup">
+                            <span class="input-group-text icon-pill">
+                                <i class="fas fa-pen-to-square"></i>
+                            </span>
+                            <input name="Autoriza"
+                                   id="Autoriza"
+                                   class="form-control"
+                                   placeholder="Especifique quién autoriza"
+                                   value="@(isOrden ? "" : Model.Autoriza)"
+                                   required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <div class="control-tile">
+                        <label class="form-label" for="DestinoSelect">
+                            Destino <span class="req">*</span>
+                        </label>
+                        <div class="input-group input-group-sm soft mb-1 flex-nowrap">
+                            <span class="input-group-text icon-pill">
+                                <i class="fas fa-location-dot"></i>
+                            </span>
+                            <select id="DestinoSelect"
+                                    class="form-select form-select-sm"
+                                    data-dropup-auto="false"
+                                    required>
+                                <option value="">Seleccionar Destino</option>
+                                @foreach (var d in destinosCat)
+                                {
+                                    var match = !string.IsNullOrWhiteSpace(destinoSel) &&
+                                    d.Equals(destinoSel, StringComparison.OrdinalIgnoreCase);
+                                    if (match)
+                                    {
+                                        <option value="@d" selected="selected">@d</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@d">@d</option>
+                                    }
+                                }
+                                @{
+                                    var destinoEnLista = destinosCat.Any(d => d.Equals(destinoSel, StringComparison.OrdinalIgnoreCase));
+                                    var otrosSelected = !destinoEnLista && !string.IsNullOrWhiteSpace(destinoSel);
+                                }
+                                @if (otrosSelected)
+                                {
+                                    <option value="OTROS" selected="selected">OTROS</option>
+                                }
+                                else
+                                {
+                                    <option value="OTROS">OTROS</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="input-group input-group-sm soft @((destinosCat.Any(d => d.Equals(destinoSel, StringComparison.OrdinalIgnoreCase))) ? "d-none" : "") flex-nowrap"
+                             id="DestinoOtrosGroup">
+                            <span class="input-group-text icon-pill">
+                                <i class="fas fa-pen-to-square"></i>
+                            </span>
+                            <input name="Destino"
+                                   id="Destino"
+                                   class="form-control"
+                                   placeholder="Especificar destino"
+                                   value="@((destinosCat.Any(d => d.Equals(destinoSel, StringComparison.OrdinalIgnoreCase))) ? "" : destinoSel)"
+                                   required />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FILA 4: MOTIVO + NOVEDADES -->
+            <div class="row g-2 mt-1">
+                <div class="col-12 col-md-6">
+                    <div class="control-tile">
+                        <label class="form-label" for="MotivoSelect">
+                            Motivo <span class="req">*</span>
+                        </label>
+                        <!-- Combo Motivo -->
+                        <div class="input-group input-group-sm soft mb-1 flex-nowrap">
+                            <span class="input-group-text icon-pill">
+                                <i class="fas fa-comment-dots"></i>
+                            </span>
+                            <select id="MotivoSelect"
+                                    class="form-select form-select-sm"
+                                    data-dropup-auto="false"
+                                    required>
+                                <option value="">Seleccionar motivo</option>
+                                @foreach (var m in motivosCat)
+                                {
+                                    var matchMot = !string.IsNullOrWhiteSpace(motivoSel) &&
+                                    m.Equals(motivoSel, StringComparison.OrdinalIgnoreCase);
+                                    if (matchMot)
+                                    {
+                                        <option value="@m" selected="selected">@m</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@m">@m</option>
+                                    }
+                                }
+                                @if (motivoOtrosSelected)
+                                {
+                                    <option value="OTRAS" selected="selected">OTRAS</option>
+                                }
+                                else
+                                {
+                                    <option value="OTRAS">OTRAS</option>
+                                }
+                            </select>
+                        </div>
+                        <!-- Campo extra cuando se elige OTRAS -->
+                        <div class="input-group input-group-sm soft @(motivoEnLista ? "d-none" : "") flex-nowrap"
+                             id="MotivoOtrosGroup">
+                            <span class="input-group-text icon-pill">
+                                <i class="fas fa-pen-to-square"></i>
+                            </span>
+                            <input name="Motivo"
+                                   id="Motivo"
+                                   class="form-control"
+                                   placeholder="Especificar motivo"
+                                   value="@(motivoEnLista ? "" : motivoSel)"
+                                   required />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="control-tile">
+                        <label class="form-label" for="Novedades">
+                            Novedades <span class="req">*</span>
+                        </label>
+                        <div class="input-group input-group-sm soft flex-nowrap">
+                            <span class="input-group-text icon-pill">
+                                <i class="fas fa-note-sticky"></i>
+                            </span>
+                            <input name="Novedades"
+                                   id="Novedades"
+                                   class="form-control"
+                                   required
+                                   value="@Model.Novedades"
+                                   placeholder="Novedades" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="row g-0 align-items-start mt-2">
+                <div class="col-12 col-md-6"></div>
+                <div class="col-12 col-md-6 col-actions">
+                    <div class="btn-bar">
+                        <a class="btn btn-back btn-sm" data-dismiss="modal">
+                            <i class="fas fa-arrow-circle-left"></i> Atrás
+                        </a>
+                        <button type="button" id="btnActualizarMovimiento" class="btn btn-soft-save btn-sm">
+                            <i class="fas fa-save"></i> Guardar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ÉXITO: overlay propio, SIN bootstrap modal -->
+<div id="modalEdicionExitosa" class="mov-success-overlay" aria-hidden="true">
+    <div class="mov-success-box" role="status" aria-live="polite">
+        <div class="mov-success-icon">
+            <i class="fas fa-check-circle" aria-hidden="true"></i>
+        </div>
+        <h5 class="mov-success-title mb-1">¡Movimiento actualizado!</h5>
+    </div>
+</div>
+
+
+<script>
+    (function () {
+        'use strict';
+        const form = document.getElementById('editarMovimientoForm');
+        const btn = document.getElementById('btnActualizarMovimiento');
+        const err = document.getElementById('errorMessagesMovimientoEdit');
+        const successOverlay = document.getElementById('modalEdicionExitosa');
+
+        function csrf() {
+            var t = form.querySelector('input[name="__RequestVerificationToken"]');
+            return t ? t.value : '';
+        }
+
+        function showErr(m) {
+            if (!err) return;
+            err.textContent = m || 'Se produjo un error.';
+            err.classList.add('show');
+            err.setAttribute('role', 'alert');
+        }
+
+        function hideErr() {
+            if (!err) return;
+            err.classList.remove('show');
+            err.textContent = '';
+        }
+
+        // Éxito: solo mostramos el overlay, sin tocar el tamaño de la página
+        function ok() {
+            if (successOverlay) {
+                successOverlay.classList.add('show');
+            }
+            setTimeout(function () {
+                location.reload();
+            }, 900);
+        }
+
+        // --- Validación salida/retorno ---
+        const fSal = document.getElementById('Fecha');
+        const hSal = document.getElementById('Hora');
+        const fRet = document.getElementById('FechaRetorno');
+        const hRet = document.getElementById('HoraRetorno');
+
+        function ymd(s) { return (s || '').trim(); }
+        function hm(s) { return (s || '').trim(); }
+
+        function updateMinRetorno() {
+            if (fRet && fSal) fRet.min = ymd(fSal.value) || "";
+            if (hRet) {
+                if (ymd(fRet?.value) && ymd(fSal?.value) && ymd(fRet.value) === ymd(fSal.value)) {
+                    hRet.min = hm(hSal?.value) || "";
+                } else {
+                    hRet.removeAttribute('min');
+                }
+            }
+        }
+
+        function retornoEsValido() {
+            const fs = ymd(fSal?.value), hs = hm(hSal?.value);
+            const fr = ymd(fRet?.value), hr = hm(hRet?.value);
+
+            if (!fr && !hr) return true;
+            if (!fr || !hr) { showErr('Complete fecha y hora de retorno, o deje ambos vacíos.'); return false; }
+            if (fr < fs) { showErr('La fecha de retorno no puede ser menor a la fecha de salida.'); return false; }
+            if (fr === fs && hr < hs) { showErr('La hora de retorno no puede ser menor a la hora de salida.'); return false; }
+            return true;
+        }
+
+        fSal?.addEventListener('change', updateMinRetorno);
+        hSal?.addEventListener('change', updateMinRetorno);
+        fRet?.addEventListener('change', updateMinRetorno);
+        updateMinRetorno();
+
+        // --- Autoriza dinámico ---
+        const $autSel = document.getElementById('AutorizaSelect');
+        const $autInput = document.getElementById('Autoriza');
+        const $autGrp = document.getElementById('AutorizaOtrosGroup');
+
+        function syncAutoriza() {
+            if (!$autSel || !$autInput || !$autGrp) return;
+            const v = $autSel.value;
+            if (v === 'OTROS') {
+                $autGrp.classList.remove('d-none');
+                $autInput.removeAttribute('readonly');
+                $autInput.setAttribute('required', 'required');
+                // limpiar campo al elegir OTROS
+                $autInput.value = '';
+            } else if (v === 'ORDEN SUPERIOR') {
+                $autGrp.classList.add('d-none');
+                $autInput.value = 'ORDEN SUPERIOR';
+                $autInput.setAttribute('readonly', 'readonly');
+                $autInput.setAttribute('required', 'required');
+            } else {
+                $autGrp.classList.remove('d-none');
+                $autInput.removeAttribute('readonly');
+                $autInput.setAttribute('required', 'required');
+                $autInput.value = '';
+            }
+        }
+        $autSel?.addEventListener('change', syncAutoriza); syncAutoriza();
+
+        // --- Destino dinámico ---
+        const $desSel = document.getElementById('DestinoSelect');
+        const $desInput = document.getElementById('Destino');
+        const $desGrp = document.getElementById('DestinoOtrosGroup');
+
+        function syncDestino() {
+            if (!$desSel || !$desInput || !$desGrp) return;
+            const opt = $desSel.value;
+            if (opt === 'OTROS') {
+                $desGrp.classList.remove('d-none');
+                $desInput.removeAttribute('readonly');
+                $desInput.setAttribute('required', 'required');
+                // limpiar campo al elegir OTROS
+                $desInput.value = '';
+            } else if (opt) {
+                $desGrp.classList.add('d-none');
+                $desInput.value = opt;
+                $desInput.setAttribute('readonly', 'readonly');
+                $desInput.setAttribute('required', 'required');
+            } else {
+                $desGrp.classList.add('d-none');
+                $desInput.value = '';
+                $desInput.removeAttribute('readonly');
+                $desInput.setAttribute('required', 'required');
+            }
+        }
+        $desSel?.addEventListener('change', syncDestino); syncDestino();
+
+        // --- Motivo dinámico ---
+        const $motSel = document.getElementById('MotivoSelect');
+        const $motInput = document.getElementById('Motivo');
+        const $motGrp = document.getElementById('MotivoOtrosGroup');
+
+        function syncMotivo() {
+            if (!$motSel || !$motInput || !$motGrp) return;
+            const opt = $motSel.value;
+            if (opt === 'OTRAS') {
+                $motGrp.classList.remove('d-none');
+                $motInput.removeAttribute('readonly');
+                $motInput.setAttribute('required', 'required');
+                // limpiar al elegir OTRAS
+                $motInput.value = '';
+            } else if (opt) {
+                $motGrp.classList.add('d-none');
+                $motInput.value = opt;
+                $motInput.setAttribute('readonly', 'readonly');
+                $motInput.setAttribute('required', 'required');
+            } else {
+                $motGrp.classList.add('d-none');
+                $motInput.value = '';
+                $motInput.removeAttribute('readonly');
+                $motInput.setAttribute('required', 'required');
+            }
+        }
+        $motSel?.addEventListener('change', syncMotivo); syncMotivo();
+
+        function checkRequired() {
+            const ids = ['IdPersonal', 'Fecha', 'Hora', 'Motivo', 'Autoriza', 'Destino', 'Novedades'];
+            for (const id of ids) {
+                const el = document.getElementById(id);
+                if (!el) continue;
+                const v = String(el.value || '').trim();
+                if (!v) {
+                    showErr('Complete los campos obligatorios.');
+                    el.focus();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        btn?.addEventListener('click', function (e) {
+            e.preventDefault();
+            hideErr();
+            updateMinRetorno();
+            syncAutoriza();
+            syncDestino();
+            syncMotivo();
+
+            if (!form.checkValidity()) {
+                showErr('Complete los campos obligatorios.');
+                return;
+            }
+            if (!checkRequired()) return;
+            if (!retornoEsValido()) return;
+
+            const fd = new FormData(form);
+            fetch(form.getAttribute('action'), {
+                method: 'POST',
+                headers: { 'RequestVerificationToken': csrf() },
+                body: fd
+            })
+                .then(r => r.ok ? r.json() : Promise.reject())
+                .then(j => {
+                    if (j && j.success) ok();
+                    else showErr((j && j.message) || 'No se pudo actualizar el movimiento.');
+                })
+                .catch(() => showErr('Error de red/servidor.'));
+        });
+    })();
+</script>
+
+<style>
+    /* ============================================================
+               ESTILO 3D MODERNO – EDITAR MOVIMIENTO
+               Solo aplica dentro de .mov-edit para no afectar otros modales
+               ============================================================ */
+    .mov-edit {
+        --pnp-green: #00471B;
+        --pnp-green-600: #05502a;
+        --pnp-green-soft: #f1f7f3;
+        --pnp-gold: #ffd966;
+        --pnp-border-soft: rgba(0, 0, 0, .06);
+        --pnp-shadow-soft: 0 12px 30px rgba(0, 0, 0, .18);
+        --pnp-shadow-inner: inset 0 1px 0 rgba(255, 255, 255, .9);
+    }
+
+    /* Cuerpo del formulario como tarjeta 3D */
+    .mov-edit-body {
+        padding: .55rem .75rem .7rem;
+        border-radius: 14px;
+        background: radial-gradient(circle at 0% 0%, rgba(255, 255, 255, .95), transparent 55%), radial-gradient(circle at 100% 100%, rgba(0, 71, 27, .08), transparent 55%), linear-gradient(135deg, #f7faf8, #e6f0ea);
+        box-shadow: var(--pnp-shadow-soft);
+        border: 1px solid var(--pnp-border-soft);
+        position: relative;
+        overflow: hidden;
+    }
+
+        /* Sutil brillo lateral */
+        .mov-edit-body::before {
+            content: "";
+            position: absolute;
+            inset: -40%;
+            background: radial-gradient(circle at 0 0, rgba(255, 255, 255, .85), transparent 55%);
+            opacity: .8;
+            pointer-events: none;
+        }
+
+    /* Cada bloque de campo como “tarjetita” 3D */
+    .mov-edit .control-tile {
+        margin-bottom: .35rem;
+        padding: .35rem .6rem .45rem;
+        border-radius: 10px;
+        background: linear-gradient(145deg, rgba(255, 255, 255, .96), rgba(242, 247, 244, .96));
+        border: 1px solid rgba(190, 205, 196, .85);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, .06), var(--pnp-shadow-inner);
+        position: relative;
+        transition: transform .15s ease-out, box-shadow .15s ease-out, border-color .15s ease-out;
+    }
+
+        .mov-edit .control-tile:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 26px rgba(0, 0, 0, .09), var(--pnp-shadow-inner);
+            border-color: rgba(0, 71, 27, .18);
+        }
+
+    .mov-edit .form-label {
+        font-size: .78rem;
+        font-weight: 600;
+        letter-spacing: .02em;
+        text-transform: uppercase;
+        color: var(--pnp-green);
+        margin-bottom: .2rem;
+    }
+
+    .mov-edit .req {
+        color: #d63333;
+        font-weight: 700;
+        font-size: .78rem;
+    }
+
+    /* Input group 3D suave */
+    .mov-edit .input-group.soft {
+        border-radius: 999px;
+        background: #f5faf7;
+        border: 1px solid rgba(0, 0, 0, .04);
+        box-shadow: 0 1px 1px rgba(255, 255, 255, .8), 0 3px 9px rgba(0, 0, 0, .08);
+        overflow: hidden;
+    }
+
+        .mov-edit .input-group.soft:focus-within {
+            border-color: rgba(0, 71, 27, .4);
+            box-shadow: 0 0 0 1px rgba(0, 71, 27, .18), 0 8px 18px rgba(0, 0, 0, .18);
+            background: #ffffff;
+        }
+
+    .mov-edit .input-group-text.icon-pill {
+        border: none;
+        border-radius: 999px 0 0 999px;
+        background: linear-gradient(135deg, var(--pnp-green), var(--pnp-green-600));
+        color: #fff;
+        font-size: .8rem;
+        padding-inline: .65rem;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, .1);
+    }
+
+        .mov-edit .input-group-text.icon-pill i {
+            text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+        }
+
+    .mov-edit .form-control,
+    .mov-edit .form-select {
+        border: none;
+        font-size: .81rem;
+        background: transparent;
+        box-shadow: none !important;
+        padding-inline: .55rem .7rem;
+    }
+
+        .mov-edit .form-control:focus,
+        .mov-edit .form-select:focus {
+            outline: none;
+        }
+
+    /* Combo de personal */
+    .mov-edit .select-personal-compact {
+        font-weight: 600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    /* Barra de botones */
+    .mov-edit .col-actions {
+        margin-top: .25rem;
+    }
+
+    .mov-edit .btn-bar {
+        display: flex;
+        justify-content: flex-end;
+        gap: .35rem;
+        flex-wrap: wrap;
+    }
+
+    .mov-edit .btn {
+        border-radius: 999px;
+        /* Más altos y largos */
+        padding: .35rem 1.25rem;
+        /* Texto un poco más grande */
+        font-size: .86rem;
+        font-weight: 600;
+        letter-spacing: .02em;
+        text-transform: uppercase;
+        border-width: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, .12), var(--pnp-shadow-inner);
+        transition: transform .12s ease-out, box-shadow .12s ease-out, filter .12s ease-out;
+    }
+
+
+        .mov-edit .btn i {
+            font-size: .8rem;
+        }
+
+    .mov-edit .btn-back {
+        background: linear-gradient(135deg, #e7edf0, #d6dde0);
+        color: #2d3b40;
+    }
+
+    .mov-edit .btn-soft-save {
+        background: linear-gradient(140deg, var(--pnp-green), #0a7f3a);
+        color: #fff;
+        box-shadow: 0 3px 10px rgba(0, 71, 27, .6), var(--pnp-shadow-inner);
+    }
+
+    .mov-edit .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px rgba(0, 0, 0, .18), var(--pnp-shadow-inner);
+        filter: brightness(1.02);
+    }
+
+    .mov-edit .btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, .22), var(--pnp-shadow-inner);
+        filter: brightness(.97);
+    }
+
+    /* Mensaje de error dentro del modal */
+    #errorMessagesMovimientoEdit.form-error {
+        font-size: .8rem;
+        margin-bottom: .25rem;
+        padding: .2rem .55rem;
+        border-radius: 999px;
+        background: rgba(220, 53, 69, .07);
+        color: #842029;
+        border: 1px solid rgba(220, 53, 69, .35);
+        opacity: 0;
+        transform: translateY(-2px);
+        transition: opacity .15s ease-out, transform .15s ease-out;
+    }
+
+        #errorMessagesMovimientoEdit.form-error.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+    /* ============================================================
+               OVERLAY DE ÉXITO 3D
+               ============================================================ */
+    .mov-success-overlay {
+        position: fixed;
+        inset: 0;
+        /* Fondo transparente – sin oscurecer la pantalla */
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity .18s ease-out, visibility .18s ease-out;
+        z-index: 9999;
+    }
+
+        .mov-success-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+    .mov-success-box {
+        min-width: 230px;
+        padding: .75rem 1.3rem .9rem;
+        border-radius: 16px;
+        background: linear-gradient(140deg, #ffffff, #eaf5ef);
+        box-shadow: 0 14px 40px rgba(0, 0, 0, .4), 0 0 0 1px rgba(255, 255, 255, .25);
+        text-align: center;
+        animation: movSuccessPop .3s ease-out forwards;
+        border: 1px solid rgba(0, 71, 27, .16);
+    }
+
+    .mov-success-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        margin: 0 auto .25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at 30% 0%, #ffffff, #b7f1c6);
+        box-shadow: 0 10px 26px rgba(7, 94, 45, .55), var(--pnp-shadow-inner);
+    }
+
+        .mov-success-icon i {
+            font-size: 1.6rem;
+            color: #0a7f3a;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+        }
+
+    .mov-success-title {
+        font-size: .95rem;
+        font-weight: 700;
+        color: var(--pnp-green);
+        letter-spacing: .02em;
+        text-transform: uppercase;
+    }
+
+    @@keyframes movSuccessPop {
+        0% {
+            transform: translateY(10px) scale(.9);
+            opacity: 0;
+        }
+
+        100% {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+    }
+
+    /* ============================================================
+               RESPONSIVE FINO
+               ============================================================ */
+    @@media (max-width: 576px) {
+        .mov-edit-body {
+            padding: .45rem .5rem .55rem;
+            border-radius: 12px;
+        }
+
+        .mov-edit .control-tile {
+            padding: .3rem .55rem .4rem;
+        }
+
+        .mov-edit .btn-bar {
+            justify-content: flex-end;
+        }
+
+        .mov-success-box {
+            width: 90%;
+            max-width: 280px;
+        }
+    }
+</style>

@@ -1,0 +1,792 @@
+﻿/* ============ Variables base (Paleta PNP unificada) ============ */
+:root {
+    --pnp-green: #00471B;
+    --pnp-green-600: #007A33;
+    --pnp-green-700: #003715;
+    --pnp-gold: #FFD700;
+    --ink: #0f1a14;
+    --ink-700: #0b1511;
+    --paper: #f6faf7;
+    --line: #e5e7eb;
+    --muted: #6b7280;
+    --radius: 12px;
+    --ring: rgba(0,122,51,.22);
+    --ui-scale: .9;
+    --ribbon-h: 0px; /* ← sin cinta arriba */
+    --header-h: 52px; /* ← reducido (antes 56px) */
+    --sidebar-w: 170px;
+    --brand-w: 240px;
+    --tbl-font: .80rem;
+    --tbl-th-font: .76rem;
+    --tbl-pad-y: .26rem;
+    --tbl-pad-x: .45rem;
+    --tbl-sm-pad-y: .10rem;
+    --tbl-sm-th-pad-y: .60rem;
+    --tbl-ultra-fs: .78rem;
+    --tbl-ultra-th-fs: .70rem;
+    --tbl-ultra-pad-y: .22rem;
+    --icon-btn-size: 35px;
+    --icon-font-size: 1.5rem;
+    --icon-radius: 6px;
+    --icon-btn-size-sm: 24px;
+    --icon-font-size-sm: .82rem;
+    --icon-btn-size-xs: 22px;
+    --icon-font-size-xs: .78rem;
+    --ok: #16a34a;
+    --bad: #ef4444;
+    --scroll-gutter: 18px;
+    /* === Variables unificadas de encabezado (navbar/modales) === */
+    --pnp-header-start: #0b3b24;
+    --pnp-header-end: #08361f;
+}
+
+/* ===== Fondo base + bloqueo de scroll global (scroll local en page-viewport) ===== */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden !important;
+    color: #111827;
+    font-family: 'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    background: radial-gradient(900px 600px at -10% -10%, rgba(0,71,27,.08), transparent 55%), radial-gradient(900px 600px at 120% 120%, rgba(255,215,0,.10), transparent 55%), var(--paper);
+}
+
+    body:not(.modal-open) {
+        padding-right: 0 !important
+    }
+
+/* ===== Zoom lógico ===== */
+.app-zoom {
+    transform: scale(var(--ui-scale));
+    transform-origin: top left;
+    width: calc(100%/var(--ui-scale));
+    min-height: 100vh
+}
+
+/* ===== Cinta superior fija (eliminada sin dejar espacio) ===== */
+.brand-ribbon {
+    display: none !important;
+}
+
+/* ===== Header ===== */
+header {
+    position: fixed;
+    top: 0 !important; /* ← sin hueco arriba */
+    left: 0;
+    right: 0;
+    z-index: 1030
+}
+
+.navbar.topbar, .navbar.navbar-dark {
+    background-image: linear-gradient(90deg,var(--pnp-header-start),var(--pnp-header-end)) !important;
+    background-color: transparent !important;
+    border-bottom: 3px solid var(--pnp-gold) !important;
+    opacity: 1 !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+    background-blend-mode: normal !important;
+    isolation: isolate !important;
+    box-shadow: none !important;
+}
+
+    .navbar.topbar::before, .navbar.topbar::after,
+    .navbar.navbar-dark::before, .navbar.navbar-dark::after {
+        content: none !important;
+    }
+
+.topbar .container, .topbar .container-fluid {
+    padding-left: .5rem;
+    padding-right: .75rem
+}
+
+/* Divisor del topbar adaptado a la nueva altura */
+.topbar-divider {
+    display: inline-block;
+    width: 5px;
+    height: calc(var(--header-h) - 8px); /* antes 44px */
+    background: linear-gradient(180deg,transparent,rgba(255,255,255,.35),transparent);
+    margin: 0 .75rem
+}
+
+.topbar-section-title {
+    color: #e5e7eb;
+    font-weight: 600;
+    font-size: .85rem;
+    letter-spacing: .02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 46vw;
+    margin-left: calc(var(--brand-w) - var(--sidebar-w))
+}
+
+/* ===== Usuario (derecha) ===== */
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    color: #f9fafb
+}
+
+    .nav-user .avatar {
+        width: 36px;
+        height: 36px;
+        object-fit: cover;
+        border-radius: 999px;
+        border: 1px solid rgba(255,215,0,.35);
+        background: #fff;
+        box-shadow: 0 1px 5px rgba(0,0,0,.12)
+    }
+
+    .nav-user .user-labels {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        line-height: 1.05;
+        white-space: nowrap;
+        text-align: center
+    }
+
+    .nav-user .name, .nav-user .grade, .nav-user .role {
+        font-size: .65rem
+    }
+
+    .nav-user .role {
+        background: rgba(255,215,0,.16);
+        border: 1px solid rgba(255,215,0,.5);
+        color: #fde68a;
+        padding: 1px 6px;
+        border-radius: 999px;
+        margin-top: 2px
+    }
+
+    .nav-user.dropdown.position-static .dropdown-menu {
+        position: absolute;
+        right: 0;
+        left: auto;
+        top: calc(100% + .35rem) !important;
+        transform: none !important;
+        margin-top: 0;
+        min-width: 240px;
+        z-index: 1080
+    }
+
+/* ===== Sidebar ===== */
+.sidebar {
+    width: var(--sidebar-w);
+    position: fixed;
+    top: calc(var(--ribbon-h) + var(--header-h)); /* se ajusta solo con header-h */
+    left: 0;
+    bottom: 0;
+    background: linear-gradient(180deg,var(--ink-700) 0%, #0f1a14 100%);
+    color: #e5e7eb;
+    box-shadow: 4px 0 24px rgba(0,0,0,.10);
+    z-index: 1010;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    text-align: left;
+    border-right: 2px solid rgba(255,215,0,.25)
+}
+
+.fixed-top-block {
+    flex: 0 0 auto
+}
+
+.sidebar .user-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px
+}
+
+    .sidebar .user-info img {
+        width: 84px;
+        height: 84px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #fff;
+        padding: 3px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.15)
+    }
+
+.menu-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 6px 0 10px;
+    overflow-y: hidden;
+    scrollbar-width: none
+}
+
+    .menu-scroll::-webkit-scrollbar {
+        width: 0;
+        height: 0
+    }
+
+.sidebar:hover .menu-scroll {
+    overflow-y: auto;
+    scrollbar-width: thin
+}
+
+    .sidebar:hover .menu-scroll::-webkit-scrollbar {
+        width: 6px
+    }
+
+    .sidebar:hover .menu-scroll::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,.30);
+        border-radius: 8px
+    }
+
+        .sidebar:hover .menu-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,.45)
+        }
+
+.menu-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    width: calc(100% - 16px);
+    color: #e5e7eb;
+    text-decoration: none;
+    padding: 7px 10px;
+    margin: 3px 8px;
+    border-radius: 9px;
+    transition: .15s ease;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis
+}
+
+    .menu-links a i {
+        flex: 0 0 18px;
+        width: 18px;
+        text-align: center;
+        font-size: 14px;
+        opacity: .95
+    }
+
+    .menu-links a:hover {
+        background: rgba(255,215,0,.18);
+        transform: translateX(2px);
+        color: #fff
+    }
+
+.sidebar a.active-menu {
+    background: linear-gradient(90deg,rgba(255,215,0,.28),rgba(255,215,0,.16));
+    box-shadow: inset 0 0 0 1px rgba(255,215,0,.45);
+    color: #fff;
+    font-weight: 700
+}
+
+.menu-section {
+    width: calc(100% - 16px);
+    border: 0;
+    background: rgba(255,255,255,.05);
+    color: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    margin: 4px 8px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-weight: 700
+}
+
+    .menu-section .label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px
+    }
+
+        .menu-section .label i {
+            font-size: 14px;
+            width: 18px;
+            text-align: center
+        }
+
+    .menu-section .caret {
+        transition: transform .2s ease
+    }
+
+    .menu-section.collapsed .caret {
+        transform: rotate(-90deg)
+    }
+
+    .menu-section:hover {
+        background: rgba(255,215,0,.16);
+        color: #fff
+    }
+
+.submenu .menu-links a {
+    padding: 6px 10px 6px 24px;
+    margin: 2px 6px;
+    font-size: 11px;
+    font-weight: 500;
+    background: rgba(255,255,255,.03);
+    border-left: 2px solid rgba(255,215,0,.45)
+}
+
+    .submenu .menu-links a:hover {
+        background: rgba(255,255,255,.14);
+        color: #fff;
+        border-left: 2px solid var(--pnp-gold)
+    }
+
+    .submenu .menu-links a.active-menu {
+        background: rgba(255,215,0,.25);
+        color: #fff;
+        font-weight: 700;
+        border-left: 3px solid var(--pnp-gold)
+    }
+
+/* ===== Contenido ===== */
+.content {
+    padding-left: var(--sidebar-w);
+    padding-top: calc(var(--ribbon-h) + var(--header-h) + 16px);
+    padding-bottom: 20px
+}
+
+.page-viewport {
+    height: calc(100vh - (var(--ribbon-h) + var(--header-h)));
+    overflow: auto;
+    box-sizing: border-box
+}
+
+/* ===== Tablas & tarjetas ===== */
+.table-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: .8rem;
+    box-shadow: 0 10px 24px rgba(0,0,0,.06);
+    overflow: hidden;
+    max-width: 100%
+}
+
+.table {
+    margin: 0;
+    font-size: var(--tbl-font);
+    background: #fff
+}
+
+    .table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: linear-gradient(0deg,var(--pnp-green-700),var(--pnp-green));
+        color: #fff;
+        border-color: transparent;
+        text-transform: uppercase;
+        letter-spacing: .02em;
+        font-weight: 700;
+        font-size: var(--tbl-th-font);
+        vertical-align: middle;
+        white-space: nowrap;
+        padding: var(--tbl-sm-th-pad-y) var(--tbl-pad-x);
+        transform: translateZ(0);
+        box-shadow: inset 0 -1px 0 rgba(0,0,0,.06)
+    }
+
+    .table th, .table td {
+        padding: var(--tbl-pad-y) var(--tbl-pad-x);
+        line-height: 1.2;
+        vertical-align: middle
+    }
+
+    .table.table-sm th, .table.table-sm td {
+        padding: var(--tbl-sm-pad-y) var(--tbl-pad-x);
+        line-height: 1.1
+    }
+
+    .table tbody tr:nth-child(even) {
+        background: #fbfdff
+    }
+
+.table-hover tbody tr:hover:not(.row-selected):not(.is-selected) {
+    background: rgba(59,130,246,.04)
+}
+
+.table-ultra-compact {
+    font-size: var(--tbl-ultra-fs);
+    table-layout: fixed
+}
+
+    .table-ultra-compact thead th {
+        padding: .26rem .40rem;
+        font-size: var(--tbl-ultra-th-fs);
+        white-space: nowrap
+    }
+
+    .table-ultra-compact tbody td {
+        padding: var(--tbl-ultra-pad-y) .40rem;
+        line-height: 1.1;
+        vertical-align: middle
+    }
+
+/* ===== Modales ===== */
+.modal-header {
+    background-image: linear-gradient(90deg,var(--pnp-header-start),var(--pnp-header-end)) !important;
+    background-color: transparent !important;
+    color: #f5f5f5 !important;
+    border-bottom: 3px solid var(--pnp-gold) !important;
+}
+
+.modal .btn-close, .modal .close {
+    filter: invert(1) brightness(200%) !important;
+    opacity: .9 !important
+}
+
+.modal-center.show {
+    display: flex !important;
+    align-items: center;
+    justify-content: center
+}
+
+.modal-center .modal-dialog {
+    margin: 0 auto
+}
+
+.modal .modal-body, .modal .modal-footer {
+    font-size: .92rem
+}
+
+.modal .modal-footer {
+    margin-top: .6rem
+}
+
+.modal-dialog {
+    width: auto;
+    max-width: min(96vw,900px);
+    margin: .5rem auto
+}
+
+.modal-content {
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    box-shadow: 0 12px 30px rgba(0,0,0,.18)
+}
+
+.modal .modal-body {
+    background: #f3f8f8;
+    padding: .9rem;
+    max-height: calc(100dvh - 8rem);
+    overflow: auto
+}
+
+.modal-backdrop {
+    z-index: 1040 !important
+}
+
+.modal {
+    z-index: 1050 !important
+}
+
+/* ===== Botón Iniciar sesión coherente ===== */
+#btnAbrirLogin {
+    background: transparent !important;
+    border: 1px solid rgba(255,255,255,.25) !important;
+    color: #e8f0ea !important;
+    border-radius: .5rem;
+    font-weight: 700;
+    transition: all .25s;
+    box-shadow: none !important
+}
+
+    #btnAbrirLogin:hover, #btnAbrirLogin:focus-visible {
+        background-color: rgba(255,255,255,.10) !important;
+        border-color: rgba(255,255,255,.35) !important;
+        color: #fff !important
+    }
+
+/* ===== Impresión ===== */
+@page {
+    size: A4 portrait;
+    margin: 12mm
+}
+
+@media print {
+    nav, header, .navbar, .sidebar, .dropdown-menu {
+        display: none !important
+    }
+
+    .print-scope .header-card, .print-scope .table-card {
+        border: 0 !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin-bottom: 8px !important
+    }
+
+    .print-scope .page-title {
+        display: block !important;
+        text-align: center !important;
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        color: #000 !important;
+        margin: 0 0 6px !important
+    }
+
+    .print-scope .table {
+        table-layout: fixed !important;
+        width: 100% !important;
+        font-size: 12px !important;
+        background: #fff !important
+    }
+
+        .print-scope .table thead th {
+            background: #eaeaea !important;
+            color: #000 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            padding: 6px !important;
+            white-space: nowrap !important
+        }
+
+        .print-scope .table tbody td {
+            padding: 6px !important;
+            word-break: break-word !important;
+            white-space: normal !important
+        }
+
+    .print-scope thead {
+        display: table-header-group
+    }
+
+    .print-scope tfoot {
+        display: table-row-group
+    }
+
+    .print-scope tr {
+        page-break-inside: avoid
+    }
+
+    .print-scope a[href]:after {
+        content: ""
+    }
+
+    .print-scope .container {
+        max-width: none !important;
+        width: 100% !important
+    }
+}
+
+/* ===== Responsivo ===== */
+@media (max-width:768px) {
+    :root {
+        --sidebar-w: 0px;
+        --brand-w: 0px
+    }
+
+    .sidebar {
+        transform: translateX(-100%)
+    }
+
+    .content {
+        padding-left: 0;
+        padding-top: calc(var(--ribbon-h)+var(--header-h)+16px)
+    }
+
+    .topbar-divider, .topbar-section-title {
+        display: none
+    }
+}
+
+/* ============================================================
+   HEADER PNP — RÉPLICA EXACTA (tipografía, tamaños, espaciados)
+   ============================================================ */
+
+/* 🔹 Escudo (ajustado) */
+.brand-logo {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+    border-radius: 12%;
+    background: none;
+    border: 2px solid rgba(255, 255, 255, .4);
+    box-shadow: 0 0 3px rgba(255, 255, 255, .25);
+    flex-shrink: 0;
+}
+
+/* 🔹 Contenedor de marca y texto */
+.pnp-brand {
+    display: flex;
+    align-items: center;
+    gap: .55rem; /* separación entre escudo y texto */
+}
+
+    /* 🔹 Texto superior “Policía Nacional del Perú” */
+    .pnp-brand .brand small {
+        font-family: "Inter", system-ui, Segoe UI, Roboto, Arial, sans-serif;
+        font-size: .70rem;
+        font-weight: 800;
+        color: #e8d88f;
+        letter-spacing: .03em;
+        text-shadow: 0 1px 1px rgba(0,0,0,.35);
+        line-height: 1.1;
+        text-transform: uppercase;
+        margin: 0;
+    }
+
+    /* 🔹 Texto inferior “SISTEMA DE CONTROL DE ASISTENCIA” */
+    .pnp-brand .brand span {
+        display: block;
+        font-family: "Inter", system-ui, Segoe UI, Roboto, Arial, sans-serif;
+        font-size: .55rem;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: .02em;
+        text-shadow: 0 1px 1px rgba(0,0,0,.35);
+        text-transform: uppercase;
+        line-height: 1;
+        margin-top: 2px;
+    }
+
+/* 🔹 Línea divisoria y título de sección */
+.topbar-divider {
+    width: 1px;
+    height: calc(var(--header-h) - 12px);
+    background-color: rgba(255,255,255,.25);
+    margin: 0 .75rem;
+}
+
+.topbar-section-title {
+    font-weight: 600;
+    color: #fff;
+    font-size: .85rem;
+    letter-spacing: .03em;
+}
+
+/* ================== Menú de usuario (layout actual) ================== */
+/* Fuente un poco más pequeña en todo el dropdown */
+.nav-user.dropdown .dropdown-menu {
+    --dd-fs: .82rem; /* tamaño base del dropdown */
+    --dd-icon: .95rem; /* tamaño de iconos */
+    --dd-pad-y: .38rem;
+    --dd-pad-x: .75rem;
+    --dd-hover-bg: var(--pnp-green, #0a6a30); /* hover verde con contraste */
+    --dd-hover-text: #fff;
+    --dd-active-bg: #085425; /* activo/pressed */
+    --dd-focus-ring: rgba(0,122,51,.35);
+    font-size: var(--dd-fs);
+    padding: .35rem 0;
+    border: 1px solid rgba(0,0,0,.06);
+    box-shadow: 0 8px 22px rgba(0,0,0,.12);
+    border-radius: .6rem;
+}
+
+/* Ítems del menú: texto y disposición */
+.nav-user .dropdown-item {
+    font-size: var(--dd-fs) !important;
+    padding: var(--dd-pad-y) var(--dd-pad-x) !important;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    color: #0f172a; /* texto normal legible */
+}
+
+    /* Iconos un poco más chicos y alineados */
+    .nav-user .dropdown-item i,
+    .nav-user .dropdown-item .fa,
+    .nav-user .dropdown-item .fas,
+    .nav-user .dropdown-item .far {
+        font-size: var(--dd-icon) !important;
+        width: 1.1rem;
+        text-align: center;
+        opacity: .95;
+    }
+
+    /* Hover/focus con mayor contraste (no celeste) */
+    .nav-user .dropdown-item:hover,
+    .nav-user .dropdown-item:focus {
+        background: var(--dd-hover-bg) !important;
+        color: var(--dd-hover-text) !important;
+    }
+
+        .nav-user .dropdown-item:hover i,
+        .nav-user .dropdown-item:focus i {
+            color: var(--dd-hover-text) !important;
+        }
+
+    /* Activo/pressed */
+    .nav-user .dropdown-item:active,
+    .nav-user .dropdown-item.active {
+        background: var(--dd-active-bg) !important;
+        color: #fff !important;
+    }
+
+    /* Accesibilidad: anillo de foco visible */
+    .nav-user .dropdown-item:focus-visible {
+        outline: 2px solid var(--dd-focus-ring);
+        outline-offset: 2px;
+        border-radius: .4rem;
+    }
+
+/* Separador compacto */
+.nav-user .dropdown-divider {
+    margin: .25rem 0;
+    border-top: 1px solid rgba(0,0,0,.06);
+}
+
+/* 🔹 Específico: “Cambiar foto de perfil” y “Cambiar contraseña” aún más pequeños */
+#btnOpenChangeAvatar,
+#btnOpenChangePwd {
+    font-size: .78rem !important; /* un “paso” menos que el resto */
+    line-height: 1.1;
+}
+
+/* Opcional: botón “Salir” mantiene énfasis en rojo sin perder contraste */
+.nav-user .dropdown-item.text-danger:hover,
+.nav-user .dropdown-item.text-danger:focus {
+    background: #b91c1c !important; /* rojo con buen contraste */
+    color: #fff !important;
+}
+
+    .nav-user .dropdown-item.text-danger:hover i,
+    .nav-user .dropdown-item.text-danger:focus i {
+        color: #fff !important;
+    }
+
+/* ================== Ajuste de ancho del menú de usuario ================== */
+.nav-user.dropdown .dropdown-menu {
+    width: auto !important; /* 🔹 Se ajusta al contenido */
+    min-width: unset !important; /* 🔹 Elimina ancho mínimo fijo (240px) */
+    white-space: nowrap !important; /* 🔹 Evita salto de línea innecesario */
+    padding: .35rem 0;
+    text-align: left;
+}
+
+/* Asegura que el texto se mantenga centrado y no corte iconos */
+.nav-user .dropdown-item {
+    justify-content: flex-start;
+}
+
+
+/* ================== Eliminar color de fondo del panel lateral ================== */
+.sidebar {
+    background: none !important; /* 🔹 Sin fondo */
+    backdrop-filter: none !important;
+    box-shadow: none !important; /* 🔹 Sin sombra lateral */
+    border-right: none !important; /* 🔹 Sin línea de borde */
+}
+
+    /* 🔹 Mantener el texto legible aunque no haya fondo */
+    .sidebar .menu-links a,
+    .sidebar .menu-section,
+    .sidebar .submenu .menu-links a {
+        color: #0f1a14; /* texto oscuro institucional */
+    }
+
+        .sidebar .menu-links a:hover,
+        .sidebar .menu-section:hover,
+        .sidebar .submenu .menu-links a:hover {
+            color: var(--pnp-green); /* verde institucional al pasar el cursor */
+            background: rgba(0,71,27,.06); /* fondo leve semitransparente */
+        }
+
+    /* 🔹 Enlace activo: resalta con borde dorado */
+    .sidebar a.active-menu {
+        background: rgba(255,215,0,.15);
+        border-left: 3px solid var(--pnp-gold);
+        color: var(--pnp-green-700);
+    }

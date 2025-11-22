@@ -1,0 +1,439 @@
+﻿@{
+    ViewData["Title"] = "Reporte de Personal";
+    Layout = "_Layout";
+}
+<link rel="stylesheet" href="~/Style/reporte-styles.css" asp-append-version="true" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<div class="mov-page container-fluid py-3">
+    <!-- Header -->
+    <div class="mb-3 gap-2 flex-wrap page-head no-print">
+        <h5 class="m-0">
+            <i class="fa-solid fa-users me-2"></i>Reporte de Personal
+        </h5>
+        <div class="actions-toolbar">
+            <!-- Limpiar todo -->
+            <button id="btnClearAll" class="btn btn-success">
+                <i class="fa-solid fa-eraser me-1"></i> Limpiar
+            </button>
+            <a id="btnExport" class="btn btn-outline-secondary" href="#">
+                <i class="fa-solid fa-file-csv me-1"></i> Exportar
+            </a>
+            <button id="btnPrint" class="btn btn-outline-primary">
+                <i class="fa-solid fa-print me-1"></i> Imprimir
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card-like mb-3 no-print">
+        <div class="p-3 filters-grid">
+            <div class="col">
+                <label class="form-label">Buscar </label>
+                <input id="q" type="text" class="form-control"
+                       placeholder="Filtrar por CIP, nombres, grado, unidad, DNI…">
+            </div>
+
+            <div class="col">
+                <label class="form-label">Sexo</label>
+                <select id="sexo" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Femenino</option>
+                </select>
+            </div>
+
+            <div class="col">
+                <label class="form-label">Edad ≥</label>
+                <input id="edadMin" type="number" class="form-control" min="0" max="100" placeholder="min">
+            </div>
+
+            <div class="col">
+                <label class="form-label">Edad ≤</label>
+                <input id="edadMax" type="number" class="form-control" min="0" max="100" placeholder="max">
+            </div>
+
+            <div class="col">
+                <label class="form-label">Estado</label>
+                <select id="estado" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="true">Activo</option>
+                    <option value="false">Inactivo</option>
+                </select>
+            </div>
+
+            <!-- Grado (multiselect) -->
+            <div class="col">
+                <label class="form-label">Grado</label>
+                <div class="mdrop" id="mdGrado">
+                    <button type="button" class="mdrop-toggle">
+                        <span class="mdrop-label">Todos</span>
+                        <i class="fa-solid fa-chevron-down ms-2"></i>
+                    </button>
+                    <div class="mdrop-panel">
+                        <div class="mdrop-head">
+                            <input type="text" class="form-control form-control-sm" placeholder="Buscar…">
+                            <button type="button" class="btn btn-light btn-xs" data-act="all">Todo</button>
+                            <button type="button" class="btn btn-light btn-xs" data-act="none">Limpiar</button>
+                        </div>
+                        <div class="mdrop-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Unidad (multiselect) -->
+            <div class="col">
+                <label class="form-label">Unidad</label>
+                <div class="mdrop" id="mdUnidad">
+                    <button type="button" class="mdrop-toggle">
+                        <span class="mdrop-label">Todas</span>
+                        <i class="fa-solid fa-chevron-down ms-2"></i>
+                    </button>
+                    <div class="mdrop-panel">
+                        <div class="mdrop-head">
+                            <input type="text" class="form-control form-control-sm" placeholder="Buscar…">
+                            <button type="button" class="btn btn-light btn-xs" data-act="all">Todo</button>
+                            <button type="button" class="btn btn-light btn-xs" data-act="none">Limpiar</button>
+                        </div>
+                        <div class="mdrop-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fechas -->
+            <div class="col">
+                <label class="form-label">F. Nac. Desde</label>
+                <input id="fnacDesde" type="date" class="form-control" placeholder="dd/mm/aaaa">
+            </div>
+            <div class="col">
+                <label class="form-label">F. Nac. Hasta</label>
+                <input id="fnacHasta" type="date" class="form-control" placeholder="dd/mm/aaaa">
+            </div>
+            <div class="col">
+                <label class="form-label">F. Incorp. Desde</label>
+                <input id="fincDesde" type="date" class="form-control" placeholder="dd/mm/aaaa">
+            </div>
+            <div class="col">
+                <label class="form-label">F. Incorp. Hasta</label>
+                <input id="fincHasta" type="date" class="form-control" placeholder="dd/mm/aaaa">
+            </div>
+
+            <div class="col">
+                <label class="form-label">&nbsp;</label>
+                <button id="btnClearDates" class="btn btn-light w-100">
+                    <i class="fa-solid fa-rotate-left me-1"></i> Limpiar fechas
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="row g-3 mb-2 no-print">
+        <div class="col-6 col-md-3">
+            <div class="kpi p-2 text-center">
+                <div class="small">Total</div>
+                <div class="fs-5 fw-bold" id="kTotal">0</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="kpi p-2 text-center">
+                <div class="small">Activos</div>
+                <div class="fs-5 fw-bold text-success" id="kAct">0</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="kpi p-2 text-center">
+                <div class="small">Inactivos</div>
+                <div class="fs-5 fw-bold text-danger" id="kIna">0</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="kpi p-2 text-center">
+                <div class="small">Prom. Edad</div>
+                <div class="fs-5 fw-bold" id="kAvgEdad">0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Imprimible: TÍTULO + TABLA -->
+    <div class="print-scope">
+        <!-- Título solo para impresión -->
+        <div class="print-title d-none d-print-block">
+            <i class="fa-solid fa-users me-2"></i>Reporte de Personal
+        </div>
+
+        <div class="table-wrap sticky-head mb-3">
+            <table class="table table-sm table-hover align-middle table-striped table-compact" id="tbl">
+                <colgroup>
+                    <col style="width:90px">
+                    <col>
+                    <col>
+                    <col style="width:56px">
+                    <col style="width:58px">
+                    <col>
+                    <col>
+                    <col style="width:86px">
+                    <col class="col-correo">
+                    <col class="col-estado">
+                    <col style="width:110px">
+                    <col style="width:138px">
+                </colgroup>
+                <thead class="table-dark">
+                    <tr>
+                        <th>CIP</th>
+                        <th>Apellidos</th>
+                        <th>Nombres</th>
+                        <th>Sexo</th>
+                        <th class="text-end">Edad</th>
+                        <th>Grado</th>
+                        <th>Unidad</th>
+                        <th>DNI</th>
+                        <th class="col-correo">Correo</th>
+                        <th class="col-estado">Estado</th>
+                        <th>F. Nacimiento</th>
+                        <th>F. Registro</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    (()=> {
+      const fetchUrl='@Url.Action("Json", "ReportePersonal")';
+      const exportUrl='@Url.Action("ExportCsv", "ReportePersonal")';
+
+      // Filtros
+      const $q = g('#q'), $sexo=g('#sexo'), $emin=g('#edadMin'), $emax=g('#edadMax'), $estado=g('#estado');
+      const $fnacDesde=g('#fnacDesde'), $fnacHasta=g('#fnacHasta'), $fincDesde=g('#fincDesde'), $fincHasta=g('#fincHasta');
+      const $btnClearDates=g('#btnClearDates');
+
+      // Multiselects
+      const mdGrado=mdrop('#mdGrado'), mdUnidad=mdrop('#mdUnidad');
+
+      // Acciones
+      const $btnClearAll=g('#btnClearAll'), $btnExport=g('#btnExport'), $btnPrint=g('#btnPrint');
+
+      // KPIs / tabla
+      const $kTotal=g('#kTotal'), $kAct=g('#kAct'), $kIna=g('#kIna'), $kAvgEdad=g('#kAvgEdad');
+      const $tbody=g('#tbody');
+
+      let raw=[], view=[];
+      // Catálogos maestros que NO se encogen
+      const catalogsMaster = { grados:new Set(), unidades:new Set(), ready:false };
+
+      function g(s){return document.querySelector(s)}
+      const deb=(fn,ms)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};};
+      function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+      // Multiselect helper
+      function mdrop(sel){
+        const root=typeof sel==='string'?document.querySelector(sel):sel;
+        const toggle=root.querySelector('.mdrop-toggle');
+        const search=root.querySelector('.mdrop-head input[type="text"]');
+        const btnAll=root.querySelector('[data-act="all"]'), btnNone=root.querySelector('[data-act="none"]');
+        const list=root.querySelector('.mdrop-list'), label=root.querySelector('.mdrop-label');
+        let values=[], chosen=new Set();
+
+        toggle.addEventListener('click',(e)=>{e.stopPropagation(); closeAll(root); root.classList.toggle('open'); search.focus();});
+        document.addEventListener('click',(e)=>{ if(!root.contains(e.target)) root.classList.remove('open'); });
+        btnAll.addEventListener('click',()=>{ values.forEach(v=>chosen.add(v)); draw(); setLabel(); changed(); });
+        btnNone.addEventListener('click',()=>{ chosen.clear(); draw(); setLabel(); changed(); });
+        search.addEventListener('input',()=> draw(search.value.trim().toLowerCase()));
+
+        function draw(filter=""){
+          list.innerHTML=values
+            .filter(v=>!filter||v.toLowerCase().includes(filter))
+            .map(v=>`<label class="mdrop-item">
+                        <input type="checkbox" value="${esc(v)}" ${chosen.has(v)?'checked':''}/>
+                        <span class="wrap-2" title="${esc(v)}">${esc(v)}</span>
+                     </label>`).join('');
+          list.querySelectorAll('input[type="checkbox"]').forEach(chk=>{
+            chk.addEventListener('change',()=>{
+              const v=chk.value;
+              if(chk.checked) chosen.add(v); else chosen.delete(v);
+              if (search.value){ search.value=''; }
+              setLabel(); draw(); changed();
+            });
+          });
+        }
+        function setLabel(){
+          if(chosen.size===0) label.textContent='Todos';
+          else if(chosen.size===1) label.textContent=[...chosen][0];
+          else label.textContent=`${chosen.size} seleccionados`;
+        }
+        function setOptions(arr){
+          values=Array.from(new Set(arr.filter(Boolean).map(v=>v.trim()))).sort((a,b)=>a.localeCompare(b));
+          chosen=new Set([...chosen].filter(v=>values.includes(v)));
+          draw(); setLabel();
+        }
+        function getSelected(){return [...chosen];}
+        function clear(){ chosen.clear(); setLabel(); draw(); changed(); }
+        function changed(){ root.dispatchEvent(new CustomEvent('mdrop:change')); }
+        return { setOptions, getSelected, clear, root };
+      }
+      function closeAll(except){
+        document.querySelectorAll('.mdrop.open').forEach(el=>{ if(except&&el===except) return; el.classList.remove('open'); });
+      }
+
+      // NO enviamos grado/unidad al servidor (para no encoger catálogos)
+      function buildQuery(){
+        const p=new URLSearchParams();
+        if($sexo.value)   p.set('sexo',$sexo.value);
+        if($emin.value)   p.set('edadMin',$emin.value);
+        if($emax.value)   p.set('edadMax',$emax.value);
+        if($estado.value) p.set('estado',$estado.value);
+        if($fnacDesde.value) p.set('fnacDesde',$fnacDesde.value);
+        if($fnacHasta.value) p.set('fnacHasta',$fnacHasta.value);
+        if($fincDesde.value) p.set('fincDesde',$fincDesde.value);
+        if($fincHasta.value) p.set('fincHasta',$fincHasta.value);
+        return p.toString();
+      }
+
+      async function load(){
+        const qs=buildQuery();
+        const url=qs? `${fetchUrl}?${qs}`: fetchUrl;
+        const res=await fetch(url,{headers:{'Accept':'application/json'}});
+        const js=await res.json();
+        raw=Array.isArray(js)?js:[];
+
+        // Llenar catálogo maestro solo una vez (mantenerlo completo)
+        if(!catalogsMaster.ready){
+          raw.forEach(x=>{
+            if (x.grado)  catalogsMaster.grados.add(String(x.grado).trim());
+            if (x.unidad) catalogsMaster.unidades.add(String(x.unidad).trim());
+          });
+          mdGrado.setOptions([...catalogsMaster.grados]);
+          mdUnidad.setOptions([...catalogsMaster.unidades]);
+          catalogsMaster.ready = true;
+        }else{
+          mdGrado.setOptions([...catalogsMaster.grados]);
+          mdUnidad.setOptions([...catalogsMaster.unidades]);
+        }
+
+        apply();
+        updateExport();
+      }
+
+      function apply(){
+        const key = ($q.value||'').trim().toLowerCase();
+        const gradosSel = new Set(mdGrado.getSelected());
+        const unidadesSel = new Set(mdUnidad.getSelected());
+
+        view = raw.filter(r=>{
+          if(gradosSel.size && !gradosSel.has((r.grado||'').trim())) return false;
+          if(unidadesSel.size && !unidadesSel.has((r.unidad||'').trim())) return false;
+
+          if(key){
+            const bucket = [
+                r.cip,r.apellidos,r.nombres,r.grado,r.unidad,
+                r.dni,r.correo,r.estado,r.fechaNacimiento,r.fechaRegistro
+            ]
+              .map(x=>(x||'').toString().toLowerCase()).join(' ');
+            if(!bucket.includes(key)) return false;
+          }
+          return true;
+        });
+
+        render();
+        kpis();
+      }
+
+      function render(){
+        const rows=view.map(r=>{
+          const st=(r.estado||'').toString().toLowerCase()==='activo'
+            ? '<span class="badge bg-success">Activo</span>'
+            : '<span class="badge bg-secondary">Inactivo</span>';
+          return `
+            <tr>
+              <td>${esc(r.cip||'')}</td>
+              <td>${esc(r.apellidos||'')}</td>
+              <td>${esc(r.nombres||'')}</td>
+              <td>${esc(r.sexo||'')}</td>
+              <td class="text-end">${r.edad??''}</td>
+              <td>${esc(r.grado||'')}</td>
+              <td>${esc(r.unidad||'')}</td>
+              <td>${esc(r.dni||'')}</td>
+              <td class="col-correo">${esc(r.correo||'')}</td>
+              <td class="col-estado">${st}</td>
+              <td>${esc(r.fechaNacimiento||'')}</td>
+              <td>${esc(r.fechaRegistro||'')}</td>
+            </tr>`;
+        }).join('');
+        $tbody.innerHTML=rows;
+      }
+
+      function kpis(){
+        const total=view.length;
+        const act=view.filter(x=>(x.estado||'').toString().toLowerCase()==='activo').length;
+        const ina=total-act;
+        const edades=view.map(x=>x.edad).filter(x=>x!=null);
+        const avg=edades.length? Math.round(edades.reduce((a,b)=>a+b,0)/edades.length):0;
+        $kTotal.textContent=total;
+        $kAct.textContent=act;
+        $kIna.textContent=ina;
+        $kAvgEdad.textContent=avg;
+      }
+
+      function updateExport(){
+        const p=new URLSearchParams();
+        if($q.value) p.set('q',$q.value.trim());
+        if($sexo.value)   p.set('sexo',$sexo.value);
+        if($emin.value)   p.set('edadMin',$emin.value);
+        if($emax.value)   p.set('edadMax',$emax.value);
+        if($estado.value) p.set('estado',$estado.value);
+        if($fnacDesde.value) p.set('fnacDesde',$fnacDesde.value);
+        if($fnacHasta.value) p.set('fnacHasta',$fnacHasta.value);
+        if($fincDesde.value) p.set('fincDesde',$fincDesde.value);
+        if($fincHasta.value) p.set('fincHasta',$fincHasta.value);
+        // En export SÍ incluimos multiselecciones
+        mdGrado.getSelected().forEach(v=>p.append('grado',v));
+        mdUnidad.getSelected().forEach(v=>p.append('unidad',v));
+        const qs=p.toString();
+        $btnExport.href = qs? `${exportUrl}?${qs}`: exportUrl;
+      }
+
+      // Eventos
+      const debLoad  = deb(load, 200);
+      const debApply = deb(apply, 120);
+
+      // Texto → cliente
+      $q.addEventListener('input', ()=>{ debApply(); updateExport(); });
+
+      // Números / selects / fechas → servidor (sin grado/unidad)
+      [$sexo,$emin,$emax,$estado,$fnacDesde,$fnacHasta,$fincDesde,$fincHasta].forEach(el=>{
+        el.addEventListener('input', debLoad);
+        el.addEventListener('change', debLoad);
+      });
+
+      // Multiselects → SOLO cliente (para no encoger catálogos)
+      [mdGrado.root, mdUnidad.root].forEach(r=>{
+        r.addEventListener('mdrop:change', ()=>{ debApply(); updateExport(); });
+      });
+
+      // Limpiar fechas
+      $btnClearDates.addEventListener('click', ()=>{
+        $fnacDesde.value=""; $fnacHasta.value="";
+        $fincDesde.value=""; $fincHasta.value="";
+        debLoad();
+      });
+
+      // Limpiar TODO
+      $btnClearAll.addEventListener('click', ()=>{
+        $q.value=""; $sexo.value=""; $emin.value=""; $emax.value=""; $estado.value="";
+        $fnacDesde.value=""; $fnacHasta.value="";
+        $fincDesde.value=""; $fincHasta.value="";
+        if (mdGrado.clear) mdGrado.clear();
+        if (mdUnidad.clear) mdUnidad.clear();
+        debApply(); updateExport();
+      });
+
+      // Imprimir
+      $btnPrint.addEventListener('click', ()=> window.print());
+
+      // Init
+      load();
+    })();
+</script>

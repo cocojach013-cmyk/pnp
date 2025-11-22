@@ -1,0 +1,450 @@
+﻿@model ControlPNP.ViewModels.UsuarioVM
+@{
+    Layout = null;
+    ViewData["Title"] = "Registrar Usuario";
+    var setupToken = ViewBag.SetupToken as string;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Control PNP - Registrar Usuario</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+
+    <style>
+        :root {
+            --pnp-green: #00471B;
+            --pnp-green-600: #007A33;
+            --pnp-green-700: #003715;
+            --pnp-gold: #FFD700;
+            --pnp-graphite: #2E3B3E;
+            --bg-soft: #fafcf9;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html, body {
+            height: 100%
+        }
+
+        @@media (min-width:576px) {
+            html {
+                font-size: 15px
+            }
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+            color: #1c1f21;
+            background: radial-gradient(1200px 600px at 10% -10%, rgba(0,71,27,.06), transparent 60%), radial-gradient(1000px 500px at 110% 10%, rgba(255,215,0,.08), transparent 60%), linear-gradient(180deg,#fff,var(--bg-soft));
+        }
+
+        .brand-ribbon {
+            height: 6px;
+            background: linear-gradient(90deg,var(--pnp-green) 0 35%, var(--pnp-gold) 35% 65%, var(--pnp-green) 65% 100%)
+        }
+
+        .canvas {
+            min-height: calc(100% - 6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(16px,3vw,40px)
+        }
+
+        .auth-card {
+            width: min(100%,920px);
+            background: rgba(255,255,255,.96);
+            border: 1px solid rgba(0,0,0,.08);
+            border-top: 4px solid var(--pnp-green);
+            border-radius: 18px;
+            box-shadow: 0 20px 40px rgba(0,0,0,.06);
+            overflow: hidden
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg,#384346,#262e31);
+            color: #fff;
+            border-bottom: 3px solid var(--pnp-gold)
+        }
+
+            .auth-header .badge {
+                background-color: var(--pnp-gold);
+                color: #1a1a1a
+            }
+
+        .brand-badge {
+            display: flex;
+            align-items: center;
+            gap: .75rem
+        }
+
+            .brand-badge img {
+                width: 58px;
+                height: auto
+            }
+
+        .brand-title small {
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: #e5e7eb;
+            font-weight: 600
+        }
+
+        .brand-title strong {
+            display: block;
+            font-weight: 800;
+            color: #fff;
+            font-size: 1rem
+        }
+
+        .form-label {
+            color: #111827;
+            font-weight: 600
+        }
+
+        .input-group-text {
+            background-color: var(--pnp-graphite);
+            color: var(--pnp-gold);
+            border-color: var(--pnp-graphite)
+        }
+
+        .form-control, .form-select {
+            color: #0f172a;
+            background: #fff;
+            border-color: #64748b;
+            min-height: 44px
+        }
+
+            .form-control::placeholder {
+                color: #6b7280
+            }
+
+            .form-control:focus, .form-select:focus {
+                border-color: var(--pnp-green-600);
+                box-shadow: 0 0 0 .25rem rgba(0,122,51,.18)
+            }
+
+        .btn-pnp {
+            --bs-btn-color: #fff;
+            --bs-btn-bg: var(--pnp-green);
+            --bs-btn-border-color: var(--pnp-green);
+            --bs-btn-hover-bg: var(--pnp-green-700);
+            --bs-btn-hover-border-color: var(--pnp-green-700);
+            --bs-btn-active-bg: var(--pnp-green-700);
+            --bs-btn-active-border-color: var(--pnp-green-700)
+        }
+
+        .btn-outline-pnp {
+            color: var(--pnp-green-600);
+            border-color: var(--pnp-green-600);
+            background: #fff
+        }
+
+            .btn-outline-pnp:hover {
+                background: #f3f4f6;
+                color: var(--pnp-green-700)
+            }
+
+        .alert-single-line {
+            margin-top: .25rem;
+            margin-bottom: .75rem
+        }
+
+        .card-footer {
+            border-top: 3px solid var(--pnp-gold);
+            background: #fff
+        }
+
+        .footer-note {
+            color: #6b7280;
+            font-size: .9rem
+        }
+
+        @@media (prefers-color-scheme:dark) {
+            body {
+                background: linear-gradient(180deg,#121617,#171c1e);
+                color: #e5e7eb
+            }
+
+            .auth-card {
+                background: rgba(22,27,29,.92);
+                border-color: rgba(255,255,255,.05)
+            }
+
+            .form-label {
+                color: #e5e7eb
+            }
+
+            .form-control, .form-select {
+                background: #0f1416;
+                color: #e5e7eb;
+                border-color: #2d3a3f
+            }
+
+                .form-control::placeholder {
+                    color: #94a3b8
+                }
+
+            .input-group-text {
+                background: #1b2225;
+                color: var(--pnp-gold);
+                border-color: #1b2225
+            }
+
+            .card-footer {
+                background: #121617
+            }
+
+            .footer-note {
+                color: #9ca3af
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="brand-ribbon"></div>
+
+    <main class="canvas">
+        <div class="auth-card">
+            <div class="auth-header py-3 px-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="brand-badge">
+                        <img src="~/Imagenes/Escudo.png" alt="Escudo PNP">
+                        <div class="brand-title">
+                            <small>Policía Nacional del Perú</small>
+                            <strong>Registro del Primer Usuario</strong>
+                        </div>
+                    </div>
+                    <span class="badge rounded-pill"><i class="fa-solid fa-id-card-clip me-1"></i> Instalación inicial</span>
+                </div>
+            </div>
+
+            <div class="p-4 p-md-5">
+                <form id="registroForm"
+                      asp-controller="Acceso"
+                      asp-action="RegistrarUsuario"
+                      method="post"
+                      autocomplete="off">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="setup" value="@setupToken" />
+
+                    <!-- Errores en el MISMO modal/form -->
+                    <div id="errorMessages" class="alert alert-danger alert-single-line d-none"></div>
+
+                    <div class="row g-3 mb-2">
+                        <div class="col-md-6">
+                            <label for="IdPersonal" class="form-label">Personal</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-users"></i></span>
+                                <select class="form-select" asp-for="IdPersonal" required>
+                                    <option value="">Seleccionar Personal</option>
+                                    @foreach (var p in (IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.PersonalList ?? Enumerable.Empty<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>())
+                                    {
+                                        <option value="@p.Value">@p.Text</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="Usuario" class="form-label">Usuario</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                                <input class="form-control" asp-for="Usuario" required autocomplete="off" placeholder="nombre.usuario" />
+                            </div>
+                            <span asp-validation-for="Usuario" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-2">
+                        <div class="col-md-6">
+                            <label for="Clave" class="form-label">Clave</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                                <input class="form-control" asp-for="Clave" id="Clave" type="password" required autocomplete="new-password" placeholder="••••••••" />
+                                <button class="btn btn-outline-pnp" type="button" data-toggle="pwd" data-target="#Clave" title="Mostrar/Ocultar">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">Debe tener al menos 6 caracteres e incluir mayúscula, minúscula, número y símbolo (! % * ? &).</small>
+                            <span asp-validation-for="Clave" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="ConfirmarClave" class="form-label">Confirmar Clave</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                                <input class="form-control" asp-for="ConfirmarClave" id="ConfirmarClave" type="password" required autocomplete="new-password" placeholder="••••••••" />
+                                <button class="btn btn-outline-pnp" type="button" data-toggle="pwd" data-target="#ConfirmarClave" title="Mostrar/Ocultar">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="ConfirmarClave" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="Permiso" class="form-label">Permiso</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
+                                <select class="form-select" asp-for="Rol" required>
+                                    <option value="">Seleccionar Permiso</option>
+                                    <option value="Administrador">Administrador</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="Rol" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="alert alert-info mt-4 mb-0">
+                                La foto de perfil se tomará del registro de <strong>Personal</strong>.
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-pnp fw-semibold" id="btnRegistrar">
+                            <i class="fa-solid fa-floppy-disk me-1"></i> Registrar
+                        </button>
+                        <a asp-controller="Acceso" asp-action="Login" class="btn btn-outline-pnp">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Volver a Login
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card-footer text-center py-3">
+                <div class="footer-note">
+                    <i class="fa-solid fa-shield-halved me-1" style="color: var(--pnp-green);"></i>
+                    © @DateTime.Now.Year • PNP • Seguridad y Disciplina
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal de éxito (Usuario) -->
+    <div id="usuarioOkModal" class="modal fade modal-center modal-xs" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Registro exitoso</h5></div>
+                <div class="modal-body text-center">
+                    <p class="mb-2">El usuario fue registrado correctamente.</p>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-primary btn-sm" id="btnOkUsuarioExitoso">Aceptar</button>
+                </div>
+            </div>
+        </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function () {
+            // Mostrar/ocultar contraseña
+            document.addEventListener('click', function (e) {
+                const btn = e.target.closest('[data-toggle="pwd"]');
+                if (!btn) return;
+                const input = document.querySelector(btn.getAttribute('data-target'));
+                if (!input) return;
+                const ico = btn.querySelector('i');
+                const isPwd = input.type === 'password';
+                input.type = isPwd ? 'text' : 'password';
+                if (ico) {
+                    ico.classList.toggle('fa-eye', !isPwd);
+                    ico.classList.toggle('fa-eye-slash', isPwd);
+                }
+                input.focus();
+            });
+
+            // Helper: regex de contraseña
+            const pwdRx = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!%*?&]).{6,}$/;
+
+            // Envío por AJAX para poder mostrar modal de éxito
+            const form = $("#registroForm");
+            const btn  = $("#btnRegistrar");
+            const err  = $("#errorMessages");
+            const okModalEl = document.getElementById('registroOkModal');
+            const okModal   = okModalEl ? new bootstrap.Modal(okModalEl) : null;
+            const loginUrl  = '@Url.Action("Login", "Acceso")';
+
+            function showError(msg){
+                if(!msg) msg = "Se produjo un error.";
+                err.text(msg).removeClass("d-none");
+            }
+            function hideError(){ err.addClass("d-none").empty(); }
+
+            form.on("submit", function(e){
+                e.preventDefault();
+                hideError();
+
+                // Validaciones simples en cliente
+                const pwd = ($("#Clave").val() || "").trim();
+                const rep = ($("#ConfirmarClave").val() || "").trim();
+
+                if(!pwdRx.test(pwd)){
+                    showError("La contraseña no cumple los requisitos (mín. 6, mayúscula, minúscula, número y símbolo !%*?&).");
+                    return;
+                }
+                if(pwd !== rep){
+                    showError("Las contraseñas no coinciden.");
+                    return;
+                }
+
+                btn.prop("disabled", true);
+
+                $.ajax({
+                    url: form.attr("action"),
+                    type: "POST",
+                    data: form.serialize(),
+                    headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]', form).val() }
+                }).done(function(resp){
+                    if(resp && resp.success){
+                        // Mostrar modal de éxito y luego ir a Login
+                        if(okModal){
+                            okModal.show();
+
+                            // botón "Ir a Iniciar Sesión"
+                            $("#btnIrLogin").off("click").on("click", function(){
+                                window.location.href = loginUrl;
+                            });
+
+                            // fallback: si el usuario cierra el modal, también redirige
+                            okModalEl.addEventListener('hidden.bs.modal', function () {
+                                window.location.href = loginUrl;
+                            }, { once:true });
+
+                            // auto-cerrar a los 1.2s por si no hace clic
+                            setTimeout(function(){
+                                // si sigue abierto, lo cerramos (dispara hidden -> redirect)
+                                const isShown = okModalEl.classList.contains("show");
+                                if(isShown){ okModal.hide(); }
+                            }, 1200);
+                        } else {
+                            // Por si no hay modal (no debería)
+                            window.location.href = loginUrl;
+                        }
+                    }else{
+                        showError((resp && resp.message) || "No se pudo registrar.");
+                    }
+                }).fail(function(){
+                    showError("Error del servidor.");
+                }).always(function(){
+                    btn.prop("disabled", false);
+                });
+            });
+        })();
+    </script>
+</body>
+</html>

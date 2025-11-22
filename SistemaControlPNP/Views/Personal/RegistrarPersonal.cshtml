@@ -1,0 +1,1137 @@
+﻿@model SistemaControlPNP.Models.Personal
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    Layout = null;
+
+    var now = DateTime.Now;
+    var nowIso = now.ToString("o");
+    var maxDate = DateTime.UtcNow.ToString("yyyy-MM-dd");
+
+    var placeholder = Url.Content("~/Imagenes/sin-perfil.jpg");
+}
+
+<link rel="stylesheet" href="~/Style/modales-styles.css" asp-append-version="true" />
+
+<div class="pnp-form reg-personal">
+    <div class="pnp-body">
+        <form id="registrarPersonalForm"
+              asp-controller="Personal" asp-action="RegistrarPersonal"
+              method="post" enctype="multipart/form-data" autocomplete="off" novalidate>
+            @Html.AntiForgeryToken()
+
+            <!-- ENCABEZADO MODERNO (vacío por ahora, si luego quieres lo llenamos) -->
+
+            <input type="hidden" name="FechaRegistro" value="@nowIso" />
+            <input type="hidden" name="Estado" value="true" />
+
+            <div id="errorMessagesRegistrar" class="form-error" role="alert"></div>
+
+            <!-- BLOQUE SUPERIOR -->
+            <div class="row g-0 align-items-start pt-0">
+                <div class="col-12 col-md-8">
+                    <div class="row g-0">
+                        <!-- Grado -->
+                        <div class="col-12 col-md-6">
+                            <div class="control-tile">
+                                <label class="form-label" for="Grado">Grado<span class="req">*</span></label>
+                                <div class="input-group input-group-sm soft">
+                                    <span class="input-group-text"><i class="fas fa-medal"></i></span>
+                                    @Html.DropDownListFor(m => m.Grado,
+                                    (IEnumerable<SelectListItem>)ViewBag.GradosList,
+                                                                        "Seleccionar",
+                                                                        new { @class = "form-select form-select-sm", required = "required" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CIP -->
+                        <div class="col-12 col-md-6">
+                            <div class="control-tile">
+                                <label class="form-label" for="NumeroCip">CIP<span class="req">*</span></label>
+                                <div class="input-group input-group-sm soft">
+                                    <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                    <input asp-for="NumeroCip" class="form-control" maxlength="8"
+                                           pattern="^\d{8}$"
+                                           title="El CIP debe contener 8 dígitos."
+                                           required inputmode="numeric"
+                                           oninput="this.value=this.value.replace(/[^0-9]/g,'');" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nombres / Apellidos -->
+                        <div class="row g-0 align-items-end mt-1">
+                            <div class="col-12 col-md-6">
+                                <div class="control-tile">
+                                    <label class="form-label" for="Nombres">Nombres<span class="req">*</span></label>
+                                    <div class="input-group input-group-sm soft">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                        <input asp-for="Nombres" class="form-control" required />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="control-tile">
+                                    <label class="form-label" for="Apellidos">Apellidos<span class="req">*</span></label>
+                                    <div class="input-group input-group-sm soft">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                        <input asp-for="Apellidos" class="form-control" required />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DNI / Teléfono -->
+                        <div class="row g-0 align-items-end mt-1">
+                            <div class="col-12 col-md-6">
+                                <div class="control-tile">
+                                    <label class="form-label" for="Dni">DNI<span class="req">*</span></label>
+                                    <div class="input-group input-group-sm soft">
+                                        <span class="input-group-text"><i class="fas fa-id-badge"></i></span>
+                                        <input asp-for="Dni" class="form-control" maxlength="8"
+                                               pattern="^\d{8}$"
+                                               title="El DNI debe contener 8 dígitos."
+                                               required inputmode="numeric"
+                                               oninput="this.value=this.value.replace(/[^0-9]/g,'');" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="control-tile">
+                                    <label class="form-label" for="Telefono">Teléfono</label>
+                                    <div class="input-group input-group-sm soft">
+                                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                        <input asp-for="Telefono" class="form-control"
+                                               maxlength="15"
+                                               pattern="^\+?\d{1,14}$"
+                                               title="Solo números y, opcionalmente, + (máx. 15)."
+                                               inputmode="tel" oninput="this.value=this.value.replace(/[^0-9+]/g,'');" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FOTO -->
+                <div class="col-12 col-md-4">
+                    <div class="control-tile photo-tile">
+                        <label class="form-label d-block">Foto</label>
+                        <div class="photo-uploader" id="photoUploaderReg">
+                            <input type="file" id="fotoFileRegistrar" name="fotoFile"
+                                   accept="image/jpeg,image/png,image/webp" hidden />
+                            <input type="file" id="fotoCaptureInputRegistrar" accept="image/*" capture="environment" hidden />
+
+                            <div class="photo-dropzone" id="photoDropReg" tabindex="0" role="button">
+                                <div class="dz-ico"><i class="fas fa-camera-retro"></i></div>
+                                <div class="dz-sub">
+                                    <button type="button" class="linklike" id="btnBrowseReg">Explorar</button>
+                                    <button type="button" class="linklike" id="btnCaptureReg">Tomar foto</button>
+                                </div>
+                                <div class="dz-hint">JPG/PNG/WEBP · máx 2MB</div>
+                            </div>
+
+                            <div class="photo-preview mt-2" id="photoPreviewReg" style="display:none;">
+                                <figure class="avatar-figure">
+                                    <img id="imgPreviewRegistrar" alt="Foto seleccionada" class="avatar-img" />
+                                    <figcaption class="avatar-cap">Vista previa</figcaption>
+                                    <div class="avatar-actions">
+                                        <button type="button" class="btn-mini" id="btnChangeReg"><i class="fas fa-sync"></i></button>
+                                        <button type="button" class="btn-mini danger" id="btnClearReg"><i class="fas fa-times"></i></button>
+                                    </div>
+                                </figure>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sexo | Fecha | Unidad -->
+            <div class="row g-0 align-items-end mt-1">
+                <div class="col-12 col-md-4">
+                    <div class="control-tile">
+                        <label class="form-label" for="Sexo">Sexo<span class="req">*</span></label>
+                        <div class="input-group input-group-sm soft">
+                            <span class="input-group-text"><i class="fas fa-venus-mars"></i></span>
+                            @Html.DropDownListFor(m => m.Sexo,
+                                                        new List<SelectListItem> {
+                                                        new SelectListItem { Text = "Masculino", Value = "M" },
+                                                        new SelectListItem { Text = "Femenino", Value = "F" }
+                                                        },
+                                                        "Seleccionar",
+                                                        new { @class = "form-select form-select-sm", required = "required" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="control-tile">
+                        <label class="form-label" for="FechaNacimiento">Fecha de nacimiento<span class="req">*</span></label>
+                        <div class="input-group input-group-sm soft">
+                            <span class="input-group-text"><i class="fas fa-cake-candles"></i></span>
+                            <input asp-for="FechaNacimiento" class="form-control" type="date"
+                                   min="1900-01-01" max="@maxDate" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="control-tile">
+                        <label class="form-label" for="Unidad">Unidad</label>
+                        <div class="input-group input-group-sm soft">
+                            <span class="input-group-text"><i class="fas fa-building"></i></span>
+                            <input asp-for="Unidad" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dirección / Correo -->
+            <div class="row g-0 align-items-end mt-1">
+                <div class="col-12 col-md-6">
+                    <div class="control-tile">
+                        <label class="form-label" for="Direccion">Dirección</label>
+                        <div class="input-group input-group-sm soft">
+                            <span class="input-group-text"><i class="fas fa-location-dot"></i></span>
+                            <input asp-for="Direccion" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <div class="control-tile">
+                        <label class="form-label" for="CorreoInstitucional">Correo institucional</label>
+                        <div class="input-group input-group-sm soft">
+                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                            <input id="CorreoInstitucional" name="CorreoInstitucional" class="form-control"
+                                   type="email" title="El correo debe ser del dominio @@policia.gob.pe"
+                                   inputmode="email" autocomplete="off" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Huella + Botones -->
+            <div class="row g-0 align-items-start mt-2">
+                <div class="col-12 col-md-6">
+                    <div class="control-tile huella-tile">
+                        <label class="form-label d-block">Huella digital</label>
+                        <div class="d-flex gap-2 align-items-center flex-wrap huella-actions">
+                            <button type="button" id="btnCapturarHuellaRegistrar"
+                                    class="btn btn-outline-primary btn-sm btn-oval">
+                                <i class="fas fa-fingerprint"></i> Capturar
+                            </button>
+                            <span id="huellaStatusRegistrar" class="text-muted small">Sin capturar</span>
+                        </div>
+                        <input type="hidden" name="HuellaBase64" id="HuellaBase64Registrar" />
+                        <div class="huella-preview" id="huellaPreviewRegistrar" style="display:none;">
+                            <figure class="huella-figure">
+                                <img id="huellaPreviewImgRegistrar" alt="Vista previa de huella" class="huella-img" />
+                                <figcaption class="avatar-cap">Huella escaneada</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-actions">
+                    <div class="btn-bar">
+                        <a class="btn btn-warning btn-sm btn-oval" data-dismiss="modal">
+                            <i class="fas fa-arrow-circle-left"></i> Atrás
+                        </a>
+                        <button type="button" id="btnGuardarRegistrar" class="btn btn-primary btn-sm btn-oval btn-3d">
+                            <i class="fas fa-save"></i> Guardar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== MODAL CÁMARA (REGISTRAR) ===== -->
+<div class="modal fade" id="cameraModalRegistrar" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title mb-0" style="font-size:1rem;"><i class="fas fa-camera"></i> Tomar foto</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar" id="btnCamCloseXRegistrar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-2">
+                <div class="cam-wrap">
+                    <video id="camVideoRegistrar" autoplay playsinline></video>
+                    <canvas id="camCanvasRegistrar" style="display:none;"></canvas>
+                </div>
+                <div class="small text-muted mt-1">Permite acceso a la cámara si el navegador lo solicita.</div>
+            </div>
+            <div class="modal-footer justify-content-between py-2">
+                <div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnCamCancelRegistrar">Cancelar</button>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="btnCamShotRegistrar">
+                        <i class="fas fa-dot-circle"></i> Capturar
+                    </button>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnCamUseRegistrar" disabled>
+                        <i class="fas fa-check"></i> Usar foto
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal éxito registro -->
+<div id="modalRegistroExitosa" class="modal fade modal-center modal-xs" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content" role="status" aria-live="polite">
+            <div class="modal-body text-center py-4">
+                <div class="mb-2" style="font-size:3rem; line-height:1;">
+                    <i class="fas fa-check-circle text-success" aria-hidden="true"></i>
+                </div>
+                <h5 class="mb-1">¡Personal Registrado!</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+      'use strict';
+
+      function ready(fn) {
+        if (document.readyState !== 'loading') return fn();
+        document.addEventListener('DOMContentLoaded', fn);
+      }
+
+      ready(function () {
+        // Dependencias / contenedores
+        if (typeof jQuery === 'undefined') {
+          console.warn('jQuery no está cargado. El formulario AJAX usará submit tradicional como fallback.');
+        }
+
+        const maxBytes = 2 * 1024 * 1024;
+        const $err = document.getElementById('errorMessagesRegistrar');
+        function showErr(m) {
+          if ($err) {
+            $err.textContent = m || 'Se produjo un error.';
+            $err.classList.add('show');
+          } else {
+            console.warn('error container no encontrado:', m);
+          }
+        }
+        function hideErr() {
+          if ($err) {
+            $err.classList.remove('show');
+            $err.textContent = '';
+          }
+        }
+
+        // --- Correo institucional (Razor: usar @@ para renderizar @@ literal) ---
+        const EMAIL_DOMAIN = '@@policia.gob.pe';
+        const MSG = 'El correo debe ser del dominio ' + EMAIL_DOMAIN;
+        function normalizeToDomain(value) {
+          if (!value) return '';
+          let v = value.trim().toLowerCase();
+          if (!v.includes('@@')) return v;
+          const local = v.split('@@')[0] || '';
+          return local ? (local + EMAIL_DOMAIN) : '';
+        }
+        const RE_EMAIL = new RegExp('^[A-Za-z0-9._%+-]+' + '@@' + 'policia\\.gob\\.pe$', 'i');
+
+        const emailInput = document.querySelector('input[name="CorreoInstitucional"]');
+        if (emailInput) {
+          emailInput.addEventListener('invalid', function () { this.setCustomValidity(MSG); });
+          emailInput.addEventListener('input', function () { this.setCustomValidity(''); });
+          emailInput.addEventListener('keydown', (e) => {
+            if (e.key === '@@') { // algunos navegadores envían una sola @@ en key
+              setTimeout(() => {
+                const before = emailInput.value.length;
+                emailInput.value = normalizeToDomain(emailInput.value);
+                if (emailInput.value.length !== before) {
+                  emailInput.setSelectionRange(emailInput.value.length, emailInput.value.length);
+                }
+              }, 0);
+            }
+          });
+          emailInput.addEventListener('input', function () {
+            const before = this.value.length;
+            const newVal = normalizeToDomain(this.value);
+            this.value = newVal || this.value.trim().toLowerCase();
+            if (this.value.length !== before) {
+              this.setSelectionRange(this.value.length, this.value.length);
+            }
+          });
+          emailInput.addEventListener('blur', function () {
+            this.value = normalizeToDomain(this.value) || this.value.trim().toLowerCase();
+          });
+        }
+
+        // --- Uppercase robusto (respeta IME/composition) ---
+        function bindUppercaseByName(fieldName) {
+          const el = document.querySelector('[name="' + fieldName + '"]');
+          if (!el) return;
+          let composing = false;
+          el.addEventListener('compositionstart', () => { composing = true; });
+          el.addEventListener('compositionend', () => { composing = false; transform(); });
+          function transform() {
+            let start = el.selectionStart, end = el.selectionEnd;
+            const old = el.value || '';
+            const nw = old.toUpperCase();
+            if (old === nw) return;
+            el.value = nw;
+            try {
+              if (typeof start === 'number' && typeof end === 'number') {
+                const L = el.value.length;
+                start = Math.min(start, L);
+                end = Math.min(end, L);
+                el.setSelectionRange(start, end);
+              }
+            } catch (e) { /* ignore */ }
+          }
+          el.addEventListener('input', () => { if (!composing) transform(); });
+          el.addEventListener('blur', transform);
+          el.transformToUpper = transform;
+        }
+        ['Nombres', 'Apellidos', 'Unidad', 'Direccion'].forEach(bindUppercaseByName);
+
+        // ===== FOTO: elementos (IDs del Registrar tal como los tienes) =====
+        const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+
+        const $drop = document.getElementById('photoDropReg');
+        const $file = document.getElementById('fotoFileRegistrar');
+        const $cap = document.getElementById('fotoCaptureInputRegistrar');
+
+        const $previewWrap = document.getElementById('photoPreviewReg');
+        const $imgPreview = document.getElementById('imgPreviewRegistrar');
+
+        const $btnBrowse = document.getElementById('btnBrowseReg');
+        const $btnCapture = document.getElementById('btnCaptureReg');
+        const $btnChange = document.getElementById('btnChangeReg');
+        const $btnClear = document.getElementById('btnClearReg');
+
+        let _u = null;
+        function revoke() { if (_u) { URL.revokeObjectURL(_u); _u = null; } }
+        function showPreview(on) { if ($previewWrap) { $previewWrap.style.display = on ? '' : 'none'; } }
+        function setPreview(file) {
+          revoke();
+          _u = URL.createObjectURL(file);
+          if ($imgPreview) $imgPreview.src = _u;
+          showPreview(true);
+          hideErr();
+        }
+        function clearPreview() {
+          revoke();
+          if ($file) $file.value = '';
+          if ($cap) $cap.value = '';
+          if ($imgPreview) $imgPreview.removeAttribute('src');
+          showPreview(false);
+          if ($drop) $drop.classList.remove('dragover');
+        }
+        function validateAndSet(file) {
+          if (!file) return;
+          if (!allowed.includes(file.type)) { showErr('Formato no permitido. Solo JPG/PNG/WEBP.'); clearPreview(); return; }
+          if (file.size > maxBytes) { showErr('La foto supera 2MB.'); clearPreview(); return; }
+          setPreview(file);
+        }
+
+        if ($btnBrowse && $file) {
+          $btnBrowse.addEventListener('click', function (e) { e.preventDefault(); $file.click(); });
+          $file.addEventListener('change', function () { validateAndSet(this.files && this.files[0]); });
+        } else {
+          console.warn('Botón explorar o input file no encontrados:', $btnBrowse, $file);
+        }
+
+        if ($cap) $cap.addEventListener('change', function () { validateAndSet(this.files && this.files[0]); });
+        if ($btnChange) $btnChange.addEventListener('click', function () { if ($file) $file.click(); });
+        if ($btnClear) $btnClear.addEventListener('click', function (e) { e.preventDefault(); clearPreview(); });
+
+        if ($drop) {
+          ['dragenter', 'dragover'].forEach(ev => {
+            $drop.addEventListener(ev, (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              $drop.classList.add('dragover');
+            });
+          });
+          ['dragleave', 'dragend', 'mouseout'].forEach(ev => {
+            $drop.addEventListener(ev, (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              $drop.classList.remove('dragover');
+            });
+          });
+          $drop.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            $drop.classList.remove('dragover');
+            const dt = e.dataTransfer;
+            if (!dt || !dt.files || !dt.files.length) return;
+            validateAndSet(dt.files[0]);
+          });
+          $drop.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              if ($file) $file.click();
+            }
+          });
+        }
+
+        // ===== CÁMARA (REGISTRAR) =====
+        const $camModal = (typeof $ === 'function' && $('#cameraModalRegistrar')) ? $('#cameraModalRegistrar') : null;
+        const $camVideo = document.getElementById('camVideoRegistrar');
+        const $camCanvas = document.getElementById('camCanvasRegistrar');
+        const $btnCamShot = document.getElementById('btnCamShotRegistrar');
+        const $btnCamUse = document.getElementById('btnCamUseRegistrar');
+        const $btnCamCancel = document.getElementById('btnCamCancelRegistrar');
+        const $btnCamCloseX = document.getElementById('btnCamCloseXRegistrar');
+
+        let camStream = null;
+        let lastBlob = null;
+        function showErrInline(msg) { showErr(msg || 'No se pudo usar la cámara.'); }
+
+        async function startCamera() {
+          try {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('getUserMedia no disponible');
+            camStream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
+              audio: false
+            });
+            if ($camVideo) {
+              $camVideo.srcObject = camStream;
+              await $camVideo.play();
+            }
+            if ($camCanvas) $camCanvas.style.display = 'none';
+            if ($btnCamUse) $btnCamUse.disabled = true;
+          } catch (err) {
+            console.error('getUserMedia error', err);
+            showErrInline('No se pudo acceder a la cámara. Permite el acceso o usa "Explorar".');
+            if ($cap) $cap.click();
+            if ($camModal && typeof $camModal.modal === 'function') $camModal.modal('hide');
+          }
+        }
+
+        function stopCamera() {
+          try {
+            if (camStream) {
+              camStream.getTracks().forEach(t => t.stop());
+              camStream = null;
+            }
+            if ($camVideo) $camVideo.srcObject = null;
+          } catch (e) { console.error(e); }
+        }
+        function closeCamModal() {
+          stopCamera();
+          if ($camModal && typeof $camModal.modal === 'function') $camModal.modal('hide');
+          if ($btnCamUse) $btnCamUse.disabled = true;
+          lastBlob = null;
+        }
+
+        if ($btnCapture) {
+          $btnCapture.addEventListener('click', function (ev) {
+            ev.preventDefault();
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+              if ($camModal && typeof $camModal.modal === 'function') {
+                $camModal.modal({ backdrop: 'static', keyboard: false, show: true });
+              }
+              startCamera();
+            } else {
+              if ($cap) $cap.click();
+            }
+          });
+        } else {
+          console.warn('Botón "Tomar foto" no encontrado (#btnCaptureReg)');
+        }
+
+        if ($btnCamCancel) $btnCamCancel.addEventListener('click', closeCamModal);
+        if ($btnCamCloseX) $btnCamCloseX.addEventListener('click', closeCamModal);
+        if ($camModal && typeof $camModal.on === 'function') $camModal.on('hidden.bs.modal', closeCamModal);
+
+        if ($btnCamShot) {
+          $btnCamShot.addEventListener('click', function () {
+            try {
+              const vw = $camVideo ? $camVideo.videoWidth || 1280 : 1280;
+              const vh = $camVideo ? $camVideo.videoHeight || 720 : 720;
+              const side = Math.min(vw, vh);
+              const sx = (vw - side) / 2;
+              const sy = (vh - side) / 2;
+              if ($camCanvas) {
+                $camCanvas.width = side;
+                $camCanvas.height = side;
+                const ctx = $camCanvas.getContext('2d');
+                ctx.drawImage($camVideo, sx, sy, side, side, 0, 0, side, side);
+                $camCanvas.style.display = 'block';
+                $camCanvas.toBlob((blob) => {
+                  lastBlob = blob;
+                  if ($btnCamUse) $btnCamUse.disabled = !lastBlob;
+                }, 'image/jpeg', 0.92);
+              }
+            } catch (e) {
+              console.error(e);
+              showErrInline('No se pudo capturar la imagen.');
+            }
+          });
+        }
+
+        if ($btnCamUse) {
+          $btnCamUse.addEventListener('click', function () {
+            if (!lastBlob) return;
+            try {
+              if (lastBlob.size > maxBytes) {
+                showErrInline('La foto capturada supera 2MB.');
+                return;
+              }
+              const file = new File([lastBlob], 'camera.jpg', { type: 'image/jpeg', lastModified: Date.now() });
+              const dt = new DataTransfer();
+              dt.items.add(file);
+              if ($file) $file.files = dt.files;
+              validateAndSet(file);
+              closeCamModal();
+            } catch (e) {
+              console.error(e);
+              showErrInline('No se pudo aplicar la foto.');
+            }
+          });
+        }
+
+
+                // ===== CAPTURA DE HUELLA (REGISTRAR) =====
+        const btnHuellaReg = document.getElementById('btnCapturarHuellaRegistrar');
+        const statusHuellaReg = document.getElementById('huellaStatusRegistrar');
+        const inputHuellaReg = document.getElementById('HuellaBase64Registrar');
+        const previewHuellaReg = document.getElementById('huellaPreviewRegistrar');
+        const imgHuellaReg = document.getElementById('huellaPreviewImgRegistrar');
+
+        async function capturarHuellaRegistrar() {
+            if (!btnHuellaReg || !inputHuellaReg || !statusHuellaReg)
+                return;
+
+            hideErr();
+            statusHuellaReg.textContent = 'Capturando...';
+
+            // Antiforgery token del formulario
+            const tokenField = document.querySelector('#registrarPersonalForm input[name="__RequestVerificationToken"]');
+            const token = tokenField ? tokenField.value : null;
+
+            try {
+                const resp = await fetch('/Biometria/CapturarKiosco', {
+                    method: 'POST',
+                    headers: token ? { 'RequestVerificationToken': token } : {}
+                });
+
+                if (!resp.ok) {
+                    throw new Error('HTTP ' + resp.status);
+                }
+
+                const data = await resp.json();
+
+                if (!data || !data.success) {
+                    inputHuellaReg.value = '';
+                    statusHuellaReg.textContent = (data && data.message) || 'No se pudo capturar la huella (modo kiosco).';
+                    if (previewHuellaReg) previewHuellaReg.style.display = 'none';
+                    return;
+                }
+
+                // Guardamos el template en el hidden (lo que el backend espera)
+                inputHuellaReg.value = data.huellaBase64 || '';
+                statusHuellaReg.textContent = 'Huella capturada.';
+
+                // NOTA: ahora mismo el servicio devuelve el TEMPLATE, no una imagen.
+                // Cuando más adelante devuelvas PNG/BMP, aquí podrás mostrar la imagen:
+                // if (data.huellaBase64 && imgHuellaReg) {
+                //     imgHuellaReg.src = 'data:image/png;base64,' + data.huellaBase64;
+                //     previewHuellaReg.style.display = '';
+                // }
+            }
+            catch (e) {
+                console.error('Error capturando huella (registrar):', e);
+                statusHuellaReg.textContent = 'Error al capturar la huella.';
+                showErr('Error al capturar la huella (modo kiosco).');
+                if (previewHuellaReg) previewHuellaReg.style.display = 'none';
+                inputHuellaReg.value = '';
+            }
+        }
+
+        if (btnHuellaReg) {
+            btnHuellaReg.addEventListener('click', function (ev) {
+                ev.preventDefault();
+                capturarHuellaRegistrar();
+            });
+        }
+
+
+        // ===== Guardar (AJAX) =====
+        const $btnGuardar = document.getElementById('btnGuardarRegistrar');
+        const form = document.getElementById('registrarPersonalForm');
+        if (!$btnGuardar) console.warn('Botón Guardar no encontrado (#btnGuardarRegistrar)');
+        if (!form) console.warn('Formulario no encontrado (#registrarPersonalForm)');
+
+        if ($btnGuardar && form) {
+          $btnGuardar.addEventListener('click', function (e) {
+            e.preventDefault();
+            hideErr();
+
+            if (!form.checkValidity()) {
+              const firstInvalid = form.querySelector(':invalid');
+              if (firstInvalid) try { firstInvalid.focus(); } catch (ex) { }
+              if (typeof form.reportValidity === 'function') {
+                form.reportValidity();
+              } else {
+                showErr('Complete los campos obligatorios.');
+              }
+              return;
+            }
+
+            if (emailInput) {
+              const val = (emailInput.value || '').trim().toLowerCase();
+              if (val && !RE_EMAIL.test(val)) {
+                emailInput.setCustomValidity(MSG);
+                emailInput.reportValidity();
+                return;
+              }
+              emailInput.setCustomValidity('');
+            }
+
+            if (typeof jQuery === 'undefined') {
+              form.submit();
+              return;
+            }
+
+            const $btn = $(this).prop('disabled', true);
+            const fd = new FormData(form);
+
+            $.ajax({
+              url: $(form).attr('action'),
+              type: 'POST',
+              processData: false,
+              contentType: false,
+              data: fd
+            })
+            .done(function (resp) {
+              if (resp && resp.success) {
+                const $m = $('#modalRegistroExitosa');
+                if ($m && $m.modal) $m.modal({ backdrop: 'static', keyboard: false, show: true });
+                setTimeout(function () {
+                  try {
+                    $m.modal('hide');
+                    $('#registroModal').modal('hide');
+                  } catch (e) { }
+                  location.reload();
+                }, 1200);
+              } else {
+                showErr((resp && resp.message) || 'No se pudo guardar los cambios.');
+              }
+            })
+            .fail(function (xhr) {
+              const msg = (xhr && xhr.responseJSON && xhr.responseJSON.message) || 'Error del servidor.';
+              showErr(msg);
+            })
+            .always(function () { $btn.prop('disabled', false); });
+          });
+        }
+
+        console.info('Registrar form: eventos inicializados. jQuery:', typeof jQuery !== 'undefined');
+      });
+    })();
+</script>
+
+<style>
+    /* ===== CONTENEDOR GENERAL REGISTRO PERSONAL ===== */
+    .reg-personal {
+        --pnp-green: #00471b;
+        --pnp-gold: #b8963b;
+        --pnp-soft: #f3f6f8;
+        --tile-border: rgba(10, 24, 18, 0.06);
+        background: radial-gradient(circle at top left, #f7fafc 0, #e4edf3 28%, #dde7ec 55%, #d4e0e7 100%);
+        border-radius: 16px;
+        padding: 0.65rem 0.75rem 0.75rem; /* compacto */
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+        border: 1px solid rgba(15, 26, 20, 0.16);
+        position: relative;
+        overflow: hidden;
+        max-width: 100%;
+    }
+
+        .reg-personal::before {
+            content: "";
+            position: absolute;
+            inset: -40%;
+            background: radial-gradient(circle at 0 0, rgba(185, 150, 59, 0.15) 0, transparent 55%), radial-gradient(circle at 100% 0, rgba(0, 71, 27, 0.14) 0, transparent 60%);
+            opacity: 0.9;
+            pointer-events: none;
+        }
+
+        .reg-personal .pnp-body {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Evitar espacios laterales en las columnas internas */
+        .reg-personal .row.g-0 > [class*="col"] {
+            padding-right: 0 !important;
+            padding-left: 0 !important;
+        }
+
+        .reg-personal .row.g-0 {
+            margin-right: 0 !important;
+            margin-left: 0 !important;
+        }
+
+        /* ===== TILES / CONTROLES 3D COMPACTOS ===== */
+        .reg-personal .control-tile {
+            background: linear-gradient(145deg, #ffffff, #ecf2f4);
+            border-radius: 12px;
+            border: 1px solid var(--tile-border);
+            padding: .35rem .55rem .45rem;
+            margin-bottom: .28rem;
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .reg-personal .control-tile::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(120deg, rgba(148, 163, 184, 0.25), transparent 40%, transparent 60%, rgba(148, 163, 184, 0.12));
+                mix-blend-mode: soft-light;
+                opacity: 0;
+                transition: opacity .18s ease-out;
+                pointer-events: none;
+            }
+
+            .reg-personal .control-tile:hover::before {
+                opacity: 0.5;
+            }
+
+        .reg-personal .form-label {
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--pnp-green);
+            margin-bottom: .15rem;
+            letter-spacing: .02em;
+            text-transform: uppercase;
+        }
+
+        .reg-personal .req {
+            color: #b91c1c;
+            margin-left: 2px;
+            font-weight: 700;
+        }
+
+        /* ===== INPUTS COMPACTOS CON ICONO ===== */
+        .reg-personal .input-group.soft {
+            background: #f9fafb;
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            height: 30px;
+        }
+
+        .reg-personal .input-group-text {
+            border: none;
+            background: linear-gradient(135deg, #ffffff, #e5e7eb);
+            color: var(--pnp-green);
+            border-right: 1px solid rgba(148, 163, 184, 0.45);
+            min-width: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: .1rem .35rem;
+            font-size: .7rem;
+        }
+
+        .reg-personal .form-control,
+        .reg-personal .form-select {
+            border: none;
+            background: transparent;
+            font-size: .73rem;
+            padding-top: .05rem;
+            padding-bottom: .05rem;
+            padding-left: .3rem;
+            padding-right: .45rem;
+            box-shadow: none !important;
+            min-height: 26px;
+        }
+
+            .reg-personal .form-control:focus,
+            .reg-personal .form-select:focus {
+                background: #f1f5f9;
+                box-shadow: none;
+            }
+
+        /* ===== FOTO / UPLOADER 3D ===== */
+        .reg-personal .photo-tile {
+            min-height: 100%;
+        }
+
+    .photo-uploader {
+        display: flex;
+        flex-direction: column;
+        gap: .35rem;
+    }
+
+    .photo-dropzone {
+        border-radius: 14px;
+        border: 1px dashed rgba(148, 163, 184, 0.9);
+        background: radial-gradient(circle at top, #f9fafb 0, #eef2f7 55%, #e5edf5 100%);
+        padding: .5rem .45rem;
+        text-align: center;
+        cursor: pointer;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.16);
+        transition: transform .12s ease-out, box-shadow .12s ease-out, border-color .12s;
+    }
+
+        .photo-dropzone:hover,
+        .photo-dropzone.dragover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.2);
+            border-color: var(--pnp-green);
+        }
+
+    .dz-ico {
+        font-size: 1.25rem;
+        color: var(--pnp-green);
+        margin-bottom: .1rem;
+    }
+
+    .dz-sub {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: .45rem;
+        margin-bottom: .05rem;
+    }
+
+    .linklike {
+        background: transparent;
+        border: none;
+        color: var(--pnp-green);
+        font-size: .76rem;
+        text-decoration: underline;
+        padding: 0;
+        cursor: pointer;
+    }
+
+    .dz-hint {
+        font-size: .66rem;
+        color: #6b7280;
+    }
+
+    .avatar-figure {
+        margin: 0;
+        display: inline-block;
+        border-radius: 14px;
+        padding: .18rem;
+        background: linear-gradient(135deg, #e5e7eb, #ffffff);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.18);
+        position: relative;
+    }
+
+    .avatar-img {
+        display: block;
+        width: 90px;
+        height: 90px;
+        object-fit: cover;
+        border-radius: 10px;
+        box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.7);
+    }
+
+    .avatar-cap {
+        margin-top: .15rem;
+        font-size: .62rem;
+        text-align: center;
+        color: #4b5563;
+    }
+
+    .avatar-actions {
+        position: absolute;
+        top: .25rem;
+        right: .25rem;
+        display: flex;
+        flex-direction: column;
+        gap: .16rem;
+    }
+
+    .btn-mini {
+        border-radius: 999px;
+        border: none;
+        padding: .1rem .28rem;
+        font-size: .6rem;
+        box-shadow: 0 4px 9px rgba(15, 23, 42, 0.35);
+        background: rgba(15, 23, 42, 0.8);
+        color: #f9fafb;
+        cursor: pointer;
+    }
+
+        .btn-mini.danger {
+            background: #b91c1c;
+        }
+
+    /* ===== HUELLA 3D ===== */
+    .huella-tile {
+        display: flex;
+        flex-direction: column;
+        gap: .3rem;
+    }
+
+    .huella-actions {
+        margin-bottom: .2rem;
+    }
+
+    .huella-figure {
+        margin: 0;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        padding: .25rem .28rem .3rem;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #ffffff, #e5eff5);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.22);
+        border: 1px solid rgba(148, 163, 184, 0.7);
+    }
+
+    .huella-img {
+        width: 70px;
+        height: 70px;
+        object-fit: contain;
+        border-radius: 8px;
+        background: #f9fafb;
+        padding: .2rem;
+    }
+
+    /* ===== BOTONES / BARRa DE ACCIONES ===== */
+    .col-actions .btn-bar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: .45rem;
+        margin-top: .2rem;
+    }
+
+    .btn-oval {
+        border-radius: 999px !important;
+        padding: .2rem .65rem !important;
+        font-size: .73rem !important;
+        display: inline-flex;
+        align-items: center;
+        gap: .24rem;
+    }
+
+    .btn-3d {
+        box-shadow: 0 8px 18px rgba(37, 99, 235, 0.5);
+        transform: translateY(0);
+        transition: transform .1s ease-out, box-shadow .1s ease-out;
+    }
+
+        .btn-3d:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.65);
+        }
+
+        .btn-3d:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.6);
+        }
+
+    /* ===== ERRORES (FORM-ERROR) ===== */
+    .reg-personal .form-error {
+        margin: .3rem 0 .45rem;
+        padding: .22rem .65rem;
+        border-radius: 999px;
+        font-size: .76rem;
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+        display: none;
+    }
+
+        .reg-personal .form-error.show {
+            display: block;
+        }
+
+    /* ===== MODAL ÉXITO: COMPACTO Y SUAVE ===== */
+    #modalRegistroExitosa .modal-dialog {
+        max-width: 320px;
+        margin: 1.2rem auto;
+    }
+
+    #modalRegistroExitosa .modal-content {
+        border-radius: 16px;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        background: radial-gradient(circle at top, #ecfdf5 0, #e0f2fe 40%, #eff6ff 100%);
+        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.4);
+    }
+
+    #modalRegistroExitosa .modal-body h5 {
+        font-size: .95rem;
+        font-weight: 700;
+        color: #064e3b;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @@media (max-width: 768px) {
+        .reg-personal {
+            padding: .55rem .55rem .65rem;
+        }
+
+        .avatar-img {
+            width: 80px;
+            height: 80px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .reg-personal .control-tile {
+            padding: .38rem .5rem .4rem;
+        }
+
+        .reg-personal .form-control,
+        .reg-personal .form-select {
+            font-size: .74rem;
+        }
+
+        .col-actions .btn-bar {
+            justify-content: flex-start;
+        }
+    }
+
+    /* ===== AJUSTE SOLO A TUS MODALES DE PERSONAL ===== */
+    .modal-crud-registroPersonal .modal-dialog,
+    .modal-crud-editarPersnal .modal-dialog {
+        margin-bottom: 0 !important;
+    }
+
+    /* Evitar desbordes horizontales en cualquier modal */
+    .modal {
+        overflow-x: hidden !important;
+    }
+
+    /* ===== FIX REAL: evitar que el modal de éxito aparezca grande ===== */
+
+    /* Antes de que Bootstrap lo muestre, el dialog DEBE YA tener tamaño pequeño */
+    #modalRegistroExitosa .modal-dialog {
+        max-width: 310px !important;
+        width: 100% !important;
+        margin: 1.25rem auto !important;
+        transform: translateY(0) !important; /* evita animación rara */
+    }
+
+    /* Evita expansión previa del contenido */
+    #modalRegistroExitosa .modal-content {
+        width: 100% !important;
+        transform: none !important;
+        transition: none !important; /* sin reflow visual */
+        animation: none !important;
+    }
+
+    /* Evita la animación fade inicial que causa el “salto” */
+    #modalRegistroExitosa.modal.fade .modal-dialog {
+        transition: none !important;
+        transform: none !important;
+    }
+
+</style>

@@ -1,0 +1,227 @@
+﻿@{
+    ViewData["Title"] = "Ayuda del Sistema";
+    Layout = "_Layout";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<div class="dashboard-container">
+    <div class="page-zoom">
+        <div class="container-fluid pt-2 pb-5 px-3 px-sm-4">
+
+            <!-- ===== Título ===== -->
+            <h1 class="text-center mb-3 dashboard-title">
+                <span class="title-line-1">CENTRO DE AYUDA</span>
+                <span class="title-line-2">Guía del Sistema de Control de Asistencia PNP</span>
+                <span class="title-line-3">Comisaría de Turismo Cajamarca</span>
+            </h1>
+
+            <!-- ===== Introducción ===== -->
+            <div class="card shadow-sm mb-4 border-0">
+                <div class="card-body">
+                    <h5 class="fw-bold text-success mb-2">
+                        <i class="fas fa-circle-info me-2"></i> ¿Qué es este sistema?
+                    </h5>
+                    <p class="mb-2">
+                        Este sistema permite registrar y gestionar la asistencia, movimientos,
+                        usuarios, auditoría y datos del personal policial de manera ágil, segura
+                        y centralizada.
+                    </p>
+                    <p class="m-0">
+                        Aquí encontrarás una guía clara para usar cada módulo.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ===== Secciones ===== -->
+            <div class="row g-3">
+
+                <!-- ===== Personal ===== -->
+                <div class="col-12 col-lg-6">
+                    <div class="card shadow-sm h-100 border-0">
+                        <div class="card-header fw-bold">
+                            <i class="fas fa-id-badge me-2"></i> Gestión de Personal
+                        </div>
+                        <div class="card-body">
+                            <p>En este módulo puedes:</p>
+                            <ul>
+                                <li>Registrar nuevo personal</li>
+                                <li>Editar datos personales</li>
+                                <li>Subir o actualizar foto</li>
+                                <li>Registrar huella biométrica</li>
+                                <li>Activar o desactivar personal</li>
+                            </ul>
+                            <p class="mb-0 text-muted small">
+                                Ruta: <strong>Gestión de Personal</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Usuarios ===== -->
+                <div class="col-12 col-lg-6">
+                    <div class="card shadow-sm h-100 border-0">
+                        <div class="card-header fw-bold">
+                            <i class="fas fa-users-cog me-2"></i> Gestión de Usuarios
+                        </div>
+                        <div class="card-body">
+                            <p>Permite administrar las cuentas del sistema:</p>
+                            <ul>
+                                <li>Crear nuevos usuarios</li>
+                                <li>Asignar roles</li>
+                                <li>Restablecer contraseñas</li>
+                                <li>Activar o desactivar cuentas</li>
+                            </ul>
+                            <p class="mb-0 text-muted small">
+                                Ruta: <strong>Gestión de Usuarios</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Asistencia ===== -->
+                <div class="col-12 col-lg-6">
+                    <div class="card shadow-sm h-100 border-0">
+                        <div class="card-header fw-bold">
+                            <i class="fas fa-user-check me-2"></i> Control de Asistencia
+                        </div>
+                        <div class="card-body">
+                            <p>Funciones principales:</p>
+                            <ul>
+                                <li>Búsqueda de personal por CIP o huella</li>
+                                <li>Registrar ingreso</li>
+                                <li>Registrar salida</li>
+                                <li>Ver historial del día</li>
+                                <li>Ver asistencias pendientes</li>
+                            </ul>
+                            <p class="mb-0 text-muted small">
+                                Ruta: <strong>Control de Asistencia</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Movimientos ===== -->
+                <div class="col-12 col-lg-6">
+                    <div class="card shadow-sm h-100 border-0">
+                        <div class="card-header fw-bold">
+                            <i class="fas fa-route me-2"></i> Movimiento de Personal
+                        </div>
+                        <div class="card-body">
+                            <p>En este módulo puedes:</p>
+                            <ul>
+                                <li>Registrar salidas operativas o administrativas</li>
+                                <li>Registrar retorno</li>
+                                <li>Ver movimientos abiertos</li>
+                                <li>Consultar historial por fecha</li>
+                            </ul>
+                            <p class="mb-0 text-muted small">
+                                Ruta: <strong>Movimientos de Personal</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Auditoría ===== -->
+                <div class="col-12 col-lg-12">
+                    <div class="card shadow-sm h-100 border-0">
+                        <div class="card-header fw-bold">
+                            <i class="fas fa-history me-2"></i> Auditoría del Sistema
+                        </div>
+                        <div class="card-body">
+                            <p>Este módulo registra:</p>
+                            <ul>
+                                <li>Acciones de cada usuario</li>
+                                <li>Ingreso al sistema</li>
+                                <li>Modificación de datos</li>
+                                <li>Eliminación o desactivación</li>
+                                <li>Registros de asistencia y movimiento</li>
+                            </ul>
+                            <p class="mb-0 text-muted small">
+                                Ruta: <strong>Bitácora / Auditoría</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ===== Pie ===== -->
+            <div class="text-center mt-4 text-muted small">
+                <i class="fas fa-shield-halved"></i> Policía Nacional del Perú — Sistema de Control de Asistencia<br />
+                Versión 2025 — Comisaría de Turismo Cajamarca
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --pnp-green: #00471B;
+        --pnp-green-700: #003715;
+        --pnp-gold: #FFD700;
+        --ring: rgba(0,122,51,.18);
+    }
+
+    /* Evitar barra horizontal */
+    .dashboard-container {
+        overflow-x: hidden;
+    }
+
+    /* ===== Aplicar zoom igual que Dashboard ===== */
+    @@media (min-width:993px) {
+        .page-zoom {
+            transform: scale(.9);
+            transform-origin: top center;
+            width: 100%;
+            margin: 0 auto;
+        }
+    }
+
+    @@media (max-width:992px) {
+        .page-zoom {
+            transform: none !important;
+            width: 100% !important;
+        }
+    }
+
+    /* ===== Títulos ===== */
+    .dashboard-title {
+        color: var(--pnp-green);
+        font-weight: 900;
+        letter-spacing: .6px;
+        line-height: 1.15;
+        margin-bottom: .35rem;
+        text-transform: uppercase;
+        text-shadow: 0 1px 0 #cfe5d3;
+    }
+
+        .dashboard-title .title-line-1 {
+            font-size: 1.4rem;
+        }
+
+        .dashboard-title .title-line-2 {
+            font-size: 1rem;
+        }
+
+        .dashboard-title .title-line-3 {
+            font-size: 1.2rem;
+        }
+
+    /* ===== Tarjetas ===== */
+    .card-header {
+        background: linear-gradient(180deg,var(--pnp-green),var(--pnp-green-700));
+        color: #fff;
+        border-bottom: none;
+    }
+
+    .card ul {
+        padding-left: 1.2rem;
+        margin-bottom: .5rem;
+    }
+
+    .card.shadow-sm {
+        border-radius: 13px;
+    }
+</style>

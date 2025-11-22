@@ -1,0 +1,528 @@
+﻿@using System.Linq
+@model IEnumerable<SistemaControlPNP.Models.AsistenciaViewModel>
+
+@{
+    var total = Model?.Count() ?? 0;
+    var presentes = Model?.Count(a => (a.Asistencia ?? "").Equals("Presente", StringComparison.OrdinalIgnoreCase)) ?? 0;
+    var sinSalida = Model?.Count(a => !a.FechaSalida.HasValue) ?? 0;
+    var ahora = DateTime.Now.ToString("dd/MM/yyyy HH:mm"); // solo UI
+    var esAdmin = User.IsInRole("Administrador");
+}
+<link rel="stylesheet" href="~/Style/modal-styles.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/Style/form-styles.css" asp-append-version="true" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<div id="vista-asistencia" class="container page-wrap content-stretch print-scope vista-crud">
+    <!-- ===== Header ===== -->
+    <div class="header-card mb-3">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+                <h4 class="page-title">
+                    <i class="fas fa-calendar-check"></i> Lista de Asistencia
+                </h4>
+                <div class="page-subtle">Registro y control de asistencia del personal.</div>
+            </div>
+
+            <div class="header-actions">
+                <!-- Pastillas -->
+                <span class="stat-pill" title="Total de registros" data-toggle="tooltip">
+                    <i class="fas fa-database"></i> @total
+                </span>
+                <span class="stat-pill" title="Presentes" data-toggle="tooltip">
+                    <i class="fas fa-user-check"></i>
+                    <span id="headerPresentes">@presentes</span>
+                </span>
+                <span class="stat-pill" title="Sin salida" data-toggle="tooltip">
+                    <i class="fas fa-right-from-bracket"></i>
+                    <span id="headerSinSalida">@sinSalida</span>
+                </span>
+
+                <!-- Barra de controles en una sola fila -->
+                <div id="searchWrap" class="search-wrap search-wrap--one-line">
+                    <!-- Buscador -->
+                    <div class="input-ico">
+                        <i class="fas fa-search"></i>
+                        <input id="busqueda" type="text"
+                               class="form-control form-control-sm"
+                               placeholder="Selecciona un filtro..." disabled aria-disabled="true" />
+                    </div>
+
+                    <!-- Filtro -->
+                    <select id="filtro" class="form-control form-control-sm">
+                        <option value="" selected>Filtrar</option>
+                        <option value="nombre">Nombres y apellidos</option>
+                        <option value="grado">Grado</option>
+                        <option value="unidad">Unidad</option>
+                        <option value="fecha_ingreso">Fecha ingreso</option>
+                        <option value="fecha_salida">Fecha salida</option>
+                        <option value="asistencia">Asistencia</option>
+                        <option value="sin_salida">Sin salida</option>
+                    </select>
+
+                    <!-- Nuevo -->
+                    <a href="#" id="registroLink" class="btn btn-success btn-sm"
+                       title="Nuevo" data-toggle="tooltip">
+                        <i class="fas fa-plus-circle"></i> Nuevo
+                    </a>
+
+                    <!-- Imprimir -->
+                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                            onclick="window.print()" title="Imprimir" data-toggle="tooltip">
+                        <i class="fas fa-print"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Tabla ===== -->
+    <div class="table-card table-fixed-head">
+        <div class="table-scroll table-scroll-x">
+            <table id="asistenciaTable"
+                   class="table table-bordered table-hover table-sm row-selectable mb-0 table-ultra-compact table-wide tabla-crud">
+                <colgroup>
+                    <col style="width:11%">
+                    <col style="width:12%">
+                    <col style="width:15%">
+                    <col style="width:24%">
+                    <col style="width:12%">
+                    <col style="width:10%">
+                    <col style="width:12%">
+                    <col style="width:10%">
+                    <col style="width:11%">
+                    @* SOLO si es admin agregamos la col de acción *@
+                    @if (esAdmin)
+                    {
+                        <col class="col-accion" style="width:120px" />
+                    }
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="text-center">Grado</th>
+                        <th class="text-center">Nombres</th>
+                        <th class="text-center">Apellidos</th>
+                        <th class="text-center">Unidad</th>
+                        <th class="text-center">Fecha Ingreso</th>
+                        <th class="text-center">Hora Ingreso</th>
+                        <th class="text-center">Fecha Salida</th>
+                        <th class="text-center">Hora Salida</th>
+                        <th class="text-center">Asistencia</th>
+                        @* Header Acción solo para admin *@
+                        @if (esAdmin)
+                        {
+                            <th class="text-center col-accion">Acción</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody id="asistenciaTableBody">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            var presente = (item.Asistencia ?? "").Equals("Presente", StringComparison.OrdinalIgnoreCase);
+                            var colorClass = presente ? "badge-soft active" : "badge-soft inactive";
+                            bool tieneSalida = item.FechaSalida.HasValue;
+
+                            <tr id="row-@item.IdAsistencia">
+                                <td class="text-center">@item.Grado</td>
+                                <td class="text-center">@item.Nombres</td>
+                                <td class="text-center">@item.Apellidos</td>
+                                <td class="text-center">@item.Unidad</td>
+                                <td class="text-center">@item.FechaIngresoStr</td>
+                                <td class="text-center">@item.HoraIngresoStr</td>
+                                <td class="text-center">@((tieneSalida) ? item.FechaSalidaStr : "-")</td>
+                                <td class="text-center">@((tieneSalida) ? item.HoraSalidaStr : "-")</td>
+                                <td class="text-center">
+                                    @{
+                                        var asis = (item.Asistencia ?? "").Trim().ToLower();
+                                        string icon = "fa-times-circle";
+                                        string color = "text-danger"; // rojo por defecto
+
+                                        if (asis == "presente")
+                                        {
+                                            icon = "fa-check-circle";
+                                            color = "text-success"; // verde
+                                        }
+                                        else if (asis == "tarde")
+                                        {
+                                            icon = "fa-clock";  // reloj
+                                            color = "text-danger"; // rojo
+                                        }
+                                    }
+
+                                    <span class="badge-soft @(asis == "presente" ? "active" : "inactive")">
+                                        <i class="fas @icon @color"></i> @item.Asistencia
+                                    </span>
+                                </td>
+
+                                @* Columna de acción SOLO para admin *@
+                                @if (esAdmin)
+                                {
+                                    <td class="text-center col-accion">
+                                        <div class="action-buttons">
+                                            <!-- EDITAR por IdAsistencia -->
+                                            <button type="button" class="btn-icon-box btn-icon--xs btn-editar text-primary"
+                                                    data-id="@item.IdAsistencia" title="Editar" data-toggle="tooltip">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+
+                                            @if (!tieneSalida)
+                                            {
+                                                <!-- SALIDA por IdPersonal, con display para el modal -->
+                                                <button type="button"
+                                                        class="btn-icon-box btn-icon--xs btn-marcar-salida text-warning"
+                                                        data-id="@item.IdPersonal"
+                                                        data-display="@($"{item.Grado} {item.Nombres} {item.Apellidos}")"
+                                                        title="Marcar salida"
+                                                        data-toggle="tooltip">
+                                                    <i class="fas fa-sign-out-alt"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            @* 9 columnas si no es admin, 10 si es admin *@
+                            <td colspan="@(esAdmin ? 10 : 9)">
+                                <div class="empty-box">
+                                    <i class="fas fa-inbox"></i>
+                                    <div>No hay registros de asistencia aún.</div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===== Footer ===== -->
+        <div class="table-footer">
+            <div aria-live="polite">
+                Mostrando <strong><span id="countVisibles">@total</span></strong>
+                <span id="wordRegs">@((total == 1) ? "registro" : "registros")</span>
+                <span id="presentesWrap" style="display:@(presentes > 0 ? "inline" : "none")">
+                    · <strong><span id="countPresentes">@presentes</span></strong> presente@(presentes == 1 ? "" : "s")
+                </span>
+                <span id="sinSalidaWrap" style="display:@(sinSalida > 0 ? "inline" : "none")">
+                    · <strong><span id="countSinSalida">@sinSalida</span></strong> sin salida
+                </span>
+            </div>
+            <div>Actualizado: @ahora</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Modales ===== -->
+<!-- Registrar Asistencia -->
+<div class="modal fade modal-center modal-crud-registro" id="registroModal" tabindex="-1" role="dialog"
+     aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Registrar asistencia</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="registroFormContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Editar Asistencia -->
+<div class="modal fade modal-center modal-crud-editar" id="editarModal" tabindex="-1" role="dialog"
+     aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar asistencia</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="editarFormContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmar salida -->
+<div id="confirmarSalidaModal" class="modal fade modal-center modal-xs" tabindex="-1" role="dialog"
+     aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar salida</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="salidaAlert" class="alert alert-danger alert-one-line-auto"
+                     style="display:none;" aria-live="assertive"></div>
+                <p id="textoSalida" class="text-center mb-2">¿Deseas marcar la salida?</p>
+                <div class="text-center small text-muted">Se registrará la hora actual del sistema.</div>
+            </div>
+            <div class="modal-footer justify-content:center">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btnConfirmarSalida" data-enter-default>Marcar salida</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form style="display:none;">@Html.AntiForgeryToken()</form>
+
+@section Scripts {
+    <script>
+        (function () {
+            function csrf() {
+                return $('input[name="__RequestVerificationToken"]').first().val();
+            }
+            function norm(s) {
+                return (s || '').toString().toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            }
+
+            // Tooltips
+            $(function () {
+                const $tips = $('[data-toggle="tooltip"]');
+                try { $tips.tooltip('dispose'); } catch (e) { }
+                $tips.tooltip({
+                    trigger: 'hover',
+                    container: 'body',
+                    boundary: 'window',
+                    placement: 'top'
+                });
+                $(document).on('click focus', '[data-toggle="tooltip"]', function () {
+                    $(this).tooltip('hide').blur();
+                });
+            });
+
+            // Column map
+            const headers = Array.from(document.querySelectorAll('#asistenciaTable thead th'))
+                .map(th => (th.textContent || '').trim().toLowerCase());
+
+            const COL = {
+                grado: headers.indexOf('grado'),
+                nombres: headers.indexOf('nombres'),
+                apellidos: headers.indexOf('apellidos'),
+                unidad: headers.indexOf('unidad'),
+                fechaIng: headers.indexOf('fecha ingreso'),
+                horaIng: headers.indexOf('hora ingreso'),
+                fechaSal: headers.indexOf('fecha salida'),
+                horaSal: headers.indexOf('hora salida'),
+                asistencia: headers.indexOf('asistencia')
+            };
+
+            const $filtro = $('#filtro'),
+                  $busqueda = $('#busqueda');
+
+            const placeholderFor = v => {
+                switch (v) {
+                    case 'nombre': return 'Buscar por nombres o apellidos...';
+                    case 'grado': return 'Buscar por grado...';
+                    case 'unidad': return 'Buscar por unidad...';
+                    case 'fecha_ingreso': return 'Buscar por fecha de ingreso (dd/mm/aaaa)...';
+                    case 'fecha_salida': return 'Buscar por fecha de salida (dd/mm/aaaa)...';
+                    case 'asistencia': return 'Escribe presente / ausente...';
+                    case 'sin_salida': return 'Muestra solo sin salida';
+                    default: return 'Selecciona un filtro...';
+                }
+            };
+
+            function updateHeaderStats() {
+                let pres = 0, sinS = 0;
+                $('#asistenciaTableBody tr').each(function () {
+                    const tds = this.cells;
+                    const asis = COL.asistencia > -1 ? (tds[COL.asistencia].textContent || '').toLowerCase() : '';
+                    const fs = COL.fechaSal > -1 ? (tds[COL.fechaSal].textContent || '').trim() : '';
+                    if (asis.includes('presente')) pres++;
+                    if (fs === '-' || fs === '') sinS++;
+                });
+                $('#headerPresentes').text(pres);
+                $('#headerSinSalida').text(sinS);
+            }
+
+            function updateFooterCounts() {
+                const $rows = $('#asistenciaTableBody tr:visible');
+                const visibles = $rows.length;
+                let presVis = 0, sinSVis = 0;
+
+                $rows.each(function () {
+                    const tds = this.cells;
+                    const asis = COL.asistencia > -1 ? (tds[COL.asistencia].textContent || '').toLowerCase() : '';
+                    const fs = COL.fechaSal > -1 ? (tds[COL.fechaSal].textContent || '').trim() : '';
+                    if (asis.includes('presente')) presVis++;
+                    if (fs === '-' || fs === '') sinSVis++;
+                });
+
+                $('#countVisibles').text(visibles);
+                $('#wordRegs').text(visibles === 1 ? 'registro' : 'registros');
+                $('#countPresentes').text(presVis);
+                $('#presentesWrap').css('display', presVis > 0 ? 'inline' : 'none');
+                $('#countSinSalida').text(sinSVis);
+                $('#sinSalidaWrap').css('display', sinSVis > 0 ? 'inline' : 'none');
+            }
+
+            function matchRow(by, q, tr) {
+                const tds = tr.cells;
+                if (!by) return true;
+                const nn = x => norm(x || '');
+
+                if (by === 'nombre' && COL.nombres > -1 && COL.apellidos > -1) {
+                    const txt = nn((tds[COL.nombres].textContent || '') + ' ' + (tds[COL.apellidos].textContent || ''));
+                    return txt.includes(q);
+                }
+                if (by === 'grado' && COL.grado > -1) {
+                    return nn(tds[COL.grado].textContent || '').includes(q);
+                }
+                if (by === 'unidad' && COL.unidad > -1) {
+                    return nn(tds[COL.unidad].textContent || '').includes(q);
+                }
+                if (by === 'asistencia' && COL.asistencia > -1) {
+                    return nn(tds[COL.asistencia].textContent || '').includes(q);
+                }
+                if (by === 'sin_salida' && COL.fechaSal > -1) {
+                    const txt = (tds[COL.fechaSal].textContent || '').trim();
+                    return txt === '-' || txt === '' || nn(txt) === '-';
+                }
+                if (by === 'fecha_ingreso' && COL.fechaIng > -1) {
+                    return nn(tds[COL.fechaIng].textContent || '').includes(q);
+                }
+                if (by === 'fecha_salida' && COL.fechaSal > -1) {
+                    return nn(tds[COL.fechaSal].textContent || '').includes(q);
+                }
+                return true;
+            }
+
+            function filtrarTexto() {
+                const by = $filtro.val();
+                const q = norm(($busqueda.val() || '').trim());
+                $('#asistenciaTableBody tr').each(function () {
+                    const ok = by ? matchRow(by, q, this) : true;
+                    this.style.display = ok ? '' : 'none';
+                });
+                updateFooterCounts();
+            }
+
+            function toggleInputsByFiltro() {
+                const v = $filtro.val();
+
+                if (!v || v === 'sin_salida') {
+                    $busqueda.prop('disabled', v !== 'sin_salida')
+                             .val('')
+                             .attr('placeholder', placeholderFor(v || ''));
+                    // Si es sin_salida aplicamos filtro directo:
+                    if (v === 'sin_salida') {
+                        $('#asistenciaTableBody tr').each(function () {
+                            const ok = matchRow('sin_salida', '', this);
+                            this.style.display = ok ? '' : 'none';
+                        });
+                        updateFooterCounts();
+                    } else {
+                        $('#asistenciaTableBody tr').show();
+                        updateFooterCounts();
+                    }
+                } else {
+                    $busqueda.prop('disabled', false)
+                             .val('')
+                             .attr('placeholder', placeholderFor(v))
+                             .focus();
+                    $('#asistenciaTableBody tr').show();
+                    updateFooterCounts();
+                }
+            }
+
+            let t; const debounce = (fn, ms) => (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+
+            $('#busqueda').on('input', debounce(filtrarTexto, 120));
+            $('#busqueda').on('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    $(this).val('');
+                    filtrarTexto();
+                }
+            });
+            $('#filtro').on('change', toggleInputsByFiltro);
+
+            // Selección de filas (no interrumpir botones)
+            $(document).on('click', '#asistenciaTable tbody tr', function (e) {
+                if ($(e.target).closest('.btn, .btn-icon-box, a, i').length) return;
+                $(this).toggleClass('row-selected');
+            });
+
+            // Nuevo
+            $('#registroLink').on('click', function (e) {
+                e.preventDefault();
+                $.get('@Url.Action("Registrar", "Asistencia")')
+                    .done(function (html) {
+                        $('#registroFormContainer').html(html);
+                        $('#registroModal').modal('show');
+                    })
+                    .fail(function () { alert('No se pudo cargar el formulario de registro.'); });
+            });
+
+            // Editar
+            $(document).on('click', '.btn-editar', function () {
+                const idAsistencia = $(this).data('id');
+                $.get('@Url.Action("EditarAsistencia", "Asistencia")', { id: idAsistencia })
+                    .done(function (html) {
+                        $('#editarFormContainer').html(html);
+                        $('#editarModal').modal('show');
+                    })
+                    .fail(function () { alert('No se pudo cargar el formulario de edición.'); });
+            });
+
+            // Marcar salida (por IdPersonal)
+            let idSalidaPend = null;
+            $(document).on('click', '.btn-marcar-salida', function () {
+                idSalidaPend = $(this).data('id');
+
+                const display = $(this).data('display') || ''; // "Grado Nombres Apellidos"
+                $('#salidaAlert').hide().text('');
+
+                if (display) {
+                    $('#textoSalida').html(`¿Deseas marcar la salida de <strong>${display}</strong>?`);
+                } else {
+                    $('#textoSalida').text('¿Deseas marcar la salida para el registro seleccionado?');
+                }
+
+                $('#confirmarSalidaModal').modal('show');
+            });
+
+            $('#btnConfirmarSalida').on('click', function () {
+                if (!idSalidaPend) return;
+                const $btn = $(this).prop('disabled', true);
+                $('#salidaAlert').hide().text('');
+
+                $.ajax({
+                    url: '@Url.Action("RegistrarSalida", "Asistencia")',
+                    type: 'POST',
+                    headers: { 'RequestVerificationToken': csrf() },
+                    contentType: 'application/json',
+                    data: JSON.stringify({ idPersonal: idSalidaPend }),
+                    success: function (resp) {
+                        if (resp && resp.success) {
+                            $('#confirmarSalidaModal').modal('hide');
+                            location.reload();
+                        } else {
+                            $('#salidaAlert').text((resp && resp.message) || 'No se pudo registrar la salida.').show();
+                        }
+                    },
+                    error: function () { $('#salidaAlert').text('Error de red/servidor.').show(); },
+                    complete: function () { $btn.prop('disabled', false); }
+                });
+            });
+
+            // Estado inicial UI
+            $(function () {
+                $('#busqueda').prop('disabled', true).attr('placeholder', 'Selecciona un filtro...');
+                toggleInputsByFiltro();
+                updateFooterCounts();
+                updateHeaderStats();
+            });
+        })();
+    </script>
+}

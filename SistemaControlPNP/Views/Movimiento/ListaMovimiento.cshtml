@@ -1,0 +1,526 @@
+﻿@using System.Linq
+@model IEnumerable<SistemaControlPNP.Models.MovimientoViewModel>
+
+@{
+    var total = Model?.Count() ?? 0;
+    var ahora = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+    var conDestino = Model?.Count(m => !string.IsNullOrWhiteSpace(m.Destino)) ?? 0;
+    var conNovedades = Model?.Count(m => !string.IsNullOrWhiteSpace(m.Novedades)) ?? 0;
+    var esAdmin = User.IsInRole("Administrador");
+}
+
+<link rel="stylesheet" href="~/Style/form-styles.css" asp-append-version="true" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<div id="vista-movimientos" class="container page-wrap content-stretch print-scope vista-crud">
+    <!-- ===== Encabezado ===== -->
+    <div class="header-card mb-3">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+                <h4 class="page-title">
+                    <i class="fas fa-route"></i> Movimientos de Personal
+                </h4>
+                <div class="page-subtle">Registro y control de salidas y retornos del personal.</div>
+            </div>
+
+            <div class="header-actions">
+                <!-- Pastillas -->
+                <span class="stat-pill" title="Total de movimientos" data-toggle="tooltip">
+                    <i class="fas fa-database"></i>
+                    <span id="hdrTotalMov">@total</span>
+                </span>
+                <span class="stat-pill" title="Con destino" data-toggle="tooltip">
+                    <i class="fas fa-location-dot"></i>
+                    <span id="hdrDestinoMov">@conDestino</span>
+                </span>
+                <span class="stat-pill" title="Con novedades" data-toggle="tooltip">
+                    <i class="fas fa-note-sticky"></i>
+                    <span id="hdrNovMov">@conNovedades</span>
+                </span>
+
+                <!-- Controles en una sola fila -->
+                <div id="searchWrapMov" class="search-wrap search-wrap--one-line">
+                    <div class="input-ico">
+                        <i class="fas fa-search"></i>
+                        <input id="busquedaMov" type="text"
+                               class="form-control form-control-sm"
+                               placeholder="Selecciona un filtro..." disabled aria-disabled="true" />
+                    </div>
+
+                    <select id="filtroMov" class="form-control form-control-sm">
+                        <option value="" selected>Filtrar</option>
+                        <option value="nombre">Nombres y apellidos</option>
+                        <option value="grado">Grado</option>
+                        <option value="motivo">Motivo</option>
+                        <option value="autoriza">Autoriza</option>
+                        <option value="destino">Destino</option>
+                        <option value="novedades">Novedades</option>
+                        <option value="fecha_salida">Fecha salida</option>
+                        <option value="hora_salida">Hora salida</option>
+                        <option value="fecha_retorno">Fecha retorno</option>
+                        <option value="hora_retorno">Hora retorno</option>
+                    </select>
+
+                    @if (esAdmin)
+                    {
+                        <a href="#" id="registroLinkMov" class="btn btn-success btn-sm"
+                           title="Nuevo movimiento" data-toggle="tooltip">
+                            <i class="fas fa-plus-circle"></i> Nuevo
+                        </a>
+                    }
+
+                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                            onclick="window.print()" title="Imprimir" data-toggle="tooltip">
+                        <i class="fas fa-print"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Tabla ===== -->
+    <div class="table-card table-fixed-head">
+        <div class="table-scroll table-scroll-x">
+            <table id="movimientosTable"
+                   class="table table-bordered table-hover table-sm row-selectable mb-0 table-ultra-compact table-wide tabla-crud">
+                <colgroup>
+                    <col style="width:9%">
+                    <col style="width:13%">
+                    <col style="width:13%">
+                    <col style="width:14%">
+                    <col style="width:13%">
+                    <col style="width:14%">
+                    <col style="width:18%">
+                    <col style="width:11%">
+                    <col style="width:9%">
+                    <col style="width:11%">
+                    <col style="width:9%">
+                    @if (esAdmin)
+                    {
+                        <col class="col-accion" style="width:120px" />
+                    }
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="text-center">Grado</th>
+                        <th class="text-center">Apellidos</th>
+                        <th class="text-center">Nombres</th>
+                        <th class="text-center">Motivo</th>
+                        <th class="text-center">Autoriza</th>
+                        <th class="text-center">Destino</th>
+                        <th class="text-center">Novedades</th>
+                        <th class="text-center">Fecha Salida</th>
+                        <th class="text-center">Hora Salida</th>
+                        <th class="text-center">Fecha Retorno</th>
+                        <th class="text-center">Hora Retorno</th>
+                        @if (esAdmin)
+                        {
+                            <th class="text-center col-accion">Acción</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody id="movimientosTableBody">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var m in Model)
+                        {
+                            <tr id="row-@m.IdMovimiento">
+                                <td class="text-center">@m.Grado</td>
+                                <td class="text-center">@m.Apellidos</td>
+                                <td class="text-center">@m.Nombres</td>
+                                <td class="text-center">@m.Motivo</td>
+                                <td class="text-center">@m.Autoriza</td>
+                                <td class="text-center">@m.Destino</td>
+                                <td class="text-center">@m.Novedades</td>
+                                <td class="text-center">@m.FechaSalidaLocal.ToString("dd/MM/yyyy")</td>
+                                <td class="text-center">@m.FechaSalidaLocal.ToString("HH:mm")</td>
+                                <td class="text-center">@((m.FechaRetornoLocal.HasValue) ? m.FechaRetornoLocal.Value.ToString("dd/MM/yyyy") : "")</td>
+                                <td class="text-center">@((m.FechaRetornoLocal.HasValue) ? m.FechaRetornoLocal.Value.ToString("HH:mm") : "")</td>
+                                @if (esAdmin)
+                                {
+                                    <td class="text-center col-accion">
+                                        <div class="action-buttons">
+                                            <!-- Editar -->
+                                            <button type="button"
+                                                    class="btn-icon-box btn-icon--xs text-primary btn-editar-mov"
+                                                    data-id="@m.IdMovimiento"
+                                                    title="Editar" data-toggle="tooltip">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+
+                                            @if (!m.FechaRetornoLocal.HasValue)
+                                            {
+                                                <!-- Registrar retorno -->
+                                                <button type="button"
+                                                        class="btn-icon-box btn-icon--xs text-success btn-retorno-mov"
+                                                        data-id="@m.IdMovimiento"
+                                                        title="Registrar retorno" data-toggle="tooltip">
+                                                    <i class="fas fa-person-walking-arrow-loop-left"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="@(esAdmin ? 13 : 12)">
+                                <div class="empty-box">
+                                    <i class="fas fa-inbox"></i>
+                                    <div>No hay movimientos registrados aún.</div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===== Pie ===== -->
+        <div class="table-footer">
+            <div aria-live="polite">
+                Mostrando <strong><span id="countVisiblesMov">@total</span></strong>
+                <span id="wordRegsMov">@((total == 1) ? "registro" : "registros")</span>
+                · <strong><span id="countDestinoMov">@conDestino</span></strong> con destino
+                · <strong><span id="countNovMov">@conNovedades</span></strong> con novedades
+            </div>
+            <div>Actualizado: @ahora</div>
+        </div>
+    </div>
+</div>
+
+<!-- ==== MODALES ==== -->
+<!-- Registrar Movimiento -->
+<div class="modal fade modal-center modal-crud-registro" id="registroModalMov" tabindex="-1" role="dialog"
+     aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Registrar movimiento</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="registroFormContainerMov"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Editar Movimiento -->
+<div class="modal fade modal-center modal-crud-editar" id="editarModalMov" tabindex="-1" role="dialog"
+     aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar movimiento</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="editarFormContainerMov"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Registrar Retorno -->
+<div class="modal fade modal-center modal-xs modal-slim retorno-modal-compact" id="retornoModal" tabindex="-1"
+     role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h6 class="modal-title m-0">
+                    <i class="fas fa-undo"></i> Registrar retorno
+                </h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body py-2">
+                <form id="retornoForm" novalidate>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="retornoId" name="idMovimiento" />
+                    <div id="retornoError" class="alert alert-danger py-2 px-3" style="display:none;"></div>
+
+                    <div class="control-tile mb-2">
+                        <label for="retornoNovedad" class="form-label mb-1">
+                            Novedad (opcional)
+                        </label>
+                        <div class="input-group input-group-sm soft">
+                            <span class="input-group-text">
+                                <i class="fas fa-note-sticky"></i>
+                            </span>
+                            <textarea id="retornoNovedad" name="novedades"
+                                      class="form-control retorno-textarea"
+                                      rows="2"
+                                      placeholder="Describe la novedad ..."></textarea>
+                        </div>
+                        <small class="text-muted d-block mt-1">
+                            Si no ingresa una novedad, el sistema registrará: <strong>SIN NOVEDAD</strong>.
+                        </small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer py-2 justify-content-center">
+                <button class="btn btn-secondary btn-sm" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button class="btn btn-success btn-sm" id="btnConfirmRetorno" data-enter-default>
+                    <i class="fas fa-check"></i> Registrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form style="display:none;">@Html.AntiForgeryToken()</form>
+
+@section Scripts {
+    <script>
+        (function () {
+            function csrf() {
+                return $('input[name="__RequestVerificationToken"]').first().val();
+            }
+            function norm(s) {
+                return (s || '').toString().toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            }
+
+            // ===== Tooltips
+            $(function () {
+                const $tips = $('[data-toggle="tooltip"]');
+                try { $tips.tooltip('dispose'); } catch (e) { }
+                $tips.tooltip({
+                    trigger: 'hover',
+                    container: 'body',
+                    boundary: 'window',
+                    placement: 'top'
+                });
+                $(document).on('click focus', '[data-toggle="tooltip"]', function () {
+                    $(this).tooltip('hide').blur();
+                });
+            });
+
+            // ===== Map columnas
+            const headersMov = Array.from(document.querySelectorAll('#movimientosTable thead th'))
+                .map(th => (th.textContent || '').trim().toLowerCase());
+
+            const COL = {
+                grado: headersMov.indexOf('grado'),
+                apellidos: headersMov.indexOf('apellidos'),
+                nombres: headersMov.indexOf('nombres'),
+                unidad: headersMov.indexOf('unidad'),
+                motivo: headersMov.indexOf('motivo'),
+                autoriza: headersMov.indexOf('autoriza'),
+                destino: headersMov.indexOf('destino'),
+                novedades: headersMov.indexOf('novedades'),
+                fecha_salida: headersMov.indexOf('fecha salida'),
+                hora_salida: headersMov.indexOf('hora salida'),
+                fecha_retorno: headersMov.indexOf('fecha retorno'),
+                hora_retorno: headersMov.indexOf('hora retorno')
+            };
+
+            const $filtro = $('#filtroMov');
+            const $busq = $('#busquedaMov');
+
+            const placeholderFor = v => {
+                switch (v) {
+                    case 'nombre': return 'Buscar por nombres o apellidos...';
+                    case 'grado': return 'Buscar por grado...';
+                    case 'unidad': return 'Buscar por unidad...';
+                    case 'motivo': return 'Buscar por motivo...';
+                    case 'autoriza': return 'Buscar por quien autoriza...';
+                    case 'destino': return 'Buscar por destino...';
+                    case 'novedades': return 'Buscar en novedades...';
+                    case 'fecha_salida': return 'Buscar por fecha de salida...';
+                    case 'hora_salida': return 'Buscar por hora de salida...';
+                    case 'fecha_retorno': return 'Buscar por fecha de retorno...';
+                    case 'hora_retorno': return 'Buscar por hora de retorno...';
+                    default: return 'Selecciona un filtro...';
+                }
+            };
+
+            // ===== Stats (footer + pastillas) según filas visibles
+            function updateStats() {
+                const $rows = $('#movimientosTableBody tr:visible');
+                const visibles = $rows.length;
+                let conDestino = 0, conNov = 0;
+
+                $rows.each(function () {
+                    const tds = this.cells;
+                    const destinoTxt = COL.destino > -1 ? (tds[COL.destino].textContent || '').trim() : '';
+                    const novTxt = COL.novedades > -1 ? (tds[COL.novedades].textContent || '').trim() : '';
+                    if (destinoTxt) conDestino++;
+                    if (novTxt) conNov++;
+                });
+
+                $('#countVisiblesMov').text(visibles);
+                $('#wordRegsMov').text(visibles === 1 ? 'registro' : 'registros');
+
+                $('#countDestinoMov').text(conDestino);
+                $('#countNovMov').text(conNov);
+
+                // Actualizar también las pastillas del header
+                $('#hdrTotalMov').text($('#movimientosTableBody tr').length);
+                $('#hdrDestinoMov').text(conDestino);
+                $('#hdrNovMov').text(conNov);
+            }
+
+            function matchRow(by, q, tr) {
+                const tds = tr.cells;
+                if (!by) return true;
+                const nn = x => norm(x || '');
+
+                if (by === 'nombre' && COL.nombres > -1 && COL.apellidos > -1) {
+                    const txt = nn((tds[COL.nombres].textContent || '') + ' ' +
+                                   (tds[COL.apellidos].textContent || ''));
+                    return txt.includes(q);
+                }
+
+                if (by in COL && COL[by] > -1) {
+                    return nn(tds[COL[by]].textContent || '').includes(q);
+                }
+
+                return true;
+            }
+
+            function filtrarMov() {
+                const by = $filtro.val();
+                const q = norm(($busq.val() || '').trim());
+
+                $('#movimientosTableBody tr').each(function () {
+                    const ok = by ? matchRow(by, q, this) : true;
+                    this.style.display = ok ? '' : 'none';
+                });
+
+                updateStats();
+            }
+
+            // ===== Eventos filtro
+            $busq.prop('disabled', true)
+                 .attr('placeholder', 'Selecciona un filtro...');
+
+            $filtro.on('change', function () {
+                const v = this.value;
+                $busq.val('');
+                if (!v) {
+                    $busq.prop('disabled', true)
+                         .attr('placeholder', placeholderFor(''));
+                    $('#movimientosTableBody tr').show();
+                    updateStats();
+                } else {
+                    $busq.prop('disabled', false)
+                         .attr('placeholder', placeholderFor(v))
+                         .focus();
+                    filtrarMov();
+                }
+            });
+
+            let t;
+            const debounce = (fn, ms) => (...a) => {
+                clearTimeout(t);
+                t = setTimeout(() => fn(...a), ms);
+            };
+
+            $busq.on('input', debounce(filtrarMov, 150));
+            $busq.on('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    $(this).val('');
+                    filtrarMov();
+                }
+            });
+
+            // ===== Selección de filas (múltiple)
+            $(document).on('click', '#movimientosTable tbody tr', function (e) {
+                if ($(e.target).closest('.btn, .btn-icon-box, a, i').length) return;
+                $(this).toggleClass('row-selected');
+            });
+
+            // ===== Nuevo movimiento
+            $('#registroLinkMov').on('click', function (e) {
+                e.preventDefault();
+                $.get('@Url.Action("RegistrarMovimiento", "Movimiento")')
+                    .done(function (html) {
+                        $('#registroFormContainerMov').html(html);
+                        $('#registroModalMov').modal('show');
+                    })
+                    .fail(function () {
+                        alert('No se pudo cargar el formulario de registro.');
+                    });
+            });
+
+            // ===== Editar movimiento
+            $(document).on('click', '.btn-editar-mov', function () {
+                const id = $(this).data('id');
+                $.get('@Url.Action("EditarMovimiento", "Movimiento")', { id: id })
+                    .done(function (html) {
+                        $('#editarFormContainerMov').html(html);
+                        $('#editarModalMov').modal('show');
+                    })
+                    .fail(function () {
+                        alert('No se pudo cargar el formulario de edición.');
+                    });
+            });
+
+            // ===== Registrar retorno
+            let idRetornoPend = null;
+
+            $(document).on('click', '.btn-retorno-mov', function () {
+                idRetornoPend = $(this).data('id');
+                $('#retornoId').val(idRetornoPend);
+                $('#retornoNovedad').val('');
+                $('#retornoError').hide().text('');
+                $('#retornoModal').modal('show');
+            });
+
+            $('#btnConfirmRetorno').on('click', function () {
+                const $btn = $(this).prop('disabled', true);
+                $('#retornoError').hide().text('');
+
+                const id = $('#retornoId').val();
+                let novedad = ($('#retornoNovedad').val() || '').trim();
+
+                // Si está vacío, registrar como "SIN NOVEDAD"
+                if (!novedad) {
+                    novedad = 'SIN NOVEDAD';
+                }
+
+                $.ajax({
+                    url: '@Url.Action("RegistrarRetorno", "Movimiento")',
+                    type: 'POST',
+                    headers: { 'RequestVerificationToken': csrf() },
+                    contentType: 'application/json',
+                    data: JSON.stringify({ idMovimiento: id, novedades: novedad }),
+                    success: function (resp) {
+                        if (resp && resp.success) {
+                            $('#retornoModal').modal('hide');
+                            location.reload();
+                        } else {
+                            $('#retornoError')
+                                .text((resp && resp.message) || 'No se pudo registrar el retorno.')
+                                .show();
+                        }
+                    },
+                    error: function () {
+                        $('#retornoError').text('Error de red/servidor.').show();
+                    },
+                    complete: function () {
+                        $btn.prop('disabled', false);
+                    }
+                });
+            });
+
+            // ===== Enter por defecto en retorno
+            $('#retornoModal').on('shown.bs.modal', function () {
+                $('#retornoNovedad').trigger('focus').select();
+            });
+
+            // ===== Estado inicial
+            $(function () {
+                updateStats();
+            });
+        })();
+    </script>
+}

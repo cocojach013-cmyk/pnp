@@ -1,0 +1,277 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|c:\\users\\uclab602\\desktop\\nueva carpeta (2)\\sistema de control pnp\\sistema de control pnp\\sistemacontrolpnp\\sistemacontrolpnp\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|solutionrelative:sistemacontrolpnp\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|c:\\users\\uclab602\\desktop\\nueva carpeta (2)\\sistema de control pnp\\sistema de control pnp\\sistemacontrolpnp\\sistemacontrolpnp\\controllers\\controlcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|solutionrelative:sistemacontrolpnp\\controllers\\controlcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|c:\\users\\uclab602\\desktop\\nueva carpeta (2)\\sistema de control pnp\\sistema de control pnp\\sistemacontrolpnp\\sistemacontrolpnp\\controllers\\accesocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|solutionrelative:sistemacontrolpnp\\controllers\\accesocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|c:\\users\\uclab602\\desktop\\nueva carpeta (2)\\sistema de control pnp\\sistema de control pnp\\sistemacontrolpnp\\sistemacontrolpnp\\controllers\\movimientocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|solutionrelative:sistemacontrolpnp\\controllers\\movimientocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|c:\\users\\uclab602\\desktop\\nueva carpeta (2)\\sistema de control pnp\\sistema de control pnp\\sistemacontrolpnp\\sistemacontrolpnp\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|solutionrelative:sistemacontrolpnp\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|c:\\users\\uclab602\\desktop\\nueva carpeta (2)\\sistema de control pnp\\sistema de control pnp\\sistemacontrolpnp\\sistemacontrolpnp\\controllers\\asistenciacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|solutionrelative:sistemacontrolpnp\\controllers\\asistenciacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|c:\\users\\uclab602\\desktop\\nueva carpeta (2)\\sistema de control pnp\\sistema de control pnp\\sistemacontrolpnp\\sistemacontrolpnp\\views\\biometria\\testcaptura.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|solutionrelative:sistemacontrolpnp\\views\\biometria\\testcaptura.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|c:\\users\\uclab602\\desktop\\nueva carpeta (2)\\sistema de control pnp\\sistema de control pnp\\sistemacontrolpnp\\sistemacontrolpnp\\models\\biometriatestresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|solutionrelative:sistemacontrolpnp\\models\\biometriatestresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|c:\\users\\uclab602\\desktop\\nueva carpeta (2)\\sistema de control pnp\\sistema de control pnp\\sistemacontrolpnp\\sistemacontrolpnp\\services\\ibiometriaservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|solutionrelative:sistemacontrolpnp\\services\\ibiometriaservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|c:\\users\\uclab602\\desktop\\nueva carpeta (2)\\sistema de control pnp\\sistema de control pnp\\sistemacontrolpnp\\sistemacontrolpnp\\services\\zkbiometriaservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|solutionrelative:sistemacontrolpnp\\services\\zkbiometriaservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|c:\\users\\uclab602\\desktop\\nueva carpeta (2)\\sistema de control pnp\\sistema de control pnp\\sistemacontrolpnp\\sistemacontrolpnp\\controllers\\biometriacontroller.cs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|solutionrelative:sistemacontrolpnp\\controllers\\biometriacontroller.cs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|c:\\users\\uclab602\\desktop\\nueva carpeta (2)\\sistema de control pnp\\sistema de control pnp\\sistemacontrolpnp\\sistemacontrolpnp\\views\\personal\\registrarpersonal.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|solutionrelative:sistemacontrolpnp\\views\\personal\\registrarpersonal.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|c:\\users\\uclab602\\desktop\\nueva carpeta (2)\\sistema de control pnp\\sistema de control pnp\\sistemacontrolpnp\\sistemacontrolpnp\\controllers\\personalcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|solutionrelative:sistemacontrolpnp\\controllers\\personalcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|c:\\users\\uclab602\\desktop\\nueva carpeta (2)\\sistema de control pnp\\sistema de control pnp\\sistemacontrolpnp\\sistemacontrolpnp\\views\\personal\\listapersonal.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|solutionrelative:sistemacontrolpnp\\views\\personal\\listapersonal.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|c:\\users\\uclab602\\desktop\\nueva carpeta (2)\\sistema de control pnp\\sistema de control pnp\\sistemacontrolpnp\\sistemacontrolpnp\\views\\personal\\editarpersonal.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|solutionrelative:sistemacontrolpnp\\views\\personal\\editarpersonal.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|c:\\users\\uclab602\\desktop\\nueva carpeta (2)\\sistema de control pnp\\sistema de control pnp\\sistemacontrolpnp\\sistemacontrolpnp\\sistemacontrolpnp.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{9A207BA6-1CDB-432F-84BA-F1C438B5BFB2}|SistemaControlPNP\\SistemaControlPNP.csproj|solutionrelative:sistemacontrolpnp\\sistemacontrolpnp.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "MovimientoController.cs",
+              "DocumentMoniker": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Controllers\\MovimientoController.cs",
+              "RelativeDocumentMoniker": "SistemaControlPNP\\Controllers\\MovimientoController.cs",
+              "ToolTip": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Controllers\\MovimientoController.cs",
+              "RelativeToolTip": "SistemaControlPNP\\Controllers\\MovimientoController.cs",
+              "ViewState": "AgIAAMwBAAAAAAAAAAAqwOEBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T18:28:30.808Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "SistemaControlPNP\\Controllers\\HomeController.cs",
+              "ToolTip": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "SistemaControlPNP\\Controllers\\HomeController.cs",
+              "ViewState": "AgIAALcAAAAAAAAAAAAUwMoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T18:26:44.56Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AccesoController.cs",
+              "DocumentMoniker": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Controllers\\AccesoController.cs",
+              "RelativeDocumentMoniker": "SistemaControlPNP\\Controllers\\AccesoController.cs",
+              "ToolTip": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Controllers\\AccesoController.cs",
+              "RelativeToolTip": "SistemaControlPNP\\Controllers\\AccesoController.cs",
+              "ViewState": "AgIAAAMCAAAAAAAAAAAUwBYCAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T18:24:52.406Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "SistemaControlPNP\\Views\\Home\\Index.cshtml",
+              "ToolTip": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "SistemaControlPNP\\Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAA+AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-22T09:06:27.419Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ControlController.cs",
+              "DocumentMoniker": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Controllers\\ControlController.cs",
+              "RelativeDocumentMoniker": "SistemaControlPNP\\Controllers\\ControlController.cs",
+              "ToolTip": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Controllers\\ControlController.cs",
+              "RelativeToolTip": "SistemaControlPNP\\Controllers\\ControlController.cs",
+              "ViewState": "AgIAANAAAAAAAAAAAAAqwOUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T09:06:03.842Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "AsistenciaController.cs",
+              "DocumentMoniker": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Controllers\\AsistenciaController.cs",
+              "RelativeDocumentMoniker": "SistemaControlPNP\\Controllers\\AsistenciaController.cs",
+              "ToolTip": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Controllers\\AsistenciaController.cs",
+              "RelativeToolTip": "SistemaControlPNP\\Controllers\\AsistenciaController.cs",
+              "ViewState": "AgIAAGoBAAAAAAAAAAAqwH8BAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T18:25:06.854Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "BiometriaController.cs.cs",
+              "DocumentMoniker": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Controllers\\BiometriaController.cs.cs",
+              "RelativeDocumentMoniker": "SistemaControlPNP\\Controllers\\BiometriaController.cs.cs",
+              "ToolTip": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Controllers\\BiometriaController.cs.cs",
+              "RelativeToolTip": "SistemaControlPNP\\Controllers\\BiometriaController.cs.cs",
+              "ViewState": "AgIAAGQAAAAAAAAAAAAqwHkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T08:18:19.817Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "ZkBiometriaService.cs",
+              "DocumentMoniker": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Services\\ZkBiometriaService.cs",
+              "RelativeDocumentMoniker": "SistemaControlPNP\\Services\\ZkBiometriaService.cs",
+              "ToolTip": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Services\\ZkBiometriaService.cs",
+              "RelativeToolTip": "SistemaControlPNP\\Services\\ZkBiometriaService.cs",
+              "ViewState": "AgIAAKkAAAAAAAAAAAAqwL4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T08:53:15.342Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "IBiometriaService.cs",
+              "DocumentMoniker": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Services\\IBiometriaService.cs",
+              "RelativeDocumentMoniker": "SistemaControlPNP\\Services\\IBiometriaService.cs",
+              "ToolTip": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Services\\IBiometriaService.cs",
+              "RelativeToolTip": "SistemaControlPNP\\Services\\IBiometriaService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T08:12:32.497Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "BiometriaTestResult.cs",
+              "DocumentMoniker": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Models\\BiometriaTestResult.cs",
+              "RelativeDocumentMoniker": "SistemaControlPNP\\Models\\BiometriaTestResult.cs",
+              "ToolTip": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Models\\BiometriaTestResult.cs",
+              "RelativeToolTip": "SistemaControlPNP\\Models\\BiometriaTestResult.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T08:12:55.457Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "TestCaptura.cshtml",
+              "DocumentMoniker": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Views\\Biometria\\TestCaptura.cshtml",
+              "RelativeDocumentMoniker": "SistemaControlPNP\\Views\\Biometria\\TestCaptura.cshtml",
+              "ToolTip": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Views\\Biometria\\TestCaptura.cshtml",
+              "RelativeToolTip": "SistemaControlPNP\\Views\\Biometria\\TestCaptura.cshtml",
+              "ViewState": "AgIAABQAAAAAAAAAAAAmwCkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-22T08:45:34.641Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "RegistrarPersonal.cshtml",
+              "DocumentMoniker": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Views\\Personal\\RegistrarPersonal.cshtml",
+              "RelativeDocumentMoniker": "SistemaControlPNP\\Views\\Personal\\RegistrarPersonal.cshtml",
+              "ToolTip": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Views\\Personal\\RegistrarPersonal.cshtml",
+              "RelativeToolTip": "SistemaControlPNP\\Views\\Personal\\RegistrarPersonal.cshtml",
+              "ViewState": "AgIAAFwEAAAAAAAAAAAswHEEAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-22T08:55:35.526Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "PersonalController.cs",
+              "DocumentMoniker": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Controllers\\PersonalController.cs",
+              "RelativeDocumentMoniker": "SistemaControlPNP\\Controllers\\PersonalController.cs",
+              "ToolTip": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Controllers\\PersonalController.cs",
+              "RelativeToolTip": "SistemaControlPNP\\Controllers\\PersonalController.cs",
+              "ViewState": "AgIAAMwBAAAAAAAAAAAqwOEBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T08:43:24.197Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "ListaPersonal.cshtml",
+              "DocumentMoniker": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Views\\Personal\\ListaPersonal.cshtml",
+              "RelativeDocumentMoniker": "SistemaControlPNP\\Views\\Personal\\ListaPersonal.cshtml",
+              "ToolTip": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Views\\Personal\\ListaPersonal.cshtml",
+              "RelativeToolTip": "SistemaControlPNP\\Views\\Personal\\ListaPersonal.cshtml",
+              "ViewState": "AgIAAB0DAAAAAAAAAAAmwDIDAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-22T17:48:44.233Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "EditarPersonal.cshtml",
+              "DocumentMoniker": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Views\\Personal\\EditarPersonal.cshtml",
+              "RelativeDocumentMoniker": "SistemaControlPNP\\Views\\Personal\\EditarPersonal.cshtml",
+              "ToolTip": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\Views\\Personal\\EditarPersonal.cshtml",
+              "RelativeToolTip": "SistemaControlPNP\\Views\\Personal\\EditarPersonal.cshtml",
+              "ViewState": "AgIAAKIDAAAAAAAAAAAuwLADAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-22T08:55:45.537Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "SistemaControlPNP.csproj",
+              "DocumentMoniker": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\SistemaControlPNP.csproj",
+              "RelativeDocumentMoniker": "SistemaControlPNP\\SistemaControlPNP.csproj",
+              "ToolTip": "C:\\Users\\UCLAB602\\Desktop\\Nueva carpeta (2)\\Sistema de Control PNP\\Sistema de Control PNP\\SistemaControlPNP\\SistemaControlPNP\\SistemaControlPNP.csproj",
+              "RelativeToolTip": "SistemaControlPNP\\SistemaControlPNP.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-11-22T08:24:41.596Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

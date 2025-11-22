@@ -1,0 +1,2033 @@
+﻿@{
+    Layout = null;
+    var placeholder = Url.Content("~/Imagenes/sin-perfil.jpg");
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Control PNP – Consulta y Registro</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/Style/inicio-styles.css" asp-append-version="true" />
+    <style>
+        /* ============================================================
+                                               VARIABLES PRINCIPALES DE ESTILO
+                               ============================================================ */
+        :root {
+            --pnp-green: #00471B;
+            --pnp-green-600: #007A33;
+            --pnp-green-700: #003715;
+            --pnp-gold: #FFD700;
+            --panel-w-sm: 200px; /* login - móvil */
+            --panel-w-md: 380px; /* login - base */
+            --panel-w-lg: 360px; /* login - desktop */
+
+            --content-w: 980px;
+            /* Anchos específicos de modales funcionales */
+            --mov-w: 320px; /* Movimientos (más angosto) */
+            --regret-w: 340px; /* Registrar / Retorno (angosto) */
+            /* Alturas para barra de servicio y navbar fijo */
+            --service-h: 4px;
+            --header-h: 56px;
+        }
+
+        /* ============================================================
+                                               BASE TIPOGRAFÍA Y CONTENEDORES
+                               ============================================================ */
+        body {
+            font-family: "Inter", system-ui, Segoe UI, Roboto, Arial, sans-serif;
+        }
+
+        .app-wrap {
+            padding-top: 1rem;
+            padding-bottom: 2rem;
+        }
+
+        .search-card {
+            border-radius: 1rem;
+            max-width: var(--content-w);
+            margin-inline: auto;
+        }
+
+            .search-card .card-body {
+                max-width: 100%;
+                margin-inline: auto;
+                padding-left: .85rem;
+                padding-right: .85rem;
+                /* IMPORTANTE: sin overflow-x para que nada se corte */
+            }
+
+        #resultCard {
+            max-width: var(--content-w);
+            margin-inline: auto;
+        }
+
+            #resultCard .card-body {
+                max-width: 100%;
+                margin-inline: auto;
+                padding-left: .85rem;
+                padding-right: .85rem;
+                font-size: .94rem;
+            }
+
+        @@media (max-width: 992px) {
+            .search-card, #resultCard
+
+        {
+            max-width: 100%;
+        }
+
+        }
+
+        .result-photo {
+            width: 96px;
+            height: 96px;
+            object-fit: cover;
+            border-radius: .5rem;
+            border: 1px solid rgba(0, 0, 0, .1);
+        }
+
+        .muted-hint,
+        .footer-note {
+            color: #6b7280;
+            font-size: .85rem;
+        }
+
+        #movPendWrap .table,
+        #cyclesWrap .table,
+        #openAsisWrap .table,
+        #movTodayWrap .table {
+            font-size: .80rem;
+        }
+
+            #movPendWrap .table td,
+            #movPendWrap .table th,
+            #cyclesWrap .table td,
+            #cyclesWrap .table th,
+            #openAsisWrap .table td,
+            #openAsisWrap .table th,
+            #movTodayWrap .table td,
+            #movTodayWrap .table th {
+                padding: .25rem .5rem;
+            }
+
+        .section-block {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, .06);
+            border-radius: .75rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+            padding: .75rem;
+            margin-top: .5rem;
+        }
+
+        .result-top {
+            display: grid;
+            grid-template-columns: 110px 1fr auto;
+            gap: .5rem 1rem;
+            align-items: start;
+        }
+
+        .row-ident {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: .45rem;
+        }
+
+            .row-ident .nombre-strong {
+                font-weight: 800;
+                font-size: 1.05rem;
+                line-height: 1.2;
+            }
+
+        .row-unidad {
+            color: #6b7280;
+            font-size: .9rem;
+        }
+
+        .actions-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: .35rem;
+            min-width: 260px;
+        }
+
+        .result-actions-top {
+            display: none;
+        }
+
+            .result-actions-top.show {
+                display: flex;
+                justify-content: flex-end;
+                gap: .5rem;
+                flex-wrap: wrap;
+            }
+
+        /* badge de “Hoy ya registrada” */
+        #okHoy {
+            margin-top: .10rem;
+            text-align: right;
+        }
+
+        /* Responsive del bloque superior del resultado */
+        @@media (max-width: 576.98px) {
+            .result-top
+
+        {
+            grid-template-columns: 1fr;
+        }
+
+        .actions-stack {
+            align-items: flex-start;
+            min-width: auto;
+            width: 100%;
+        }
+
+        #okHoy {
+            text-align: left;
+        }
+
+        }
+
+        /* ============================================================
+                                               BOTONES INSTITUCIONALES
+                               ============================================================ */
+        .btn-pnp {
+            background: linear-gradient(180deg, #0aa351, #067a3c);
+            border: 1px solid #056b35;
+            color: #fff;
+            font-weight: 700;
+        }
+
+            .btn-pnp:hover {
+                filter: saturate(1.05) brightness(1.03);
+            }
+
+        .btn-outline-pnp {
+            border: 1px solid var(--pnp-green-600);
+            color: var(--pnp-green-700);
+            background: #fff;
+        }
+
+            .btn-outline-pnp:hover {
+                background: rgba(0, 122, 51, .06);
+            }
+
+        .btn-pnp-salida {
+            background: linear-gradient(180deg, #ff7a45, #d84a17);
+            border: 1px solid #b13d14;
+            color: #fff;
+            font-weight: 800;
+            border-radius: .5rem;
+            box-shadow: 0 2px 6px rgba(216, 74, 23, .25);
+        }
+
+            .btn-pnp-salida:hover {
+                filter: brightness(1.05);
+                box-shadow: 0 0 10px rgba(216, 74, 23, .35);
+            }
+
+        .btn-pnp-mov {
+            background: linear-gradient(180deg, #0d8bd7, #0869ab);
+            border: 1px solid #065789;
+            color: #fff;
+            font-weight: 800;
+            border-radius: .5rem;
+            box-shadow: 0 2px 6px rgba(8, 105, 171, .25);
+        }
+
+            .btn-pnp-mov:hover {
+                filter: brightness(1.06);
+                box-shadow: 0 0 10px rgba(8, 105, 171, .35);
+            }
+
+        .btn-pnp-retorno {
+            background: linear-gradient(180deg, #1e90ff, #0069c0);
+            border: 1px solid #005aa0;
+            color: #fff;
+            font-weight: 800;
+            border-radius: .5rem;
+            box-shadow: 0 2px 6px rgba(0, 105, 192, .25);
+        }
+
+            .btn-pnp-retorno:hover {
+                filter: brightness(1.08);
+                box-shadow: 0 0 10px rgba(0, 105, 192, .35);
+            }
+
+        /* ============================================================
+                                               NAVBAR / BRAND Y BOTÓN LOGIN
+                               ============================================================ */
+        .navbar .brand small {
+            color: #e8d88f !important;
+            font-weight: 900;
+            letter-spacing: .02em;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, .35);
+        }
+
+        .navbar .brand span {
+            color: #fff;
+            font-weight: 900;
+            letter-spacing: .02em;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, .35);
+            font-size: .6rem;
+        }
+
+        .navbar .menu-link {
+            color: #e8f0ea;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: .85rem;
+            padding: .20rem .60rem;
+            border-radius: .5rem;
+            transition: .15s;
+            border: 1px solid transparent;
+        }
+
+            .navbar .menu-link:hover,
+            .navbar .menu-link:focus-visible {
+                color: #fff;
+                background: rgba(255, 255, 255, .15);
+                border-color: transparent;
+                box-shadow: none;
+                text-decoration: none;
+            }
+
+        /* Botón “Iniciar sesión” estilo borde blanco */
+        #btnAbrirLogin,
+        #btnAbrirLogin:link,
+        #btnAbrirLogin:visited,
+        #btnAbrirLogin:hover,
+        #btnAbrirLogin:focus,
+        #btnAbrirLogin:active,
+        .navbar #btnAbrirLogin {
+            background: none !important;
+            background-image: none !important;
+            background-color: transparent !important;
+            border: 1px solid rgba(255, 255, 255, .25) !important;
+            color: #e8f0ea !important;
+            box-shadow: none !important;
+            filter: none !important;
+        }
+
+        #btnAbrirLogin {
+            position: relative;
+            overflow: hidden;
+            transition: all .25s ease-in-out;
+            border-radius: .5rem;
+            font-weight: 700;
+        }
+
+            #btnAbrirLogin::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: -75%;
+                width: 50%;
+                height: 100%;
+                background: rgba(255, 255, 255, .2);
+                transform: skewX(-25deg);
+                transition: all .5s ease;
+                pointer-events: none;
+            }
+
+            #btnAbrirLogin:hover::before {
+                left: 125%;
+            }
+
+            #btnAbrirLogin:hover {
+                transform: scale(1.04);
+                box-shadow: 0 0 8px rgba(255, 255, 255, .2);
+                color: #fff;
+                border-color: rgba(255, 255, 255, .4);
+            }
+
+        /* ============================================================
+                                               TABLAS / TOGGLES / FEEDBACK
+                               ============================================================ */
+        #openAsisWrap thead {
+            background-color: var(--bs-warning-bg) !important;
+        }
+
+        #movPendWrap thead {
+            background-color: var(--bs-info-bg) !important;
+        }
+
+        .toggle-line {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+            .toggle-line .counter-pill {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: .1rem .5rem;
+                border-radius: 9999px;
+                font-weight: 700;
+                border: 1px solid rgba(0, 0, 0, .08);
+                background: #f8f9fa;
+            }
+
+            .toggle-line:hover {
+                filter: brightness(.98);
+            }
+
+        .invalid-feedback {
+            font-size: .8rem;
+            margin-top: .15rem;
+        }
+
+        #movTodayWrap .table {
+            font-size: .78rem;
+        }
+
+            #movTodayWrap .table td,
+            #movTodayWrap .table th {
+                padding: .20rem .35rem;
+            }
+
+        #movTodayWrap .nowrap {
+            white-space: nowrap;
+        }
+
+        #movTodayWrap th.w-time,
+        #movTodayWrap td.w-time {
+            width: 86px;
+        }
+
+        #movTodayWrap th.w-mid,
+        #movTodayWrap td.w-mid {
+            width: 120px;
+        }
+
+        #movTodayWrap th.w-narrow,
+        #movTodayWrap td.w-narrow {
+            width: 70px;
+            text-align: center;
+        }
+
+        .force-uppercase,
+        .force-uppercase::placeholder {
+            text-transform: uppercase;
+        }
+
+        /* ============================================================
+                                               MODALES — CABECERA UNIFICADA
+                               ============================================================ */
+        .modal-login .modal-header,
+        #movModal .modal-header,
+        #regModal .modal-header,
+        #retModal .modal-header {
+            background: linear-gradient(90deg, #002e12, #004018) !important;
+            border-bottom: 3px solid var(--pnp-gold) !important;
+            color: #fff !important;
+            padding: .40rem .65rem !important;
+            display: flex;
+            align-items: center;
+            gap: .45rem;
+        }
+
+        .modal-login .modal-title,
+        #movModal .modal-title,
+        #regModal .modal-title,
+        #retModal .modal-title {
+            color: #fff !important;
+            font-weight: 700;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+            font-size: .75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            margin: 0;
+        }
+
+        .modal-login .btn-close,
+        #movModal .btn-close,
+        #regModal .btn-close,
+        #retModal .btn-close {
+            filter: invert(1) brightness(240%);
+            opacity: .9;
+        }
+
+        /* ============================================================
+                                               MODAL LOGIN - DIMENSIONES
+                               ============================================================ */
+        .modal-login .modal-dialog {
+            max-width: var(--panel-w-md) !important;
+            margin: .60rem auto !important;
+        }
+
+        @@media (min-width: 768px) {
+            .modal-login .modal-dialog
+
+        {
+            max-width: var(--panel-w-lg) !important;
+        }
+
+        }
+
+        @@media (max-width: 575.98px) {
+            .modal-login .modal-dialog
+
+        {
+            max-width: var(--panel-w-sm) !important;
+        }
+
+        }
+
+        .modal-login .modal-content {
+            background: #fff;
+            border-radius: .7rem;
+            border: 1px solid rgba(0, 0, 0, .08);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .16) !important;
+            display: flex;
+            flex-direction: column;
+            max-height: 80vh !important;
+            height: 450px;
+        }
+
+        /* ============================================================
+                                               MODAL MOVIMIENTOS
+                               ============================================================ */
+        #movModal .modal-dialog {
+            max-width: var(--mov-w) !important;
+            margin: .5rem auto !important;
+        }
+
+        #movModal .modal-content {
+            border-radius: .6rem;
+            max-height: 75vh;
+        }
+
+        #movModal .form-label {
+            margin-bottom: .2rem;
+            font-weight: 600;
+            color: #0f172a;
+            font-size: .85rem;
+        }
+
+        #movModal .input-group-text {
+            font-size: .8rem;
+            padding: .25rem .5rem;
+        }
+
+        #movModal .form-control,
+        #movModal .form-select {
+            font-size: .8rem;
+            padding: .3rem .45rem;
+            line-height: 1.2;
+        }
+
+        #Mov_IdPersonal {
+            display: none;
+        }
+
+        #Mov_PersonalDisplay[readonly] {
+            background: #fff;
+        }
+
+        /* ============================================================
+                                               MODALES REGISTRAR y RETORNO
+                               ============================================================ */
+        #regModal .modal-dialog,
+        #retModal .modal-dialog {
+            max-width: var(--regret-w) !important;
+            margin: .5rem auto !important;
+        }
+
+        #regModal .modal-content,
+        #retModal .modal-content {
+            border-radius: .6rem;
+            max-height: 75vh;
+        }
+
+        #regModal .form-label,
+        #retModal .form-label {
+            margin-bottom: .2rem;
+            font-weight: 600;
+            color: #0f172a;
+            font-size: .85rem;
+        }
+
+        #regModal .input-group-text,
+        #retModal .input-group-text {
+            font-size: .8rem;
+            padding: .25rem .5rem;
+        }
+
+        #regModal .form-control,
+        #regModal .form-select,
+        #retModal .form-control,
+        #retModal .form-select {
+            font-size: .8rem;
+            padding: .3rem .45rem;
+            line-height: 1.2;
+        }
+
+        #Ret_PersonalDisplay[readonly] {
+            background: #fff;
+        }
+
+        /* ============================================================
+                                               MODAL ESTADO (mensajes)
+                               ============================================================ */
+        #statusModal .modal-dialog {
+            max-width: 180px;
+        }
+
+        #statusModal .modal-content {
+            border-left: 6px solid transparent;
+        }
+
+        #statusModal .status-ok {
+            border-left-color: #198754;
+        }
+
+        #statusModal .status-late {
+            border-left-color: #dc3545;
+        }
+
+        #statusModal .status-info {
+            border-left-color: #0d6efd;
+        }
+
+        #statusModal .no-header .modal-header {
+            display: none;
+        }
+
+        #statusModal .no-header .modal-body {
+            padding-top: 1rem;
+        }
+
+        #statusModal .success-center {
+            text-align: center;
+        }
+
+            #statusModal .success-center .icon {
+                font-size: 40px;
+                line-height: 1;
+                margin-bottom: .5rem;
+            }
+
+        /* ============================================================
+                                               LAYOUT: SCROLL ÁREA FIJA
+                               ============================================================ */
+        .service-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--service-h);
+            z-index: 1051;
+        }
+
+        .navbar.sticky-top {
+            position: fixed;
+            top: var(--service-h);
+            left: 0;
+            right: 0;
+            height: var(--header-h);
+            min-height: var(--header-h);
+            z-index: 1050;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(90deg, #004018, #002e12);
+            border-bottom: 3px solid var(--pnp-gold);
+        }
+
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .main-scroll-area {
+            position: absolute;
+            top: calc(var(--service-h) + var(--header-h));
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            overscroll-behavior: contain;
+            background-color: #f8faf9;
+        }
+
+            .main-scroll-area::-webkit-scrollbar {
+                width: 10px;
+            }
+
+            .main-scroll-area::-webkit-scrollbar-thumb {
+                background-color: rgba(0, 0, 0, .25);
+                border-radius: 4px;
+            }
+
+        /* ============================================================
+                                               Imagen institucional
+                               ============================================================ */
+        .pnp-fondo {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pnp-fondo-img {
+            max-width: 740px;
+            height: auto;
+            opacity: 0.9;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .1);
+            transition: transform .3s ease, opacity .3s ease;
+        }
+
+            .pnp-fondo-img:hover {
+                transform: scale(1.03);
+                opacity: 1;
+            }
+
+        /* ============================================================
+                              BASE Y RESPONSIVE – Sección: Criterio / Valor / Huella
+                               ============================================================ */
+
+        /* Tamaño base (pantallas grandes) */
+        .form-line .form-label {
+            font-size: .90rem;
+        }
+
+        .form-line .input-group-text {
+            font-size: .90rem;
+            padding: .35rem .55rem;
+        }
+
+        .form-line .form-control,
+        .form-line .form-select {
+            font-size: .92rem;
+            padding: .45rem .65rem;
+        }
+
+        /* Quitar márgenes negativos de la row dentro del card
+                               y ajustar padding para que nada se salga a los lados */
+        .search-card .card-body .form-line {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+
+            .search-card .card-body .form-line > .col-12 {
+                padding-left: .25rem !important;
+                padding-right: .25rem !important;
+            }
+
+        /* ====================== */
+        /*  TABLET 992px → 768px  */
+        /* ====================== */
+        @@media (max-width: 991.98px) {
+            : root
+
+        {
+            --content-w: 100%;
+        }
+
+        .app-wrap {
+            padding-top: .75rem;
+            padding-bottom: 1rem;
+        }
+
+        .search-card {
+            margin-inline: .4rem;
+        }
+
+            .search-card .card-body {
+                padding-left: .55rem;
+                padding-right: .55rem;
+                padding-top: .65rem;
+                padding-bottom: .65rem;
+            }
+
+        .form-line {
+            row-gap: .45rem;
+        }
+
+            .form-line .form-label {
+                font-size: .82rem;
+                margin-bottom: .15rem;
+            }
+
+            .form-line .input-group-text {
+                font-size: .82rem;
+                padding: .28rem .45rem;
+            }
+
+            .form-line .form-control,
+            .form-line .form-select {
+                font-size: .84rem;
+                padding: .35rem .50rem;
+            }
+
+            /* Evita que icono + input se rompan */
+            .form-line .input-group {
+                flex-wrap: nowrap !important;
+            }
+
+            /* Cada bloque ocupa 100% (se apilan) */
+            .form-line > .col-12 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+        .footer-note {
+            font-size: .78rem;
+        }
+
+        }
+
+        /* ====================== */
+        /*  MOBILE 768px → 480px  */
+        /* ====================== */
+        @@media (max-width: 768px) {
+            .form-line
+
+        {
+            row-gap: .45rem;
+        }
+
+        .form-line .form-label {
+            font-size: .78rem;
+        }
+
+        .form-line .input-group-text {
+            font-size: .78rem;
+            padding: .22rem .35rem;
+        }
+
+        .form-line .form-control,
+        .form-line .form-select {
+            font-size: .80rem;
+            padding: .28rem .40rem;
+        }
+
+        }
+
+        @@media (max-width: 480px) {
+            .form-line .form-label
+
+        {
+            font-size: .74rem;
+        }
+
+        .form-line .input-group-text {
+            font-size: .74rem;
+            padding: .18rem .30rem;
+        }
+
+        .form-line .form-control,
+        .form-line .form-select {
+            font-size: .78rem;
+            padding: .24rem .35rem;
+        }
+
+        }
+    </style>
+
+</head>
+<body>
+    <!-- Barra superior fija -->
+    <div class="service-bar"></div>
+
+    <!-- Encabezado fijo -->
+    <nav class="navbar navbar-dark sticky-top">
+        <div class="container py-0">
+            <div class="d-flex align-items-center gap-2">
+                <img src="~/Imagenes/Escudo.png" alt="PNP"
+                     style="width:36px;height:auto;margin-left:-40px;"
+                     class="rounded-2 border">
+                <div class="brand">
+                    <small>POLICÍA NACIONAL DEL PERÚ</small>
+                    <div class="d-flex align-items-center gap-2">
+                        <span>SISTEMA DE CONTROL DE ASISTENCIA</span>
+                        <span class="badge rounded-pill text-bg-dark border border-warning-subtle"></span>
+                    </div>
+                </div>
+            </div>
+            <a href="javascript:void(0)" id="btnAbrirLogin" class="menu-link">
+                <i class="fa-solid fa-right-to-bracket me-1"></i> Iniciar sesión
+            </a>
+        </div>
+    </nav>
+
+    <!-- 🔹 Área desplazable: todo lo que va debajo del header -->
+    <div class="main-scroll-area">
+        <main class="container app-wrap">
+            <div class="card search-card rounded-4">
+                <div class="card-body">
+                    <form id="buscadorForm" autocomplete="off">
+                        @Html.AntiForgeryToken()
+                        <div class="row g-2 align-items-end form-line">
+                            <div class="col-12">
+                                <label class="form-label">Criterio</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-shield-halved"></i></span>
+                                    <select id="criterio" class="form-select" required>
+                                        <option value="cip" selected>Por CIP</option>
+                                        <option value="huella">Por Huella</option>
+                                    </select>
+                                </div>
+                                <div class="muted-hint">Elige el método de búsqueda.</div>
+                            </div>
+
+                            <div class="col-12" id="valorWrap">
+                                <label class="form-label">Valor</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-id-badge"></i></span>
+                                    <input id="valor" type="text" class="form-control" placeholder="CIP (8 dígitos)" inputmode="numeric" maxlength="8" />
+                                </div>
+                                <div class="muted-hint">Ingresa el número CIP .</div>
+                            </div>
+
+
+                            <div class="col-12 d-none" id="huellaWrap">
+                                <label class="form-label">Huella digital</label>
+                                <div class="d-flex gap-2 flex-wrap align-items-center">
+                                    <button type="button" id="btnCapturarHuella" class="btn btn-outline-secondary">
+                                        <i class="fa-solid fa-fingerprint"></i> Capturar huella
+                                    </button>
+                                    <span id="huellaEstado" class="badge text-bg-light border">Sin capturar</span>
+                                </div>
+                                <input type="hidden" id="huellaBase64" />
+                            </div>
+
+                            <!-- Botón NUEVO (en su propia fila, alineado a la derecha, dentro del contenedor) -->
+                            <div class="col-12">
+                                <div class="d-flex justify-content-md-end justify-content-start mt-2">
+                                    <button type="button" id="btnNuevo" class="btn btn-sm btn-oval-gold px-4">
+                                        <i class="fa-solid fa-broom me-1"></i> Nuevo
+                                    </button>
+                                </div>
+                            </div>
+
+
+                    </form>
+                </div>
+                <div id="msgBox" class="mt-2" aria-live="polite"></div>
+
+                <!-- === Resultado === -->
+                <div id="resultCard" class="card mt-3 d-none">
+                    <div class="card-body">
+
+                        <!-- Cabecera con acciones a la derecha -->
+                        <div class="result-top">
+                            <img id="resFoto" class="result-photo" src="@placeholder" alt="Foto"
+                                 onerror="this.onerror=null;this.src='@placeholder';">
+
+                            <div class="result-meta">
+                                <div class="row-ident">
+                                    <span class="badge bg-light text-dark border" id="resGrado">—</span>
+                                </div>
+                                <div class="row-ident">
+                                    <span class="nombre-strong" id="resNombre">—</span>
+                                </div>
+                                <div class="row-unidad" id="resUnidad">—</div>
+                            </div>
+
+                            <div class="actions-stack">
+                                <div id="accionesTop" class="result-actions-top">
+                                    <button id="btnRegistrarAsistencia" class="btn btn-success btn-sm d-none">
+                                        <i class="fa-solid fa-check"></i> Registrar asistencia
+                                    </button>
+
+                                    <div id="accionesPostEntrada" class="btn-group d-none">
+                                        <button id="btnRegistrarSalida" class="btn btn-pnp-salida btn-sm">
+                                            <i class="fa-solid fa-person-walking-arrow-right me-1"></i> Registrar salida
+                                        </button>
+                                        <button id="btnShowMovModal" class="btn btn-pnp-mov btn-sm d-none">
+                                            <i class="fa-solid fa-route me-1"></i> Registrar movimiento
+                                        </button>
+                                    </div>
+
+                                    <button id="btnRegistrarRetorno" class="btn btn-pnp-retorno btn-sm d-none">
+                                        <i class="fa-solid fa-person-walking-arrow-loop-left me-1"></i> Registrar retorno
+                                    </button>
+                                </div>
+
+                                <span id="okHoy" class="badge text-bg-light border d-none">
+                                    <i class="fa-solid fa-circle-check me-1"></i> Hoy ya registrada
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- 1) Movimientos pendientes -->
+                        <div id="movPendWrap" class="mt-3 d-none section-block">
+                            <div class="fw-semibold mb-1"><i class="fa-solid fa-route me-1"></i> Movimientos pendientes de retorno</div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered align-middle mb-0">
+                                    <thead class="table-info">
+                                        <tr>
+                                            <th><i class="fa-regular fa-clock me-1"></i> Salida</th>
+                                            <th class="text-center"><i class="fa-solid fa-hourglass-half me-1"></i> Transcurrido</th>
+                                            <th><i class="fa-solid fa-comment-dots me-1"></i> Motivo</th>
+                                            <th><i class="fa-solid fa-user-check me-1"></i> Autoriza</th>
+                                            <th><i class="fa-solid fa-location-dot me-1"></i> Destino</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="movPendTbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 2) Asistencias abiertas -->
+                        <div id="openAsisWrap" class="mt-3 d-none section-block">
+                            <div class="fw-semibold mb-1"><i class="fa-regular fa-bell me-1"></i> Asistencias abiertas (pendientes de registrar salida)</div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered align-middle mb-0">
+                                    <thead class="table-warning">
+                                        <tr>
+                                            <th><i class="fa-regular fa-clock me-1"></i> Ingreso</th>
+                                            <th class="text-center"><i class="fa-solid fa-calendar-day me-1"></i> ¿Es de hoy?</th>
+                                            <th class="text-center"><i class="fa-solid fa-bell me-1"></i> Llegada</th>
+                                            <th class="text-center"><i class="fa-solid fa-hourglass-half me-1"></i> Transcurrido</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="openAsisTbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Toggle: Asistencias del día -->
+                        <div id="hoyCountLine" class="mt-2 d-none">
+                            <span class="toggle-line" id="toggleCyclesBtn" title="Mostrar/ocultar registros de hoy">
+                                <i class="fa-regular fa-calendar-check"></i>
+                                <strong>Asistencias del día :</strong>
+                                <span id="hoyCount" class="counter-pill">0</span>
+                                <span id="toggleHint" class="text-muted">(clic para ver)</span>
+                            </span>
+                        </div>
+
+                        <!-- 3) Registros de hoy (asistencias) -->
+                        <div id="cyclesWrap" class="mt-3 d-none section-block">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th><i class="fa-regular fa-clock me-1"></i> Ingreso</th>
+                                            <th><i class="fa-regular fa-clock me-1"></i> Salida</th>
+                                            <th class="text-center"><i class="fa-solid fa-hourglass-half me-1"></i> Llegada</th>
+                                            <th class="text-center"><i class="fa-solid fa-check-double me-1"></i> Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cyclesTbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Toggle: Movimientos del día -->
+                        <div id="movTodayCountLine" class="mt-2 d-none">
+                            <span class="toggle-line" id="toggleMovTodayBtn" title="Mostrar/ocultar movimientos de hoy">
+                                <i class="fa-solid fa-route"></i>
+                                <strong>Movimientos del día :</strong>
+                                <span id="movTodayCount" class="counter-pill">0</span>
+                                <span id="toggleMovTodayHint" class="text-muted">(clic para ver)</span>
+                            </span>
+                        </div>
+
+                        <!-- 4) Movimientos del día -->
+                        <div id="movTodayWrap" class="mt-3 d-none section-block">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="w-time"><i class="fa-regular fa-clock me-1"></i> Salida</th>
+                                            <th class="w-time"><i class="fa-regular fa-clock me-1"></i> Retorno</th>
+                                            <th class="w-mid"><i class="fa-solid fa-comment-dots me-1"></i> Motivo</th>
+                                            <th class="w-mid"><i class="fa-solid fa-user-check me-1"></i> Autoriza</th>
+                                            <th class="w-mid"><i class="fa-solid fa-location-dot me-1"></i> Destino</th>
+                                            <th class="w-narrow"><i class="fa-solid fa-hourglass-half me-1"></i> Transcurrido</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="movTodayTbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+            </div>
+    </div>
+    </main>
+    <!-- Imagen institucional debajo del buscador -->
+    <div class="pnp-fondo text-center my-3">
+        <img src="~/Imagenes/Fondo.jpg" alt="Fondo institucional PNP" class="pnp-fondo-img">
+    </div>
+
+    <div id="msgBox" class="mt-2" aria-live="polite"></div>
+    <!-- ================== Modales ================== -->
+    <!-- Modal Login -->
+    <div class="modal fade modal-login" id="loginModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content auth-shell">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fa-solid fa-right-to-bracket me-1"></i> Iniciar sesión
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <iframe id="loginFrame"
+                            title="Login"
+                            src="about:blank"
+                            style="border:0;width:100%;height:430px;display:block;border-radius:0 0 18px 18px;"
+                            sandbox="allow-same-origin allow-scripts allow-forms allow-top-navigation-by-user-activation">
+                    </iframe>
+                </div>
+                <div class="modal-footer d-none"></div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* ===== Modal Login compacto, tipo tarjeta ===== */
+
+        .modal-login .modal-dialog {
+            max-width: 460px;
+            margin: 1.25rem auto;
+        }
+
+        .modal-login .auth-shell {
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(15, 35, 20, .18);
+            background: radial-gradient(circle at top left, rgba(0, 122, 51, .12), transparent 55%), radial-gradient(circle at bottom right, rgba(212, 175, 55, .18), transparent 55%), #ffffff;
+            box-shadow: 0 18px 46px rgba(0, 0, 0, .35), 0 0 0 1px rgba(255, 255, 255, .85) inset;
+        }
+
+        .modal-login .modal-header {
+            padding: .5rem .9rem;
+            border-bottom: 1px solid rgba(0, 0, 0, .06);
+            background: linear-gradient(120deg, rgba(0, 71, 27, .98), rgba(0, 122, 51, .96), rgba(212, 175, 55, .98));
+            color: #fdfdfd;
+        }
+
+        .modal-login .modal-title {
+            font-size: .9rem;
+            font-weight: 700;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+        }
+
+        .modal-login .btn-close-white {
+            filter: invert(1) grayscale(100%);
+            opacity: .92;
+        }
+
+            .modal-login .btn-close-white:hover {
+                opacity: 1;
+            }
+
+        .modal-login .modal-body {
+            padding: 0;
+            background: transparent;
+        }
+
+        /* Ajuste general para pantallas pequeñas */
+        @@media (max-width: 576px) {
+            .modal-login .modal-dialog {
+                max-width: 100%;
+                margin: .75rem auto;
+            }
+
+            #loginFrame {
+                height: 410px;
+            }
+        }
+    </style>
+
+    <script>
+        // Carga perezosa del login dentro del iframe
+        (function () {
+            const loginModalEl = document.getElementById('loginModal');
+            if (!loginModalEl) return;
+
+            loginModalEl.addEventListener('show.bs.modal', function () {
+                const frame = document.getElementById('loginFrame');
+                if (frame && !frame.dataset.loaded) {
+                    frame.src = '@Url.Action("Login", "Acceso")';
+                    frame.dataset.loaded = "1";
+                }
+            });
+        })();
+    </script>
+
+
+    <!-- Modal Movimiento -->
+    <div class="modal fade" id="movModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-route me-2"></i> Registrar movimiento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="mb-2">
+                        <label class="form-label" for="Mov_PersonalDisplay">Personal <span class="text-danger">*</span></label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="fas fa-users"></i></span>
+                            <input id="Mov_PersonalDisplay" class="form-control" readonly value="Seleccionar..." />
+                            <select id="Mov_IdPersonal" class="form-select form-select-sm" required>
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                        <div class="invalid-feedback" id="err_Mov_IdPersonal"></div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label" for="Mov_AutorizaSelect">Autoriza <span class="text-danger">*</span></label>
+                        <div class="input-group input-group-sm mb-1">
+                            <span class="input-group-text"><i class="fas fa-user-check"></i></span>
+                            <select id="Mov_AutorizaSelect" class="form-select form-select-sm" data-dropup-auto="false">
+                                <option value="">Seleccionar</option>
+                                <option value="ORDEN SUPERIOR">ORDEN SUPERIOR</option>
+                                <option value="OTROS">OTROS</option>
+                            </select>
+                        </div>
+                        <div class="input-group input-group-sm d-none" id="Mov_AutorizaOtrosGroup">
+                            <span class="input-group-text"><i class="fas fa-pen-to-square"></i></span>
+                            <input id="Mov_Autoriza" class="form-control force-uppercase" placeholder="Especifique quién autoriza" autocomplete="off" />
+                        </div>
+                        <div class="invalid-feedback" id="err_Mov_Autoriza"></div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label" for="Mov_DestinoSelect">Destino</label>
+                        <div class="input-group input-group-sm mb-1">
+                            <span class="input-group-text"><i class="fas fa-location-dot"></i></span>
+                            <select id="Mov_DestinoSelect" class="form-select form-select-sm" data-dropup-auto="false">
+                                <option value="">Seleccionar Destino</option>
+                                <option>FISCALIA</option>
+                                <option>FECOR</option>
+                                <option>DIVINCRI CAJAMARCA</option>
+                                <option>FISCALIA DE FAMILIA</option>
+                                <option>COM. SAN JOSE</option>
+                                <option>REGION POLIICAL CAJAMARCA</option>
+                                <option>SECPIRV</option>
+                                <option>ARPOLJUD</option>
+                                <option>PENAL CAJAMARCA</option>
+                                <option>COM. BAÑOS DEL INCA</option>
+                                <option>OFAD</option>
+                                <option>DIVREINT</option>
+                                <option>COM. MOLLEPAMPA</option>
+                                <option>MUNICIPALIDA DE CAJAMARCA</option>
+                                <option>OTROS</option>
+                            </select>
+                        </div>
+                        <div class="input-group input-group-sm d-none" id="Mov_DestinoOtrosGroup">
+                            <span class="input-group-text"><i class="fas fa-pen-to-square"></i></span>
+                            <input id="Mov_Destino" class="form-control force-uppercase" placeholder="Especificar destino" autocomplete="off" />
+                        </div>
+                        <div class="invalid-feedback" id="err_Mov_Destino"></div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label" for="Mov_MotivoSelect">Motivo <span class="text-danger">*</span></label>
+                        <div class="input-group input-group-sm mb-1">
+                            <span class="input-group-text"><i class="fas fa-comment-dots"></i></span>
+                            <select id="Mov_MotivoSelect" class="form-select form-select-sm">
+                                <option value="">Seleccionar motivo</option>
+                                <option value="DILIGENCIAS">DILIGENCIAS</option>
+                                <option value="TRÁMITE DOCUMENTARIO">TRÁMITE DOCUMENTARIO</option>
+                                <option value="OTRAS">OTRAS</option>
+                            </select>
+                        </div>
+                        <div class="input-group input-group-sm d-none" id="Mov_MotivoOtrosGroup">
+                            <span class="input-group-text"><i class="fas fa-pen-to-square"></i></span>
+                            <input id="Mov_Motivo" class="form-control force-uppercase" placeholder="Especifique motivo" autocomplete="off" />
+                        </div>
+                        <div class="invalid-feedback" id="err_Mov_Motivo"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="Mov_Cancel" type="button" class="btn btn-outline-pnp" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-xmark me-1"></i> Cancelar
+                    </button>
+                    <button id="Mov_Save" type="button" class="btn btn-pnp">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Retorno -->
+    <div class="modal fade" id="retModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-person-walking-arrow-loop-left me-2"></i> Registrar retorno</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="Ret_PersonalDisplay">Personal <span class="text-danger">*</span></label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="fas fa-users"></i></span>
+                            <input id="Ret_PersonalDisplay" class="form-control" readonly value="—" />
+                            <select id="Ret_IdPersonal" class="form-select form-select-sm" required style="display:none;">
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                        <div class="invalid-feedback" id="err_Ret_IdPersonal"></div>
+                    </div>
+                    <div class="mb-1">
+                        <label class="form-label" for="Ret_Novedades">Novedades</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="fas fa-note-sticky"></i></span>
+                            <textarea id="Ret_Novedades" class="form-control force-uppercase" rows="3" placeholder="Novedades del retorno (opcional)" autocomplete="off"></textarea>
+                        </div>
+                        <div class="invalid-feedback" id="err_Ret_Novedades"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="Ret_Cancel" type="button" class="btn btn-outline-pnp" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-xmark me-1"></i> Cancelar
+                    </button>
+                    <button id="Ret_Save" type="button" class="btn btn-pnp">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Guardar retorno
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status modal -->
+    <div class="modal fade" id="statusModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-3">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="statusModalTitle">Estado</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body"><div id="statusModalBody">—</div></div>
+            </div>
+        </div>
+    </div>
+    </div> <!-- /main-scroll-area -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- ===== Script principal ===== -->
+    <script>
+        (function(){
+          // ===== Refs =====
+          const criterio=document.getElementById('criterio');
+          const valorWrap=document.getElementById('valorWrap');
+          const valor=document.getElementById('valor');
+          const huellaWrap=document.getElementById('huellaWrap');
+          const huellaEstado=document.getElementById('huellaEstado');
+          const huellaBase64=document.getElementById('huellaBase64');
+
+          const form=document.getElementById('buscadorForm');
+          const result=document.getElementById('resultCard');
+          const resFoto=document.getElementById('resFoto');
+          const resGrado=document.getElementById('resGrado');
+          const resNombre=document.getElementById('resNombre');
+          const resUnidad=document.getElementById('resUnidad');
+
+          const btnReg=document.getElementById('btnRegistrarAsistencia');
+          const okHoy=document.getElementById('okHoy');
+          const msgBox=document.getElementById('msgBox');
+          const btnNuevo=document.getElementById('btnNuevo');
+
+          const accionesTop=document.getElementById('accionesTop');
+          const accionesPostEntrada=document.getElementById('accionesPostEntrada');
+          const btnRegistrarSalida=document.getElementById('btnRegistrarSalida');
+          const btnRegistrarRetorno=document.getElementById('btnRegistrarRetorno');
+          const btnOpenMovModal=document.getElementById('btnShowMovModal');
+
+          const cyclesWrap=document.getElementById('cyclesWrap');
+          const cyclesTbody=document.getElementById('cyclesTbody');
+          const movPendWrap=document.getElementById('movPendWrap');
+          const movPendTbody=document.getElementById('movPendTbody');
+          const openAsisWrap=document.getElementById('openAsisWrap');
+          const openAsisTbody=document.getElementById('openAsisTbody');
+
+          // Toggles: Asistencias del día
+          const hoyCountLine=document.getElementById('hoyCountLine');
+          const hoyCount=document.getElementById('hoyCount');
+          const toggleCyclesBtn=document.getElementById('toggleCyclesBtn');
+          const toggleHint=document.getElementById('toggleHint');
+
+          // Toggles: Movimientos del día
+          const movTodayCountLine=document.getElementById('movTodayCountLine');
+          const movTodayCount=document.getElementById('movTodayCount');
+          const toggleMovTodayBtn=document.getElementById('toggleMovTodayBtn');
+          const toggleMovTodayHint=document.getElementById('toggleMovTodayHint');
+          const movTodayWrap=document.getElementById('movTodayWrap');
+          const movTodayTbody=document.getElementById('movTodayTbody');
+
+          if(toggleCyclesBtn){
+            toggleCyclesBtn.addEventListener('click', ()=>{
+              const hidden=cyclesWrap.classList.contains('d-none');
+              cyclesWrap.classList.toggle('d-none');
+              if(toggleHint) toggleHint.textContent = hidden ? '(clic para ocultar)' : '(clic para ver)';
+            });
+          }
+          if(toggleMovTodayBtn){
+            toggleMovTodayBtn.addEventListener('click', ()=>{
+              const hidden=movTodayWrap.classList.contains('d-none');
+              movTodayWrap.classList.toggle('d-none');
+              if(toggleMovTodayHint) toggleMovTodayHint.textContent = hidden ? '(clic para ocultar)' : '(clic para ver)';
+            });
+          }
+
+          // ===== Status modal util =====
+          const statusModalEl=document.getElementById('statusModal');
+          const statusModal = statusModalEl ? new bootstrap.Modal(statusModalEl) : null;
+          const statusTitle=document.getElementById('statusModalTitle');
+          const statusBody=document.getElementById('statusModalBody');
+          const statusContent=statusModalEl ? statusModalEl.querySelector('.modal-content'):null;
+          let statusTimer=null;
+
+          function fmtHMSFromSeconds(totalSeconds){
+            if(isNaN(totalSeconds)||totalSeconds<0) totalSeconds=0;
+            const h=Math.floor(totalSeconds/3600), m=Math.floor((totalSeconds%3600)/60), s=Math.floor(totalSeconds%60);
+            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+          }
+          function fmtElapsed(ms){
+            if(ms<0) ms=0; const sec=Math.floor(ms/1000);
+            const d=Math.floor(sec/86400), h=Math.floor((sec%86400)/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+            const hh=String(h).padStart(2,'0'), mm=String(m).padStart(2,'0'), ss=String(s).padStart(2,'0');
+            return d>0?`${d}d ${hh}:${mm}:${ss}`:`${hh}:${mm}:${ss}`;
+          }
+          function showStatusModal({title,html,type='info',autoCloseMs=1800}){
+            if(!statusModal) return;
+            statusModalEl.classList.remove('success-small');
+            if(statusContent){
+              statusContent.classList.remove('status-ok','status-late','status-info','no-header');
+              if(type==='success'){
+                statusContent.classList.add('status-ok','no-header'); statusModalEl.classList.add('success-small');
+                html=html?`<div class="success-center"><div class="icon text-success"><i class="fa-solid fa-circle-check"></i></div><div>${html}</div></div>`:
+                           `<div class="success-center"><div class="icon text-success"><i class="fa-solid fa-circle-check"></i></div><div class="fw-semibold">Operación realizada</div></div>`;
+              }else if(type==='danger'){
+                statusContent.classList.add('status-late','no-header'); statusModalEl.classList.add('success-small');
+                html=html?`<div class="success-center"><div class="icon text-danger"><i class="fa-solid fa-circle-check"></i></div><div>${html}</div></div>`:
+                           `<div class="success-center"><div class="icon text-danger"><i class="fa-solid fa-circle-check"></i></div><div class="fw-semibold">Aviso</div></div>`;
+              }else{
+                statusContent.classList.add('status-info');
+              }
+            }
+            statusTitle.textContent=(type==='success'||type==='danger')?'':(title||'Estado');
+            statusBody.innerHTML=html||'';
+            statusModal.show(); if(statusTimer){ clearTimeout(statusTimer); }
+            statusTimer=setTimeout(()=>statusModal.hide(),autoCloseMs);
+          }
+
+          // Mensajes
+          let msgTimer=null;
+          function setMsg(html,type='warning',autoMs=2500){
+            if(msgTimer){ clearTimeout(msgTimer); }
+            msgBox.innerHTML = html ? `<div class="alert alert-${type} mt-2 mb-0" role="status">${html}</div>` : '';
+            if(html && autoMs>0){ msgTimer=setTimeout(()=>{ msgBox.innerHTML=''; },autoMs); }
+          }
+          function modalAbierto(){ return !!document.querySelector('.modal.show'); }
+
+          function hideResult(){
+            result.classList.add('d-none');
+            accionesTop.classList.remove('show');
+            btnReg.classList.add('d-none');
+            okHoy.classList.add('d-none');
+            accionesPostEntrada.classList.add('d-none');
+            btnRegistrarRetorno.classList.add('d-none');
+            if(btnOpenMovModal) btnOpenMovModal.classList.add('d-none');
+            cyclesWrap.classList.add('d-none'); cyclesTbody.innerHTML='';
+            movPendWrap.classList.add('d-none'); movPendTbody.innerHTML='';
+            if(openAsisWrap) openAsisWrap.classList.add('d-none'); if(openAsisTbody) openAsisTbody.innerHTML='';
+            movTodayWrap.classList.add('d-none'); movTodayTbody.innerHTML='';
+            if(hoyCountLine) hoyCountLine.classList.add('d-none');
+            if(movTodayCountLine) movTodayCountLine.classList.add('d-none');
+            delete result.dataset.id;
+          }
+          function resetUI(){
+            if(criterio) criterio.value='cip';
+            if(valor){ valor.value=''; valor.placeholder='CIP (8 dígitos)'; valor.setAttribute('inputmode','numeric'); valor.setAttribute('maxlength','8'); }
+            if(huellaBase64) huellaBase64.value='';
+            if(huellaEstado){ huellaEstado.textContent='Sin capturar'; huellaEstado.classList.remove('bg-success','text-white'); }
+            if(huellaWrap) huellaWrap.classList.add('d-none');
+            if(valorWrap) valorWrap.classList.remove('d-none');
+            hideResult(); setMsg(''); if(valor) valor.focus();
+          }
+
+          // Inactividad (15 s)
+          let idleTimer=null; const IDLE_MS=15000; let lastMove=0;
+          function programarReset(){ clearTimeout(idleTimer); idleTimer=setTimeout(()=>{ if(!modalAbierto()) resetUI(); else programarReset(); }, IDLE_MS); }
+          function onActivity(e){ if(e.type==='mousemove'||e.type==='pointermove'){ const now=Date.now(); if(now-lastMove<200) return; lastMove=now; } programarReset(); }
+          ['mousemove','pointermove','mousedown','keydown','wheel','touchstart','touchmove','click'].forEach(ev=>document.addEventListener(ev,onActivity,{passive:true}));
+          programarReset(); const _reset=resetUI; resetUI=function(){ _reset(); programarReset(); }; if(btnNuevo) btnNuevo.addEventListener('click', resetUI);
+
+          // Criterio
+          if(criterio) criterio.addEventListener('change',()=>{
+            const v=criterio.value; hideResult();
+            if(v==='huella'){ if(valor) valor.value=''; valorWrap.classList.add('d-none'); huellaWrap.classList.remove('d-none'); setMsg(''); }
+            else{ huellaBase64.value=''; huellaEstado.textContent='Sin capturar'; huellaEstado.classList.remove('bg-success','text-white'); huellaWrap.classList.add('d-none'); valorWrap.classList.remove('d-none'); valor.focus(); }
+          });
+
+          // Captura huella (demo)
+               // Captura huella (demo)
+        const btnCap = document.getElementById('btnCapturarHuella');
+        if (btnCap) {
+            btnCap.addEventListener('click', async () => {
+                if (!huellaEstado || !huellaBase64) return;
+
+                huellaEstado.textContent = 'Capturando…';
+                huellaEstado.classList.remove('bg-success', 'text-white');
+
+                // Tomamos el token antiforgery para el POST
+                const token = (document.querySelector('input[name="__RequestVerificationToken"]') || {}).value || '';
+
+                try {
+                    const resp = await fetch('@Url.Action("CapturarKiosco", "Biometria")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token
+                        },
+                        body: '{}' // o datos adicionales si tu acción los necesita
+                    });
+
+                    if (!resp.ok) {
+                        throw new Error('HTTP ' + resp.status);
+                    }
+
+                    const json = await resp.json();
+
+                    // 🔹 ACEPTAR base64 o huellaBase64
+                    const b64 = (json && json.base64) || (json && json.huellaBase64) || '';
+
+                    if (!json || !json.success || !b64) {
+                        huellaEstado.textContent = 'Sin capturar';
+                        huellaEstado.classList.remove('bg-success', 'text-white');
+                        setMsg(json && json.message ? json.message : 'No se pudo capturar la huella.', 'danger');
+                        return;
+                    }
+
+                    // Guardar la huella en el input hidden
+                    huellaBase64.value = b64;
+
+                    // Estado visual
+                    huellaEstado.textContent = 'Huella capturada';
+                    huellaEstado.classList.add('bg-success', 'text-white');
+                    setMsg('');
+
+                    // Disparar búsqueda automática por huella
+                    await autoBuscar();
+
+                } catch (err) {
+                    console.error(err);
+                    huellaEstado.textContent = 'Sin capturar';
+                    huellaEstado.classList.remove('bg-success', 'text-white');
+                    setMsg('Error al capturar huella.', 'danger');
+                }
+            });
+        }
+
+
+          // Debounce CIP
+          let tDeb=null; const debounce=(fn,ms)=>(...args)=>{clearTimeout(tDeb); tDeb=setTimeout(()=>fn(...args),ms);};
+          if(valor){
+            valor.addEventListener('input',()=>{
+              valor.value=(valor.value||'').replace(/\D+/g,'').slice(0,8);
+              hideResult(); if(criterio && criterio.value==='cip') debouncedAutoBuscar();
+            });
+          }
+          const debouncedAutoBuscar=debounce(async()=>{ if(!criterio||criterio.value!=='cip') return; const v=(valor.value||'').trim(); if(v.length===8) await autoBuscar(); },350);
+          async function autoBuscar(){ await ejecutarBusqueda(); }
+          if(form) form.addEventListener('submit',e=>e.preventDefault());
+
+          // === Llegada: cálculo robusto ===
+          function _numOrNull(v){ const n = Number(v); return Number.isFinite(n) ? n : null; }
+          function _getLateInfo(row){
+            const onTime     = (typeof row.onTime === 'boolean') ? row.onTime : null;
+            const llegoTarde = (typeof row.llegoTarde === 'boolean') ? row.llegoTarde : null;
+
+            const sA = _numOrNull(row.lateSeconds);
+            const sB = _numOrNull(row.segundosTarde);
+            const mA = _numOrNull(row.minutesLate);
+            const mB = _numOrNull(row.minutosTarde);
+
+            let lateSeconds = null;
+            if(sA != null) lateSeconds = sA;
+            else if(sB != null) lateSeconds = sB;
+            else if(mA != null) lateSeconds = mA * 60;
+            else if(mB != null) lateSeconds = mB * 60;
+
+            let isLate = false;
+            if(onTime === false) isLate = true;
+            else if(llegoTarde === true) isLate = true;
+            else if(lateSeconds != null && lateSeconds > 0) isLate = true;
+
+            return { isLate, lateSeconds: lateSeconds || 0 };
+          }
+          function _fmtHMSFromSeconds(totalSeconds){
+            if (isNaN(totalSeconds) || totalSeconds < 0) totalSeconds = 0;
+            const h = Math.floor(totalSeconds/3600);
+            const m = Math.floor((totalSeconds%3600)/60);
+            const s = Math.floor(totalSeconds%60);
+            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+          }
+          function llegadaBadge(row){
+            const { isLate, lateSeconds } = _getLateInfo(row);
+            if (isLate){
+              return `<span class="badge text-bg-danger" title="CORTE 07:45">TARDE (${_fmtHMSFromSeconds(lateSeconds)})</span>`;
+            }
+            return `<span class="badge text-bg-success" title="CORTE 07:45">A TIEMPO</span>`;
+          }
+
+          // Tablas
+          function renderCyclesTable(rows){
+            const tbody=cyclesTbody; if(!tbody) return; tbody.innerHTML='';
+            if(!rows||!rows.length){ cyclesWrap.classList.add('d-none'); return; }
+            cyclesWrap.classList.add('d-none'); // inicia oculto (toggle)
+            rows.forEach(c=>{
+              const tr=document.createElement('tr');
+              tr.innerHTML=`<td>${c.ingresoStr||'—'}</td>
+                <td>${c.salidaStr||'—'}</td>
+                <td class="text-center">${llegadaBadge(c)}</td>
+                <td class="text-center">${c.abierta?'<span class="text-success fw-bold"><i class="fa-solid fa-door-closed me-1"></i>Abierta</span>':'<span class="text-secondary fw-semibold"><i class="fa-regular fa-circle-check me-1"></i>Cerrada</span>'}</td>`;
+              tbody.appendChild(tr);
+            });
+          }
+          let openAsisTimer=null;
+          function clearOpenAsisTimer(){ if(openAsisTimer){ clearInterval(openAsisTimer); openAsisTimer=null; } }
+          function renderOpenAsis(rows){
+            if(!openAsisWrap||!openAsisTbody) return;
+            openAsisTbody.innerHTML=''; clearOpenAsisTimer();
+            if(!rows||!rows.length){ openAsisWrap.classList.add('d-none'); return; }
+            openAsisWrap.classList.remove('d-none');
+            rows.forEach(a=>{
+              const tr=document.createElement('tr');
+              tr.innerHTML=`<td>${a.ingresoStr||'—'}</td>
+                <td class="text-center">${a.esDeHoy?'<span class="badge text-bg-success">Sí (hoy)</span>':'<span class="badge text-bg-danger">No (día anterior)</span>'}</td>
+                <td class="text-center">${llegadaBadge(a)}</td>
+                <td class="text-center"><span class="open-asis-elapsed" data-ingreso-utc="${a.ingresoUtcIso||''}">--:--:--</span></td>`;
+              openAsisTbody.appendChild(tr);
+            });
+            openAsisTimer=setInterval(()=>{
+              const now=Date.now();
+              document.querySelectorAll('#openAsisTbody .open-asis-elapsed').forEach(span=>{
+                const iso=span.getAttribute('data-ingreso-utc')||''; const t0=Date.parse(iso);
+                span.textContent=isNaN(t0)?'--:--:--':fmtElapsed(now-t0);
+              });
+              document.querySelectorAll('#movPendTbody .mov-elapsed').forEach(span=>{
+                const iso=span.getAttribute('data-salida-utc')||''; const t0=Date.parse(iso);
+                span.textContent=isNaN(t0)?'--:--:--':fmtElapsed(now-t0);
+              });
+            },1000);
+          }
+          function renderMovPend(rows){
+            const tbody=movPendTbody; if(!tbody) return; tbody.innerHTML='';
+            if(!rows||!rows.length){ movPendWrap.classList.add('d-none'); return; }
+            movPendWrap.classList.remove('d-none');
+            rows.forEach(m=>{
+              const tr=document.createElement('tr');
+              tr.innerHTML=`<td>${m.salidaStr||'—'}</td>
+                <td class="text-center"><span class="mov-elapsed" data-salida-utc="${m.salidaUtcIso||''}">--:--:--</span></td>
+                <td>${m.motivo||'—'}</td><td>${m.autoriza||'—'}</td><td>${m.destino||''}</td>`;
+              tbody.appendChild(tr);
+            });
+          }
+
+          // === Movimientos del día (Transcurrido con salida/retorno) ===
+          function renderMovToday(rows){
+            const tbody = movTodayTbody;
+            if(!tbody) return;
+            tbody.innerHTML = '';
+
+            if(!rows || !rows.length){
+              movTodayWrap.classList.add('d-none');
+              return;
+            }
+
+            // Tabla inicia oculta; se despliega con toggle
+            movTodayWrap.classList.add('d-none');
+
+            rows.forEach(m=>{
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+                <td class="w-time nowrap">${m.salidaStr || '—'}</td>
+                <td class="w-time nowrap">${m.retornoStr || '—'}</td>
+                <td class="w-mid">${m.motivo || '—'}</td>
+                <td class="w-mid">${m.autoriza || '—'}</td>
+                <td class="w-mid">${m.destino || ''}</td>
+                <td class="w-narrow text-center">
+                  <span class="movtoday-elapsed"
+                        data-salida-utc="${m.salidaUtcIso || ''}"
+                        data-retorno-utc="${m.retornoUtcIso || ''}">--:--:--</span>
+                </td>`;
+              tbody.appendChild(tr);
+            });
+
+            function updateMovTodayElapsed(){
+              const now = Date.now();
+              document.querySelectorAll('#movTodayTbody .movtoday-elapsed').forEach(span=>{
+                const sIso = span.getAttribute('data-salida-utc')  || '';
+                const rIso = span.getAttribute('data-retorno-utc') || '';
+                const ts = Date.parse(sIso);
+                const tr = rIso ? Date.parse(rIso) : NaN;
+                if(isNaN(ts)){ span.textContent = '--:--:--'; return; }
+                const endMs = !isNaN(tr) ? tr : now;
+                span.textContent = fmtElapsed(endMs - ts);
+              });
+            }
+            updateMovTodayElapsed();
+            setInterval(updateMovTodayElapsed, 1000);
+          }
+
+          // Buscar
+          async function ejecutarBusqueda(){
+            const crit=criterio ? criterio.value : 'cip';
+            if(crit==='cip'){ const v=(valor && valor.value || '').trim(); if(v.length!==8){ setMsg('El CIP debe tener 8 dígitos.','warning'); hideResult(); return; } }
+            else if(crit==='huella'){ if(!huellaBase64 || !huellaBase64.value){ setMsg('Primero captura la huella.','warning'); hideResult(); return; } }
+
+            setMsg('<i class="fa-solid fa-magnifying-glass me-1"></i> Buscando…','info',0);
+            const token=(document.querySelector('input[name="__RequestVerificationToken"]')||{}).value||'';
+            const payload={ criterio:crit, valor:(crit==='huella')?'':((valor && valor.value)||'').trim(), huellaBase64:(crit==='huella')?(huellaBase64 && huellaBase64.value || ''):null };
+
+            try{
+              const resp=await fetch('@Url.Action("BuscarPersona", "Control")',{ method:'POST', headers:{'Content-Type':'application/json','RequestVerificationToken':token}, body:JSON.stringify(payload) });
+              if(!resp.ok) throw new Error('HTTP '+resp.status);
+              const json=await resp.json();
+              if(!json.success){
+                // Mensaje y limpieza del CIP "juntos"
+                setMsg(json.message||'No se encontró personal.','warning',2500);
+                hideResult();
+                if(criterio && criterio.value==='cip' && valor){ valor.value=''; valor.focus(); }
+                return;
+              }
+
+              const d=json.data||{};
+
+              // ✅ Foto SIEMPRE con fallback a sin-perfil.jpg
+              var foto = (d.foto || '').trim();
+              resFoto.src = foto ? foto : '@placeholder';
+              resFoto.onerror = function () {
+                  this.onerror = null;
+                  this.src = '@placeholder';
+              };
+
+              resGrado.textContent=d.grado||'—';
+              resNombre.textContent=((d.nombres||'')+' '+(d.apellidos||'')).trim()||'—';
+              resUnidad.textContent=d.unidad||'—';
+
+              result.dataset.id=d.id;
+              result.classList.remove('d-none');
+              accionesTop.classList.add('show');
+
+              // Render
+              renderMovPend(json.movimientosPendientes||[]);
+              renderOpenAsis(json.asistenciasAbiertas||[]);
+              renderCyclesTable(json.ciclos||[]);
+              renderMovToday(json.movimientosHoy || []);
+
+              // === Reglas de visibilidad por conteos ===
+              const hoy = Array.isArray(json.ciclos) ? json.ciclos.length : 0;
+              const movC = Array.isArray(json.movimientosHoy) ? json.movimientosHoy.length : 0;
+
+              // Mostrar/ocultar línea y tabla de asistencias de hoy
+              if(hoy > 0){
+                hoyCount.textContent=String(hoy);
+                hoyCountLine.classList.remove('d-none');
+                cyclesWrap.classList.add('d-none'); // inicia plegado
+                if(toggleHint) toggleHint.textContent='(clic para ver)';
+              }else{
+                hoyCountLine.classList.add('d-none');
+                cyclesWrap.classList.add('d-none');
+              }
+
+              // Movimientos del día SOLO si existe asistencia abierta hoy y hay registros
+              const asistenciaAbiertaHoy = !!json.asistenciaAbiertaHoy;
+              const mostrarMovimientosHoy = asistenciaAbiertaHoy && (movC > 0);
+              if(mostrarMovimientosHoy){
+                movTodayCount.textContent=String(movC);
+                movTodayCountLine.classList.remove('d-none');
+                movTodayWrap.classList.add('d-none'); // plegado
+                if(toggleMovTodayHint) toggleMovTodayHint.textContent='(clic para ver)';
+              }else{
+                movTodayCountLine.classList.add('d-none');
+                movTodayWrap.classList.add('d-none');
+              }
+
+              // Permisos/acciones
+              const ya=json.yaTieneAlgunaHoy,
+                    pIn=json.puedeRegistrarIngreso,
+                    pOut=json.puedeRegistrarSalida,
+                    pMov=json.puedeRegistrarMovimiento,
+                    pRet=json.puedeRegistrarRetornoMovimiento;
+
+              btnReg.classList.add('d-none');
+              okHoy.classList.add('d-none');
+              accionesPostEntrada.classList.add('d-none');
+              btnRegistrarRetorno.classList.add('d-none');
+              if(btnOpenMovModal) btnOpenMovModal.classList.add('d-none');
+
+              if(pRet){
+                  btnRegistrarRetorno.classList.remove('d-none');
+              } else {
+                  // ✅ SOLO mostrar "Hoy ya registrada" cuando:
+                  //    - hay registros de hoy (hoy > 0)
+                  //    - y YA NO puede registrar ingreso (pIn == false)
+                  if (hoy > 0 && !pIn) {
+                      okHoy.classList.remove('d-none');
+                  }
+
+                  if(pOut){
+                      accionesPostEntrada.classList.remove('d-none');
+                      if(pMov){
+                          if(btnOpenMovModal){
+                              btnOpenMovModal.classList.remove('d-none');
+                              btnOpenMovModal.disabled=false;
+                          }
+                          prepareMovPerson(d);
+                      }
+                  } else {
+                      if(pIn) btnReg.classList.remove('d-none');
+                  }
+              }
+
+              const hayAbiertasAnteriores=(json.asistenciasAbiertas||[]).some(a=>!a.esDeHoy);
+              if(hayAbiertasAnteriores){ setMsg('<i class="fa-solid fa-triangle-exclamation me-1"></i> Tiene asistencia(s) abierta(s) de días anteriores. Debe registrar la salida.','warning',5000); }
+              else{ setMsg('', '', 0); }
+            }catch(err){
+              setMsg('Error en la búsqueda.','danger',2300); hideResult();
+            }
+          }
+
+          // Click Registrar asistencia
+          if(btnReg){
+            btnReg.addEventListener('click', async ()=>{
+              const id=Number(result.dataset.id||0); if(!id){ setMsg('ID de personal no válido.','danger',2200); return; }
+              const token=(document.querySelector('input[name="__RequestVerificationToken"]')||{}).value||'';
+              btnReg.disabled=true;
+              try{
+                const r=await fetch('@Url.Action("RegistrarAsistencia", "Control")',{ method:'POST', headers:{'Content-Type':'application/json','RequestVerificationToken':token}, body:JSON.stringify({idPersonal:id}) });
+                if(!r.ok) throw new Error('HTTP '+r.status);
+                const j=await r.json();
+                if(j.success){
+                  if(j.onTime===false){
+                    const lateSec=(typeof j.lateSeconds==='number')?j.lateSeconds:(typeof j.minutesLate==='number'?j.minutesLate*60:null);
+                    const texto = lateSec!=null ? `Usted llegó tarde — Tiempo retrasado: ${fmtHMSFromSeconds(lateSec)}` : 'Usted llegó tarde';
+                    // Tarde: dejar más tiempo para leer
+                    showStatusModal({ title:'', html:texto, type:'danger', autoCloseMs:2800 });
+                  }else{
+                    // Éxito normal: cerrar rápido
+                    showStatusModal({ title:'', html:'Registro de asistencia exitoso', type:'success', autoCloseMs:1200 });
+                  }
+                  await autoBuscar();
+                }else{ showStatusModal({ title:'Aviso', html:(j.message||'No se pudo registrar.'), type:'info', autoCloseMs:1800 }); }
+              }catch(e){ showStatusModal({ title:'Error', html:'Error al registrar asistencia.', type:'danger', autoCloseMs:2200 }); }
+              finally{ btnReg.disabled=false; }
+            });
+          }
+
+          // Click Registrar salida
+          if(btnRegistrarSalida){
+            btnRegistrarSalida.addEventListener('click', async ()=>{
+              const id=Number(result.dataset.id||0); if(!id){ setMsg('ID de personal no válido.','danger',2200); return; }
+              const token=(document.querySelector('input[name="__RequestVerificationToken"]')||{}).value||'';
+              btnRegistrarSalida.disabled=true;
+              try{
+                const r=await fetch('@Url.Action("RegistrarSalida", "Control")',{ method:'POST', headers:{'Content-Type':'application/json','RequestVerificationToken':token}, body:JSON.stringify({idPersonal:id}) });
+                if(!r.ok) throw new Error('HTTP '+r.status);
+                const j=await r.json();
+                if(j.success){ showStatusModal({ title:'', html:'Salida registrada', type:'success', autoCloseMs:1200 }); await autoBuscar(); }
+                else{ showStatusModal({ title:'Aviso', html:(j.message||'No se pudo registrar la salida.'), type:'info', autoCloseMs:1800 }); }
+              }catch(e){ showStatusModal({ title:'Error', html:'Error al registrar la salida.', type:'danger', autoCloseMs:2200 }); }
+              finally{ btnRegistrarSalida.disabled=false; }
+            });
+          }
+
+          // ===== Modal movimiento =====
+          const movModalEl=document.getElementById('movModal');
+          const movModal=movModalEl?new bootstrap.Modal(movModalEl):null;
+          const movIdSel=document.getElementById('Mov_IdPersonal');
+          const movDisplay=document.getElementById('Mov_PersonalDisplay');
+          const movAutorizaSel=document.getElementById('Mov_AutorizaSelect');
+          const movAutorizaGrp=document.getElementById('Mov_AutorizaOtrosGroup');
+          const movAutoriza=document.getElementById('Mov_Autoriza');
+          const movDestinoSel=document.getElementById('Mov_DestinoSelect');
+          const movDestinoGrp=document.getElementById('Mov_DestinoOtrosGroup');
+          const movDestino=document.getElementById('Mov_Destino');
+          const movMotivoSel=document.getElementById('Mov_MotivoSelect');
+          const movMotivoGrp=document.getElementById('Mov_MotivoOtrosGroup');
+          const movMotivo=document.getElementById('Mov_Motivo');
+          const movErrIdPer=document.getElementById('err_Mov_IdPersonal');
+          const movErrAut=document.getElementById('err_Mov_Autoriza');
+          const movErrDes=document.getElementById('err_Mov_Destino');
+          const movErrMot=document.getElementById('err_Mov_Motivo');
+          const movSave=document.getElementById('Mov_Save');
+          const movCancel=document.getElementById('Mov_Cancel');
+
+          function prepareMovPerson(person){
+            if(!person) return;
+            movIdSel.innerHTML=''; const opt=document.createElement('option');
+            opt.value=String(person.id||''); const label=`${person.grado?person.grado+' ':''}${(person.nombres||'')+' '+(person.apellidos||'')}`.trim()||'Seleccionar...';
+            opt.textContent=label; movIdSel.appendChild(opt); movIdSel.value=String(person.id||''); movDisplay.value=label;
+          }
+          function setFieldError(inputEl,msg,errEl){ if(inputEl){ inputEl.classList.add('is-invalid'); } if(errEl){ errEl.textContent=msg||''; } }
+          function clearFieldError(inputEl,errEl){ if(inputEl){ inputEl.classList.remove('is-invalid'); } if(errEl){ errEl.textContent=''; } }
+
+          function syncMovAutoriza(){
+            const v=movAutorizaSel.value; clearFieldError(movAutorizaSel,movErrAut);
+            if(v==='OTROS'){ movAutorizaGrp.classList.remove('d-none'); movAutoriza.removeAttribute('readonly'); movAutoriza.value=''; movAutoriza.setAttribute('required','required'); movAutoriza.focus(); }
+            else if(v==='ORDEN SUPERIOR'){ movAutorizaGrp.classList.add('d-none'); movAutoriza.value='ORDEN SUPERIOR'; movAutoriza.setAttribute('readonly','readonly'); movAutoriza.removeAttribute('required'); }
+            else{ movAutorizaGrp.classList.add('d-none'); movAutoriza.value=''; movAutoriza.removeAttribute('required'); movAutoriza.removeAttribute('readonly'); }
+          }
+          function syncMovDestino(){
+            const opt=movDestinoSel.value; clearFieldError(movDestinoSel,movErrDes);
+            if(opt==='OTROS'){ movDestinoGrp.classList.remove('d-none'); movDestino.removeAttribute('readonly'); movDestino.value=''; movDestino.focus(); }
+            else if(opt){ movDestinoGrp.classList.add('d-none'); movDestino.value=opt; movDestino.setAttribute('readonly','readonly'); }
+            else{ movDestinoGrp.classList.add('d-none'); movDestino.value=''; movDestino.removeAttribute('readonly'); }
+          }
+          function syncMovMotivo(){
+            const v=(movMotivoSel.value || '').toUpperCase(); clearFieldError(movMotivoSel,movErrMot);
+            if(v==='OTRAS'){
+              movMotivoGrp.classList.remove('d-none'); movMotivo.removeAttribute('readonly'); movMotivo.value=''; movMotivo.setAttribute('required','required'); movMotivo.focus();
+            } else if(v){
+              movMotivoGrp.classList.add('d-none'); movMotivo.value=movMotivoSel.value; movMotivo.setAttribute('readonly','readonly'); movMotivo.removeAttribute('required');
+            } else {
+              movMotivoGrp.classList.add('d-none'); movMotivo.value=''; movMotivo.removeAttribute('readonly'); movMotivo.removeAttribute('required');
+            }
+          }
+          if(movAutorizaSel) movAutorizaSel.addEventListener('change',syncMovAutoriza);
+          if(movDestinoSel) movDestinoSel.addEventListener('change',syncMovDestino);
+          if(movMotivoSel)  movMotivoSel.addEventListener('change',syncMovMotivo);
+          ['input','change'].forEach(evt=>{
+            if(movAutoriza) movAutoriza.addEventListener(evt,()=>clearFieldError(movAutorizaSel,movErrAut));
+            if(movDestino)  movDestino.addEventListener(evt,()=>clearFieldError(movDestinoSel,movErrDes));
+            if(movMotivo)   movMotivo.addEventListener(evt,()=>clearFieldError(movMotivoSel,movErrMot));
+          });
+          if(btnOpenMovModal && movModal){
+            btnOpenMovModal.addEventListener('click', ()=>{
+              syncMovAutoriza(); syncMovDestino(); syncMovMotivo();
+              [movAutorizaSel,movDestinoSel,movMotivoSel].forEach(el=>el && el.classList.remove('is-invalid'));
+              [movErrAut,movErrDes,movErrMot].forEach(el=>el && (el.textContent=''));
+              movModal.show(); setTimeout(()=>{ (movMotivoSel && !movMotivoSel.value) ? movMotivoSel.focus() : null; },150);
+            });
+          }
+          if(movCancel && movModal){ movCancel.addEventListener('click',()=>movModal.hide()); }
+
+          if(movSave){
+            movSave.addEventListener('click', async function(){
+              let valid=true;
+              const idSel=Number(movIdSel.value||0); if(!idSel){ valid=false; setFieldError(movIdSel,'Seleccione personal.',movErrIdPer); }
+              let motivoVal=(movMotivo?.value||'').trim(); if(!motivoVal){ valid=false; setFieldError(movMotivoSel,'Complete el motivo del movimiento.',movErrMot); }
+              const autorizaVal=(document.getElementById('Mov_Autoriza')?.value||'').trim(); if(!autorizaVal){ valid=false; setFieldError(movAutorizaSel,'Indique quién autoriza.',movErrAut); }
+              const destinoVal=(document.getElementById('Mov_Destino')?.value||'').trim();
+              if(!document.getElementById('Mov_DestinoOtrosGroup').classList.contains('d-none') && !destinoVal){ valid=false; setFieldError(movDestinoSel,'Especifique destino.',movErrDes); }
+              if(!valid) return;
+
+              const token=(document.querySelector('input[name="__RequestVerificationToken"]')||{}).value||'';
+              const btn=this; btn.disabled=true;
+              try{
+                const r=await fetch('@Url.Action("RegistrarMovimiento", "Control")',{ method:'POST', headers:{'Content-Type':'application/json','RequestVerificationToken':token}, body:JSON.stringify({ idPersonal:idSel, motivo:motivoVal, autoriza:autorizaVal, destino:destinoVal }) });
+                if(!r.ok) throw new Error('HTTP '+r.status);
+                const j=await r.json();
+                if(j.success){ showStatusModal({ title:'', html:'Movimiento registrado', type:'success', autoCloseMs:1200 }); movModal.hide(); await autoBuscar(); }
+                else{ showStatusModal({ title:'Aviso', html:(j.message||'No se pudo registrar el movimiento.'), type:'info', autoCloseMs:1800 }); }
+              }catch(e){ showStatusModal({ title:'Error', html:'Error al registrar el movimiento.', type:'danger', autoCloseMs:2200 }); }
+              finally{ btn.disabled=false; }
+            });
+          }
+
+          // ===== Retorno =====
+          const retModalEl=document.getElementById('retModal');
+          const retModal=retModalEl?new bootstrap.Modal(retModalEl):null;
+          const retIdSel=document.getElementById('Ret_IdPersonal');
+          const retDisplay=document.getElementById('Ret_PersonalDisplay');
+          const retNoved=document.getElementById('Ret_Novedades');
+          const retErrId=document.getElementById('err_Ret_IdPersonal');
+          const retErrNov=document.getElementById('err_Ret_Novedades');
+          const retSave=document.getElementById('Ret_Save');
+
+          if(btnRegistrarRetorno && retModal){
+            btnRegistrarRetorno.addEventListener('click', ()=>{
+              const id=Number((document.getElementById('resultCard')?.dataset?.id)||0);
+              if(!id){ setMsg('ID de personal no válido.','danger',2200); return; }
+              const grado=(resGrado?.textContent||'').trim(); const nombre=(resNombre?.textContent||'').trim();
+              const label=`${grado?grado+' ':''}${nombre}`.trim()||'—';
+              retIdSel.innerHTML=''; const opt=document.createElement('option'); opt.value=String(id); opt.textContent=label; retIdSel.appendChild(opt); retIdSel.value=String(id);
+              retDisplay.value=label; retNoved.value='';
+              [retIdSel].forEach(el=>el && el.classList.remove('is-invalid'));
+              [retErrId,retErrNov].forEach(el=>el && (el.textContent=''));
+              retModal.show(); setTimeout(()=>{ retNoved && retNoved.focus(); },150);
+            });
+          }
+
+          if(retSave){
+            retSave.addEventListener('click', async function(){
+              let valid=true; const idSel=Number(retIdSel.value||0);
+              if(!idSel){ valid=false; if(retErrId) retErrId.textContent='Personal no válido.'; }
+              if(!valid) return;
+
+              const novedades=(retNoved.value||'').trim();
+              const token=(document.querySelector('input[name="__RequestVerificationToken"]')||{}).value||'';
+              const btn=this; btn.disabled=true;
+              try{
+                const r=await fetch('@Url.Action("RegistrarRetornoMovimiento", "Control")',{ method:'POST', headers:{'Content-Type':'application/json','RequestVerificationToken':token}, body:JSON.stringify({ idPersonal:idSel, novedades }) });
+                if(!r.ok) throw new Error('HTTP '+r.status);
+                const j=await r.json();
+                if(j.success){ showStatusModal({ title:'', html:'Retorno registrado', type:'success', autoCloseMs:1200 }); retModal.hide(); await autoBuscar(); }
+                else{ showStatusModal({ title:'Aviso', html:(j.message||'No se pudo registrar el retorno.'), type:'info', autoCloseMs:1800 }); }
+              }catch(e){ showStatusModal({ title:'Error', html:'Error al registrar el retorno.', type:'danger', autoCloseMs:2200 }); }
+              finally{ btn.disabled=false; }
+            });
+          }
+
+          // Login
+          const loginModalEl2=document.getElementById('loginModal');
+          if(loginModalEl2){
+            const loginModal=new bootstrap.Modal(loginModalEl2);
+            const loginFrame=document.getElementById('loginFrame');
+            const btnLogin=document.getElementById('btnAbrirLogin');
+            if(btnLogin){ btnLogin.addEventListener('click', ()=>{ loginFrame.src='@Url.Action("Login", "Acceso")'; loginModal.show(); }); }
+            loginModalEl2.addEventListener('hidden.bs.modal',()=>{ loginFrame.src='about:blank'; });
+          }
+
+          // === Forzar mayúsculas durante escritura
+          function attachUppercaseBehavior(el){
+            if(!el) return;
+            el.addEventListener('input', ()=>{
+              const selStart = el.selectionStart, selEnd = el.selectionEnd;
+              const upper = (el.value || '').toUpperCase();
+              if(el.value !== upper){
+                el.value = upper;
+                try { el.setSelectionRange(selStart, selEnd); } catch {}
+              }
+            });
+          }
+          ['Mov_Autoriza','Mov_Destino','Mov_Motivo','Ret_Novedades'].forEach(id=>{
+            attachUppercaseBehavior(document.getElementById(id));
+          });
+
+          // init
+          resetUI();
+        })();
+    </script>
+</body>
+</html>

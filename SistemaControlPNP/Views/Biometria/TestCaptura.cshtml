@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Prueba de captura de huella";
+}
+
+<h2>Prueba de captura de huella (modo kiosco)</h2>
+
+<p>
+    Conecta el lector, coloca el dedo y pulsa el botón.
+    El sistema llamará a <code>/Biometria/CapturarKiosco</code> por AJAX.
+</p>
+
+<form id="frmHuella" method="post" asp-controller="Biometria" asp-action="CapturarKiosco">
+    @Html.AntiForgeryToken()
+    <button type="submit">Capturar huella</button>
+</form>
+
+<pre id="resultado" style="margin-top:1rem; background:#111; color:#0f0; padding:10px;"></pre>
+
+@section Scripts {
+    <script>
+        document.getElementById('frmHuella').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const resBox = document.getElementById('resultado');
+            resBox.textContent = "Capturando... coloca el dedo en el lector.";
+
+            const form = e.target;
+            const token = form.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            const response = await fetch('@Url.Action("CapturarKiosco", "Biometria")', {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': token
+                }
+            });
+
+            const data = await response.json();
+            resBox.textContent = JSON.stringify(data, null, 2);
+        });
+    </script>
+}

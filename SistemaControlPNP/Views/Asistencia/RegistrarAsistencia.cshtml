@@ -1,0 +1,642 @@
+﻿@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    Layout = null;
+    var items = ViewBag.PersonalList as List<SelectListItem> ?? new List<SelectListItem>();
+}
+
+<link rel="stylesheet" href="~/Style/modal-styles.css" asp-append-version="true" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+    /* =========================================================
+           MODAL REGISTRAR INGRESO – ULTRA COMPACTO
+           ========================================================= */
+
+    .pnp-form .control-tile {
+        margin-bottom: .5rem;
+    }
+
+    /* Cada campo (CIP / Personal) con su propia tarjetita 3D */
+    .pnp-form .field-block {
+        margin-bottom: .35rem;
+        padding: .35rem .6rem .5rem;
+        background: linear-gradient(145deg, #ffffff, #f5f7f6);
+        border-radius: .5rem;
+        border: 1px solid rgba(220, 227, 223, .95);
+        box-shadow: 0 8px 18px rgba(15, 23, 42, .14), 0 0 0 1px rgba(255, 255, 255, .9) inset;
+    }
+
+    .pnp-form .field-block-label {
+        font-size: .7rem;
+        font-weight: 600;
+        margin-bottom: .15rem;
+        color: #374151;
+    }
+
+    .pnp-form .inline-controls {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: .35rem;
+    }
+
+        /* ========== CIP ========== */
+        .pnp-form .inline-controls .input-ico {
+            position: relative;
+            width: 100%;
+            max-width: 60%;
+        }
+
+            .pnp-form .inline-controls .input-ico i {
+                position: absolute;
+                left: .45rem;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: .7rem;
+                color: #6b7280;
+                pointer-events: none;
+            }
+
+            .pnp-form .inline-controls .input-ico input.form-control {
+                padding-left: 1.6rem !important;
+                padding-top: .12rem;
+                padding-bottom: .12rem;
+                font-size: .7rem;
+                height: 30px;
+                border-radius: .4rem;
+                border: 1px solid #d1d9d4;
+                background: linear-gradient(145deg, #ffffff, #eef3f0);
+                box-shadow: 0 4px 10px rgba(148, 163, 184, .35), 0 0 0 1px rgba(255, 255, 255, .95) inset;
+                transition: box-shadow .15s ease, border-color .15s ease, transform .12s ease;
+            }
+
+                .pnp-form .inline-controls .input-ico input.form-control:focus {
+                    border-color: var(--pnp-green, #00471B);
+                    box-shadow: 0 6px 14px rgba(22, 163, 74, .45), 0 0 0 1px rgba(255, 255, 255, .95) inset;
+                    transform: translateY(-1px);
+                }
+
+    /* ========== PERSONAL (combo) ========== */
+
+    .pnp-form .row-personal {
+        display: flex;
+        flex-direction: column;
+        gap: .25rem;
+    }
+
+    .pnp-form .input-group.input-group-sm.soft {
+        width: 120%;
+        max-width: 60%;
+        background: linear-gradient(135deg, #fbfdfc, #eef5f1);
+        border-radius: .4rem;
+        box-shadow: 0 6px 16px rgba(15, 23, 42, .16), 0 0 0 1px rgba(230, 238, 233, 1);
+        align-items: stretch;
+    }
+
+    .pnp-form .input-group-text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: .4rem 0 0 .4rem;
+        border-color: var(--line, #dce3df);
+        border-right: 0;
+        background: radial-gradient(circle at 30% 30%, #ffffff 0, #e5efe8 65%);
+        color: var(--pnp-green, #00471B);
+        font-size: .7rem;
+        padding-inline: .45rem;
+        padding-top: .12rem;
+        padding-bottom: .12rem;
+    }
+
+    .pnp-form .combo-wrap {
+        position: relative;
+        flex: 1 1 auto;
+        display: flex;
+        align-items: stretch;
+        border-radius: 0 .4rem .4rem 0;
+        border: 1px solid var(--line, #dce3df);
+        border-left: 0;
+        background: #fff;
+        overflow: hidden;
+        transition: border-color .12s ease, box-shadow .12s ease, background-color .12s ease;
+    }
+
+    .pnp-form .combo-btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .25rem;
+        padding: .12rem .45rem;
+        border: 0;
+        background: linear-gradient(145deg, #ffffff, #f3f6f4);
+        cursor: pointer;
+        font-size: 0.70rem !important;
+        color: var(--ink, #0f1a14);
+        min-height: 30px;
+        line-height: 1.2;
+    }
+
+        .pnp-form .combo-btn .combo-value {
+            flex: 1 1 auto;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-size: 0.70rem !important;
+            line-height: 1.2;
+        }
+
+        .pnp-form .combo-btn i {
+            font-size: .65rem;
+            color: #9ca3af;
+        }
+
+    .pnp-form .combo-wrap:hover {
+        border-color: var(--pnp-green, #00471B);
+        background: #f9fafb;
+        box-shadow: 0 4px 10px rgba(15, 23, 42, .12), 0 0 0 1px rgba(255, 255, 255, .95) inset;
+    }
+
+    .pnp-form .combo-wrap:focus-within {
+        border-color: var(--pnp-green, #00471B);
+        box-shadow: 0 0 0 1px rgba(255,255,255,.95) inset, 0 0 0 3px rgba(0, 71, 27, .18);
+    }
+
+    .pnp-form .sr-only-select {
+        position: absolute !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        width: 0;
+        height: 0;
+    }
+
+    /* Panel desplegable */
+    .combo-panel {
+        background: #ffffff;
+        border-radius: .55rem;
+        border: 1px solid var(--line, #dce3df);
+        box-shadow: 0 18px 32px rgba(15, 26, 20, .28), 0 0 0 1px rgba(255, 255, 255, .95) inset;
+        max-height: 260px;
+        overflow: hidden;
+        z-index: 2000;
+        display: none;
+    }
+
+        .combo-panel.open {
+            display: block;
+        }
+
+    .combo-search {
+        width: 100%;
+        border: 0;
+        border-bottom: 1px solid #e5e7eb;
+        padding: .2rem .45rem;
+        font-size: 0.70rem !important;
+        background: #f9fafb;
+        line-height: 1.2;
+    }
+
+        .combo-search::placeholder {
+            color: #9ca3af;
+        }
+
+    .combo-list {
+        max-height: 220px;
+        overflow-y: auto;
+        list-style: none;
+        margin: 0;
+        padding: .15rem 0;
+    }
+
+        .combo-list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .combo-list::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 999px;
+        }
+
+    .combo-item {
+        padding: .16rem .5rem;
+        font-size: 0.70rem !important;
+        line-height: 1.2;
+        display: flex;
+        align-items: center;
+        gap: .25rem;
+        cursor: pointer;
+        color: #111827;
+        transition: background-color .12s ease, color .12s ease, transform .08s ease;
+    }
+
+        .combo-item[aria-selected="true"] {
+            background: #eef5ff;
+            font-weight: 600;
+            color: var(--pnp-green, #00471B);
+        }
+
+        .combo-item:hover {
+            background: #f3f4f6;
+            transform: translateX(1px);
+        }
+
+    .combo-empty {
+        padding: .35rem .6rem;
+        font-size: .7rem;
+        color: #6b7280;
+    }
+
+    /* ========== Tira de mensajes ========== */
+    .pnp-form .status-strip {
+        margin-bottom: .4rem;
+    }
+
+        .pnp-form .status-strip .alert {
+            margin-bottom: .25rem;
+            padding-top: .15rem;
+            padding-bottom: .15rem;
+            font-size: .7rem;
+            border-radius: 999px;
+            border: 0;
+            box-shadow: 0 4px 10px rgba(15, 23, 42, .16), 0 0 0 1px rgba(255, 255, 255, .9) inset;
+        }
+
+    /* ========== BOTÓN REGISTRAR (FUERA DEL CUADRO BLANCO) ========== */
+    .pnp-form .actions-inline {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: .35rem;
+        width: 100%;
+        max-width: 60%; /* mismo ancho que combo y CIP */
+        margin-left: auto; /* lo alinea a la derecha, alineado con el combo */
+    }
+
+    .pnp-form #btnRegistrarIngreso {
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: .2rem;
+        font-size: .76rem;
+        border-radius: .45rem;
+        padding: .15rem .85rem;
+        min-height: 32px;
+        border: 0;
+        background-image: linear-gradient(135deg, #059669, #16a34a);
+        color: #ffffff;
+        box-shadow: 0 7px 18px rgba(5, 150, 105, .6), 0 0 0 1px rgba(255,255,255,.9) inset;
+        transform: translateY(0);
+        transition: transform .12s ease, box-shadow .14s ease, filter .12s ease;
+    }
+
+        .pnp-form #btnRegistrarIngreso:disabled {
+            opacity: .6;
+            filter: grayscale(.1);
+            box-shadow: 0 4px 10px rgba(148,163,184,.45), 0 0 0 1px rgba(255,255,255,.9) inset;
+            cursor: not-allowed;
+        }
+
+        .pnp-form #btnRegistrarIngreso:not(:disabled):hover {
+            filter: brightness(1.06);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px rgba(5,150,105,.75), 0 0 0 1px rgba(255,255,255,.9) inset;
+        }
+
+        .pnp-form #btnRegistrarIngreso:not(:disabled):active {
+            transform: translateY(1px);
+            box-shadow: 0 4px 10px rgba(5,150,105,.7), 0 0 0 1px rgba(230,244,236,1) inset;
+        }
+
+    @@media (max-width: 480px) {
+        .pnp-form .field-block
+
+    {
+        padding-inline: .5rem;
+    }
+
+    .pnp-form .inline-controls .input-ico,
+    .pnp-form .input-group.input-group-sm.soft,
+    .pnp-form .actions-inline {
+        max-width: 100%;
+    }
+
+    .pnp-form .actions-inline {
+        justify-content: center;
+    }
+
+    }
+
+    .modal-crud-registro .modal-dialog {
+        max-width: 520px;
+        width: 95vw;
+        margin: 1.25rem auto;
+    }
+
+    @@media (min-width: 992px) {
+        .modal-crud-registro .modal-dialog
+
+    {
+        max-width: 520px;
+        width: 90vw;
+    }
+
+    }
+    /* ===== FIX REAL: evitar que el modal de éxito aparezca grande ===== */
+
+    /* Antes de que Bootstrap lo muestre, el dialog DEBE YA tener tamaño pequeño */
+    #modalRegistroExitosa .modal-dialog {
+        max-width: 310px !important;
+        width: 100% !important;
+        margin: 1.25rem auto !important;
+        transform: translateY(0) !important; /* evita animación rara */
+    }
+
+    /* Evita expansión previa del contenido */
+    #modalRegistroExitosa .modal-content {
+        width: 100% !important;
+        transform: none !important;
+        transition: none !important; /* sin reflow visual */
+        animation: none !important;
+    }
+
+    /* Evita la animación fade inicial que causa el “salto” */
+    #modalRegistroExitosa.modal.fade .modal-dialog {
+        transition: none !important;
+        transform: none !important;
+    }
+
+</style>
+
+<div class="pnp-form">
+    <div class="pnp-body">
+        <form id="formRegistrarIngreso" method="post" autocomplete="off" novalidate>
+            @Html.AntiForgeryToken()
+
+            <div id="errorMessagesRegAsis" class="form-error" role="alert"></div>
+
+            
+
+                <div class="status-strip">
+                    <div id="hintNoFind" class="alert alert-secondary py-1 px-2" style="display:none;">
+                        <i class="fas fa-magnifying-glass"></i> No se encontró personal con CIP <span id="nfCip"></span>.
+                    </div>
+                    <div id="hintAbierta" class="alert alert-warning py-1 px-2" style="display:none;">
+                        <i class="fas fa-info-circle"></i> Ya tiene ingreso hoy. <strong>Salida pendiente</strong>.
+                    </div>
+                    <div id="hintOk" class="alert alert-success py-1 px-2" style="display:none;">
+                        <i class="fas fa-check-circle"></i> Listo para registrar ingreso.
+                    </div>
+                </div>
+
+                <div class="inline-controls">
+
+                    <!-- BUSCAR (CIP) -->
+                    <div class="field-block">
+                        <div class="field-block-label">Buscar</div>
+                        <div class="input-ico">
+                            <i class="fas fa-search"></i>
+                            <input id="txtBuscarCip" type="text" class="form-control form-control-sm"
+                                   placeholder="Buscar por CIP (8 dígitos)..." inputmode="numeric" />
+                        </div>
+                    </div>
+
+                    <!-- PERSONAL (solo combo dentro del cuadro) -->
+                    <div class="field-block">
+                        <div class="field-block-label">Personal</div>
+
+                        <div class="row-personal">
+                            <div class="input-group input-group-sm soft align-items-stretch">
+                                <span class="input-group-text">
+                                    <i class="fas fa-user-check"></i>
+                                </span>
+
+                                <select id="selPersonal" class="form-select form-select-sm sr-only-select" tabindex="-1">
+                                    <option value="">Seleccionar...</option>
+                                    @foreach (var it in items)
+                                    {
+                                        var text = it.Text ?? "";
+                                        var start = text.LastIndexOf("CIP");
+                                        string cip = "";
+                                        if (start >= 0)
+                                        {
+                                            var sub = text.Substring(start).Replace("CIP", "").Replace("(", "").Replace(")", "").Trim();
+                                            cip = new string(sub.Where(char.IsDigit).ToArray());
+                                        }
+                                        <option value="@it.Value" data-cip="@cip">@it.Text</option>
+                                    }
+                                </select>
+
+                                <div class="combo-wrap" id="comboPersonal" role="combobox" aria-expanded="false">
+                                    <button type="button" class="combo-btn" id="comboBtnPersonal">
+                                        <span class="combo-value" id="comboValuePersonal">Seleccionar...</span>
+                                        <i class="fas fa-angle-down"></i>
+                                    </button>
+
+                                    <div class="combo-panel" id="comboPanelPersonal">
+                                        <input type="text" class="combo-search" id="comboSearchPersonal"
+                                               placeholder="Escribe nombre o apellidos..." autocomplete="off" />
+                                        <ul class="combo-list" id="comboListPersonal"></ul>
+                                        <div class="combo-empty" id="comboEmptyPersonal" style="display:none;">Sin coincidencias</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BOTÓN FUERA DEL CUADRO BLANCO DEL COMBO -->
+                    <div class="actions-inline">
+                        <button type="button" id="btnRegistrarIngreso"
+                                class="btn btn-primary btn-sm btn-registrar-inline" disabled>
+                            <i class="fas fa-sign-in-alt"></i> Registrar ingreso
+                        </button>
+                    </div>
+
+               
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    (function () {
+
+        function csrf() {
+            var t = document.querySelector('input[name="__RequestVerificationToken"]');
+            return t ? t.value : '';
+        }
+
+        var $txt = document.getElementById('txtBuscarCip');
+        var $sel = document.getElementById('selPersonal');
+        var $btn = document.getElementById('btnRegistrarIngreso');
+        var $combo = document.getElementById('comboPersonal');
+        var $comboBtn = document.getElementById('comboBtnPersonal');
+        var $comboVal = document.getElementById('comboValuePersonal');
+        var $panel = document.getElementById('comboPanelPersonal');
+        var $search = document.getElementById('comboSearchPersonal');
+        var $list = document.getElementById('comboListPersonal');
+        var $empty = document.getElementById('comboEmptyPersonal');
+
+        var $hintNoFind = document.getElementById('hintNoFind');
+        var $hintAbierta = document.getElementById('hintAbierta');
+        var $hintOk = document.getElementById('hintOk');
+        var $nfCip = document.getElementById('nfCip');
+
+        var ALL_OPTS = [];
+        for (var i = 0; i < $sel.options.length; i++) {
+            var o = $sel.options[i];
+            ALL_OPTS.push({
+                value: o.value,
+                text: o.text,
+                cip: (o.getAttribute("data-cip") || "").trim()
+            });
+        }
+        var CURRENT_OPTS = ALL_OPTS.slice();
+
+        function renderList(items) {
+            $list.innerHTML = "";
+            if (!items.length) { $empty.style.display = ""; return; }
+            $empty.style.display = "none";
+
+            var sel = $sel.value;
+
+            items.forEach(function (it) {
+                var li = document.createElement("li");
+                li.className = "combo-item";
+                li.textContent = it.text;
+                li.onclick = function () { choose(it.value, it.text); };
+                li.setAttribute("aria-selected", it.value === sel ? "true" : "false");
+                $list.appendChild(li);
+            });
+        }
+
+        function resetCombo() {
+            CURRENT_OPTS = ALL_OPTS.slice();
+            $sel.value = "";
+            $comboVal.textContent = "Seleccionar...";
+            renderList(CURRENT_OPTS);
+            $btn.disabled = true;
+            $hintNoFind.style.display = "none";
+            $hintAbierta.style.display = "none";
+            $hintOk.style.display = "none";
+        }
+
+        function reflowPanel() {
+            var r = $combo.getBoundingClientRect();
+            $panel.style.position = "fixed";
+            $panel.style.left = r.left + "px";
+            $panel.style.top = r.bottom + "px";
+            $panel.style.width = r.width + "px";
+        }
+
+        function openPanel() {
+            $panel.classList.add("open");
+            reflowPanel();
+            $search.value = "";
+            renderList(CURRENT_OPTS);
+            setTimeout(function () { $search.focus(); }, 10);
+        }
+
+        function closePanel() {
+            $panel.classList.remove("open");
+        }
+
+        function choose(v, t) {
+            $sel.value = v;
+            $comboVal.textContent = t;
+            closePanel();
+            if (!v) { $btn.disabled = true; return; }
+            checkAsistencia();
+        }
+
+        $txt.addEventListener("input", function () {
+            var clean = ($txt.value || "").replace(/\D+/g, "").slice(0, 8);
+            if ($txt.value !== clean) $txt.value = clean;
+            filtrarCip();
+        });
+
+        function filtrarCip() {
+            var q = $txt.value || "";
+
+            if (!q.length) { resetCombo(); return; }
+
+            CURRENT_OPTS = ALL_OPTS.filter(function (x) {
+                return x.value && x.cip.includes(q);
+            });
+
+            if (!CURRENT_OPTS.length) {
+                $hintNoFind.style.display = "";
+                $nfCip.textContent = q;
+                $sel.value = "";
+                $comboVal.textContent = "Seleccionar...";
+                renderList([]);
+                $btn.disabled = true;
+                return;
+            }
+
+            $hintNoFind.style.display = "none";
+            var first = CURRENT_OPTS[0];
+            $sel.value = first.value;
+            $comboVal.textContent = first.text;
+            renderList(CURRENT_OPTS);
+            checkAsistencia();
+        }
+
+        function checkAsistencia() {
+            var id = parseInt($sel.value || "0");
+            if (!id) return;
+
+            fetch('@Url.Action("TieneAsistenciaAbierta", "Asistencia")', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken": csrf()
+                },
+                body: JSON.stringify({ idPersonal: id })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.abierta) {
+                    $hintOk.style.display = "none";
+                    $hintAbierta.style.display = "";
+                    $btn.disabled = true;
+                } else {
+                    $hintAbierta.style.display = "none";
+                    $hintOk.style.display = "";
+                    $btn.disabled = false;
+                }
+            });
+        }
+
+        $comboBtn.onclick = () => $panel.classList.contains("open") ? closePanel() : openPanel();
+
+        document.addEventListener("click", e => {
+            if (!$combo.contains(e.target) && !$panel.contains(e.target)) closePanel();
+        });
+
+        $search.oninput = function () {
+            var q = $search.value.toLowerCase().trim();
+            renderList(CURRENT_OPTS.filter(x => x.text.toLowerCase().includes(q)));
+        };
+
+        $btn.onclick = function () {
+            var id = parseInt($sel.value || "0");
+            if (!id) return;
+
+            fetch('@Url.Action("RegistrarAsistencia", "Asistencia")', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken": csrf()
+                },
+                body: JSON.stringify({ idPersonal: id })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) location.reload();
+            });
+        };
+
+        resetCombo();
+
+    })();
+</script>

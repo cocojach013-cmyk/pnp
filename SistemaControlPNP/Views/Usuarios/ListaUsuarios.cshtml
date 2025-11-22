@@ -1,0 +1,891 @@
+﻿@using System.Linq
+@model IEnumerable<SistemaControlPNP.Models.Usuario>
+
+@{
+    var total = Model?.Count() ?? 0;
+    var inactivos = Model?.Count(u => !u.Estado) ?? 0;
+    var ahora = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+    var esAdmin = User.IsInRole("Administrador");
+    var adminId = ViewBag.AdminId as int? ?? 0;
+}
+
+<link rel="stylesheet" href="~/Style/form-styles.css" asp-append-version="true" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<div id="vista-usuarios" class="container page-wrap content-stretch print-scope vista-crud">
+    <!-- ===== Header ===== -->
+    <div class="header-card mb-3">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+                <h4 class="page-title">
+                    <i class="fas fa-user-shield"></i> Usuarios
+                </h4>
+                <div class="page-subtle">Administra, crea y edita las cuentas de usuario.</div>
+            </div>
+
+            <div class="header-actions">
+                <!-- Pastillas con tooltip -->
+                <span class="stat-pill" title="Total de usuarios" data-toggle="tooltip">
+                    <i class="fas fa-database"></i> @total
+                </span>
+                <span class="stat-pill" title="Inactivos" data-toggle="tooltip">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="headerInactivos">@inactivos</span>
+                </span>
+
+                <div class="search-wrap search-wrap--one-line">
+                    <div class="input-ico">
+                        <i class="fas fa-search"></i>
+                        <input id="busqueda" type="text" class="form-control form-control-sm"
+                               placeholder="Selecciona un filtro..." disabled aria-disabled="true" />
+                    </div>
+
+                    <select id="filtro" class="form-control form-control-sm">
+                        <option value="" selected>Filtrar</option>
+                        <option value="nombre">Nombres y apellidos</option>
+                        <option value="usuario">Usuario</option>
+                        <option value="grado">Grado</option>
+                        <option value="rol">Rol</option>
+                        <option value="estado">Estado</option>
+                    </select>
+
+                    @if (esAdmin)
+                    {
+                        <a href="#" id="registroLink" class="btn btn-success btn-sm"
+                           title="Nuevo usuario" data-toggle="tooltip">
+                            <i class="fas fa-plus-circle"></i> Nuevo
+                        </a>
+                    }
+
+                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                            onclick="window.print()" title="Imprimir" data-toggle="tooltip">
+                        <i class="fas fa-print"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Tabla ===== -->
+    <div class="table-card table-fixed-head">
+        <div class="table-scroll table-scroll-x">
+            <table id="usuariosTable"
+                   class="table table-bordered table-hover table-sm row-selectable mb-0 table-ultra-compact table-wide tabla-crud">
+                <colgroup>
+                    <col style="width:11%">
+                    <col style="width:15%">
+                    <col style="width:15%">
+                    <col style="width:14%">
+                    <col style="width:12%">
+                    <col style="width:10%">
+                    @if (esAdmin)
+                    {
+                        <col class="col-accion" style="width:150px" />
+                    }
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="text-center">Grado</th>
+                        <th class="text-center">Nombres</th>
+                        <th class="text-center">Apellidos</th>
+                        <th class="text-center">Usuario</th>
+                        <th class="text-center">Rol</th>
+                        <th class="text-center">Estado</th>
+                        @if (esAdmin)
+                        {
+                            <th class="text-center col-accion">Acción</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody id="usuariosTableBody">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            dynamic p = null;
+                            if (ViewBag.PersonalData != null && ViewBag.PersonalData.ContainsKey(item.IdPersonal))
+                            {
+                                p = ViewBag.PersonalData[item.IdPersonal];
+                            }
+                            string grado = p?.Grado ?? "";
+                            string nombres = p?.Nombres ?? "";
+                            string apellidos = p?.Apellidos ?? "";
+
+                            <tr id="row-@item.IdUsuario">
+                                <td class="text-center">@grado</td>
+                                <td class="text-center">@nombres</td>
+                                <td class="text-center">@apellidos</td>
+                                <td class="text-center">@item.UsuarioLogin</td>
+                                <td class="text-center">@item.Rol</td>
+                                <td class="text-center estado-cell">
+                                    @if (item.Estado)
+                                    {
+                                        <span class="badge-soft active">
+                                            <i class="fas fa-check-circle text-success"></i> Activo
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-soft inactive">
+                                            <i class="fas fa-times-circle text-danger"></i> Inactivo
+                                        </span>
+                                    }
+                                </td>
+
+                                @if (esAdmin)
+                                {
+                                    <td class="text-center col-accion">
+                                        <div class="action-buttons">
+                                            <a href="#" class="btn-icon-box btn-icon--xs btn-editar"
+                                               data-id="@item.IdUsuario" title="Editar" data-toggle="tooltip">
+                                                <i class="fas fa-edit text-primary"></i>
+                                            </a>
+
+                                            <button type="button" class="btn-icon-box btn-icon--xs btn-reset"
+                                                    data-id="@item.IdUsuario" title="Reiniciar clave" data-toggle="tooltip">
+                                                <i class="fas fa-key text-warning"></i>
+                                            </button>
+
+                                            @if (item.IdUsuario != adminId)
+                                            {
+                                                if (item.Estado)
+                                                {
+                                                    <button type="button" class="btn-icon-box btn-icon--xs btn-desactivar"
+                                                            data-id="@item.IdUsuario" data-usuario="@item.UsuarioLogin"
+                                                            title="Desactivar" data-toggle="tooltip">
+                                                        <i class="fas fa-user-slash text-danger"></i>
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="button" class="btn-icon-box btn-icon--xs btn-activar"
+                                                            data-id="@item.IdUsuario" data-usuario="@item.UsuarioLogin"
+                                                            title="Activar" data-toggle="tooltip">
+                                                        <i class="fas fa-user-check text-success"></i>
+                                                    </button>
+                                                }
+                                            }
+                                        </div>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="@(esAdmin ? 7 : 6)">
+                                <div class="empty-box">
+                                    <i class="fas fa-inbox"></i>
+                                    <div>No hay usuarios registrados aún.</div>
+                                    @if (esAdmin)
+                                    {
+                                        <div class="mt-2">
+                                            <a href="#" id="registroLinkEmpty" class="btn btn-success btn-sm" data-toggle="tooltip">
+                                                <i class="fas fa-user-plus"></i> Crear mi primer usuario
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===== Footer ===== -->
+        <div class="table-footer">
+            <div aria-live="polite">
+                Mostrando <strong><span id="countVisibles">@total</span></strong>
+                <span id="wordRegs">@((total == 1) ? "registro" : "registros")</span>
+                <span id="inactivosWrap" style="display:@(inactivos > 0 ? "inline" : "none")">
+                    · <strong><span id="countInactivos">@inactivos</span></strong> inactivo@(inactivos == 1 ? "" : "s")
+                </span>
+            </div>
+            <div>Actualizado: @ahora</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Modales (adaptativos) ===== -->
+<!-- Registrar -->
+<div class="modal fade modal-center modal-crud-registro" id="registroModal" tabindex="-1" role="dialog"
+     aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Registrar Usuario</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="registroFormContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Editar -->
+<div class="modal fade modal-center modal-crud-editar" id="editarModal" tabindex="-1" role="dialog"
+     aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Usuario</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="editarFormContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gate Admin -->
+<div id="adminGateModal" class="modal fade modal-center modal-xs modal-crud-admingate" tabindex="-1" role="dialog"
+     aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmación de administrador</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="adminGateAlert" class="alert alert-danger alert-one-line-auto"
+                     style="display:none;" aria-live="assertive"></div>
+
+                <label class="form-label">Clave de admin</label>
+                <div class="input-group input-group-sm">
+                    <input type="password" id="adminGatePwd" class="form-control text-center"
+                           placeholder="Clave de admin" required autocomplete="current-password" />
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary btn-toggle-eye" type="button"
+                                data-target="#adminGatePwd" tabindex="-1" title="Mostrar/ocultar">
+                            <i class="fa-solid fa-eye-slash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" id="btnAdminGateOK" data-enter-default>Ingresar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Clave -->
+<div id="resetPwdModal" class="modal fade modal-center modal-xs modal-crud-resetpwd" tabindex="-1" role="dialog"
+     aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reiniciar clave</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="resetAlert" class="alert alert-danger alert-one-line-auto"
+                     style="display:none;" aria-live="assertive"></div>
+
+                <label class="form-label">Clave de admin</label>
+                <div class="input-group input-group-sm">
+                    <input type="password" id="adminPwd" class="form-control text-center"
+                           placeholder="Clave de admin" required autocomplete="current-password" />
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary btn-toggle-eye" type="button"
+                                data-target="#adminPwd" tabindex="-1" title="Mostrar/ocultar">
+                            <i class="fa-solid fa-eye-slash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" id="btnConfirmReset" data-enter-default>Reiniciar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Temp password -->
+<div id="tempPwdModal" class="modal fade modal-center modal-slim" tabindex="-1" role="dialog"
+     aria-hidden="true">
+    <div class="modal-dialog" style="max-width:420px;width:min(94vw,420px);">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Clave temporal generada</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body text-center">
+                <input id="tempPwdValue" class="form-control text-center" readonly />
+                <small class="text-muted d-block mt-2">
+                    Cópiala y compártela con el usuario. Se mostrará solo una vez.
+                </small>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button class="btn btn-outline-secondary" id="btnCopyTemp">Copiar</button>
+                <button class="btn btn-primary" data-dismiss="modal" data-enter-default>Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmar Activar/Desactivar -->
+<div id="confirmarEliminarModal"
+     class="modal fade modal-center modal-xs modal-crud-confirm"
+     tabindex="-1" role="dialog"
+     aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="delAlert" class="alert alert-danger alert-one-line-auto"
+                     style="display:none;" aria-live="assertive"></div>
+                <p id="textoEliminar" class="text-center mb-2">¿Estás seguro?</p>
+
+                <label class="form-label">Clave de admin</label>
+                <div class="input-group input-group-sm">
+                    <input type="password" id="adminPwdDelete" class="form-control text-center"
+                           placeholder="Clave de admin" required autocomplete="current-password" />
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary btn-toggle-eye" type="button"
+                                data-target="#adminPwdDelete" tabindex="-1" title="Mostrar/ocultar">
+                            <i class="fa-solid fa-eye-slash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmarEliminar" data-enter-default>
+                    Desactivar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form style="display:none;">@Html.AntiForgeryToken()</form>
+
+@section Scripts {
+    <script>
+        (function () {
+            function csrf() {
+                return $('input[name="__RequestVerificationToken"]').first().val();
+            }
+            function norm(s) {
+                return (s || '').toString().toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            }
+
+            // === Tooltips
+            $(function () {
+                const $tips = $('[data-toggle="tooltip"]');
+                try { $tips.tooltip('dispose'); } catch (e) { }
+                $tips.tooltip({
+                    trigger: 'hover',
+                    container: 'body',
+                    boundary: 'window',
+                    placement: 'top'
+                });
+                $(document).on('click focus', '[data-toggle="tooltip"]', function () {
+                    $(this).tooltip('hide').blur();
+                });
+            });
+
+            // ====== Filtro + contador
+            const headerThs = Array.from(document.querySelectorAll('#usuariosTable thead th'));
+            const headers = headerThs.map(th => (th.textContent || '').trim().toLowerCase());
+            const COL = {
+                grado: headers.indexOf('grado'),
+                nombres: headers.indexOf('nombres'),
+                apellidos: headers.indexOf('apellidos'),
+                usuario: headers.indexOf('usuario'),
+                rol: headers.indexOf('rol'),
+                estado: headers.indexOf('estado')
+            };
+            const $filtro = $('#filtro'), $busqueda = $('#busqueda');
+
+            const placeholderFor = v => {
+                switch (v) {
+                    case 'nombre': return 'Buscar por nombres o apellidos...';
+                    case 'usuario': return 'Buscar usuario...';
+                    case 'grado': return 'Buscar por grado...';
+                    case 'rol': return 'Buscar por rol...';
+                    case 'estado': return 'Escribe activo / inactivo...';
+                    default: return 'Selecciona un filtro...';
+                }
+            };
+
+            function filtrar() {
+                const by = $filtro.val();
+                const q = norm(($busqueda.val() || '').trim());
+                $('#usuariosTableBody tr').each(function () {
+                    const tds = this.cells; let ok = true;
+                    if (!by) {
+                        ok = true;
+                    } else if (by === 'nombre' && COL.nombres > -1 && COL.apellidos > -1) {
+                        const txt = norm((tds[COL.nombres].textContent || '') + ' ' + (tds[COL.apellidos].textContent || ''));
+                        ok = txt.includes(q);
+                    } else if (by === 'usuario' && COL.usuario > -1) {
+                        ok = norm(tds[COL.usuario].textContent || '').includes(q);
+                    } else if (by === 'grado' && COL.grado > -1) {
+                        ok = norm(tds[COL.grado].textContent || '').includes(q);
+                    } else if (by === 'rol' && COL.rol > -1) {
+                        ok = norm(tds[COL.rol].textContent || '').includes(q);
+                    } else if (by === 'estado' && COL.estado > -1) {
+                        const est = norm(tds[COL.estado].textContent || '');
+                        ok = q ? est.includes(q) : true;
+                    }
+                    this.style.display = ok ? '' : 'none';
+                });
+                updateFooterCounts();
+            }
+
+            function updateFooterCounts() {
+                const $rows = $('#usuariosTableBody tr:visible');
+                const visibles = $rows.length;
+                const estadoCol = headers.indexOf('estado');
+                let inactivosVis = 0;
+
+                if (estadoCol > -1) {
+                    $rows.each(function () {
+                        const td = this.cells[estadoCol]; if (!td) return;
+                        const hasInactiveBadge = td.querySelector('.badge-soft.inactive');
+                        const txt = (td.textContent || '').toLowerCase();
+                        if (hasInactiveBadge || txt.includes('inactivo')) inactivosVis++;
+                    });
+                }
+                $('#countVisibles').text(visibles);
+                $('#wordRegs').text(visibles === 1 ? 'registro' : 'registros');
+                $('#countInactivos').text(inactivosVis);
+                $('#inactivosWrap').css('display', inactivosVis > 0 ? 'inline' : 'none');
+            }
+
+            function updateHeaderInactivos() {
+                const estadoCol = headers.indexOf('estado');
+                let ina = 0;
+                if (estadoCol > -1) {
+                    $('#usuariosTableBody tr').each(function () {
+                        const td = this.cells[estadoCol]; if (!td) return;
+                        const hasInactiveBadge = td.querySelector('.badge-soft.inactive');
+                        const txt = (td.textContent || '').toLowerCase();
+                        if (hasInactiveBadge || txt.includes('inactivo')) ina++;
+                    });
+                }
+                $('#headerInactivos').text(ina);
+            }
+
+            $('#busqueda').prop('disabled', true)
+                .attr('placeholder', 'Selecciona un filtro...');
+            $('#filtro').on('change', function () {
+                const v = this.value;
+                $('#busqueda').val('');
+                if (!v) {
+                    $('#busqueda').prop('disabled', true)
+                        .attr('placeholder', placeholderFor(''));
+                    $('#usuariosTableBody tr').show();
+                } else {
+                    $('#busqueda').prop('disabled', false)
+                        .attr('placeholder', placeholderFor(v)).focus();
+                }
+                filtrar();
+            });
+
+            let t; const debounce = (fn, ms) => (...a) => {
+                clearTimeout(t); t = setTimeout(() => fn(...a), ms);
+            };
+            $('#busqueda').on('input', debounce(filtrar, 120));
+            $('#busqueda').on('keydown', function (e) {
+                if (e.key === 'Escape') { $(this).val(''); filtrar(); }
+            });
+
+            $(function () {
+                filtrar();
+                updateHeaderInactivos();
+            });
+
+            /* =========================================================
+               SELECCIÓN MULTIPLE DE FILAS
+               ========================================================= */
+            $(document).on('click', '#usuariosTable tbody tr', function (e) {
+                // Evitar selección si el clic fue en botones o íconos
+                if ($(e.target).closest('.btn, .btn-icon-box, a, i').length) return;
+                // Alternar selección de la fila
+                $(this).toggleClass('row-selected');
+            });
+
+            // ===== Admin Gate (Nuevo/Editar)
+            let gateTarget = null, idPendiente = null, adminPwdTmp = null;
+            function setGateError(m) {
+                if (m) { $('#adminGateAlert').text(m).show(); }
+                else { $('#adminGateAlert').hide().text(''); }
+            }
+            function abrirAdminGate(target, id) {
+                gateTarget = target; idPendiente = id || null; adminPwdTmp = null; setGateError(null);
+                $('#adminGatePwd').val('').attr('type', 'password');
+                $('#adminGateModal .btn-toggle-eye[data-target="#adminGatePwd"] i')
+                    .removeClass('fa-eye').addClass('fa-eye-slash');
+                $('#adminGateModal').modal('show');
+            }
+            $('#registroLink, #registroLinkEmpty').on('click', function (e) {
+                e.preventDefault(); abrirAdminGate('registrar');
+            });
+            $(document).on('click', '.btn-editar', function (e) {
+                e.preventDefault(); abrirAdminGate('editar', $(this).data('id'));
+            });
+
+            $('#btnAdminGateOK').on('click', function () {
+                const pwd = ($('#adminGatePwd').val() || '').trim();
+                if (!pwd) { $('#adminGatePwd')[0].reportValidity(); return; }
+                const $btn = $(this).prop('disabled', true);
+                setGateError(null);
+
+                $.post('@Url.Action("PrecheckAdmin", "Usuarios")',
+                    { adminPassword: pwd, __RequestVerificationToken: csrf() },
+                    function (resp) {
+                        if (resp && resp.success) {
+                            adminPwdTmp = pwd; $('#adminGateModal').modal('hide');
+
+                            if (gateTarget === 'registrar') {
+                                $.get('@Url.Action("RegistrarUsuario", "Usuarios")')
+                                    .done(function (html) {
+                                        $('#registroFormContainer').html(html);
+                                        const $f = $('#registroFormContainer').find('form#registroUsuarioForm');
+                                        let $h = $f.find('#AdminPassword');
+                                        if (!$h.length) {
+                                            $h = $('<input>', {
+                                                type: 'hidden', id: 'AdminPassword', name: 'AdminPassword'
+                                            });
+                                            $f.append($h);
+                                        }
+                                        $h.val(adminPwdTmp);
+                                        $('#registroModal').modal('show');
+                                    })
+                                    .fail(function () { alert('No se pudo cargar el formulario.'); });
+                            } else if (gateTarget === 'editar' && idPendiente) {
+                                $.get('@Url.Action("EditarUsuario", "Usuarios")', { id: idPendiente })
+                                    .done(function (html) {
+                                        $('#editarFormContainer').html(html);
+                                        const $f = $('#editarFormContainer').find('form#editarUsuarioForm');
+                                        let $h = $f.find('#AdminPassword');
+                                        if (!$h.length) {
+                                            $h = $('<input>', {
+                                                type: 'hidden', id: 'AdminPassword', name: 'AdminPassword'
+                                            });
+                                            $f.append($h);
+                                        }
+                                        $h.val(adminPwdTmp);
+                                        $('#editarModal').modal('show');
+                                    })
+                                    .fail(function () { alert('No se pudo cargar el formulario de edición.'); });
+                            }
+                        } else {
+                            setGateError((resp && resp.message) || 'Clave de administrador inválida.');
+                            $('#adminGatePwd').val('').attr('type', 'password').trigger('focus');
+                            $('#adminGateModal .btn-toggle-eye[data-target="#adminGatePwd"] i')
+                                .removeClass('fa-eye').addClass('fa-eye-slash');
+                        }
+                    }
+                ).always(function () { $btn.prop('disabled', false); });
+            });
+
+            // ===== Reset Clave
+            $(document).on('click', '.btn-reset', function () {
+                const id = $(this).data('id');
+                $('#resetAlert').hide().text('');
+                $('#adminPwd').val('').attr('type', 'password');
+                $('#resetPwdModal .btn-toggle-eye[data-target="#adminPwd"] i')
+                    .removeClass('fa-eye').addClass('fa-eye-slash');
+                $('#resetPwdModal').data('id', id).modal('show');
+            });
+
+            $('#btnConfirmReset').on('click', function () {
+                const id = $('#resetPwdModal').data('id');
+                const admin = $('#adminPwd').val().trim();
+                if (!admin) { $('#adminPwd')[0].reportValidity(); return; }
+                const $btn = $(this).prop('disabled', true);
+                $('#resetAlert').hide().text('');
+
+                $.post('@Url.Action("ResetClave", "Usuarios")',
+                    { id: id, adminPassword: admin, __RequestVerificationToken: csrf() })
+                    .done(function (resp) {
+                        if (resp && resp.success) {
+                            $('#resetPwdModal').modal('hide');
+                            $('#tempPwdValue').val(resp.tempPassword || '');
+                            $('#tempPwdModal').modal('show');
+                        } else {
+                            $('#resetAlert').text((resp && resp.message) || 'No se pudo reiniciar.').show();
+                            $('#adminPwd').val('').attr('type', 'password').trigger('focus');
+                            $('#resetPwdModal .btn-toggle-eye[data-target="#adminPwd"] i')
+                                .removeClass('fa-eye').addClass('fa-eye-slash');
+                        }
+                    })
+                    .fail(function () { $('#resetAlert').text('Error de red/servidor.').show(); })
+                    .always(function () { $btn.prop('disabled', false); });
+            });
+
+            $('#btnCopyTemp').on('click', function () {
+                const el = document.getElementById('tempPwdValue');
+                el.select(); el.setSelectionRange(0, 99999);
+                document.execCommand('copy');
+            });
+
+            // ===== Toggle Activar / Desactivar
+            $(document).on('click', '.btn-desactivar', function () {
+                const id = $(this).data('id');
+                const user = $(this).data('usuario');
+                $('#confirmarEliminarModal').data('id', id).data('accion', 'desactivar');
+                $('#delAlert').hide().text('');
+                $('#adminPwdDelete').val('').attr('type', 'password');
+                $('#confirmarEliminarModal .modal-title').text('Confirmar desactivación');
+                $('#textoEliminar').text('¿Estás seguro de desactivar al usuario "' + user + '"?');
+                $('#btnConfirmarEliminar').text('Desactivar')
+                    .removeClass('btn-success').addClass('btn-danger');
+                $('#confirmarEliminarModal .btn-toggle-eye[data-target="#adminPwdDelete"] i')
+                    .removeClass('fa-eye').addClass('fa-eye-slash');
+                $('#confirmarEliminarModal').modal('show');
+            });
+
+            $(document).on('click', '.btn-activar', function () {
+                const id = $(this).data('id');
+                const user = $(this).data('usuario');
+                $('#confirmarEliminarModal').data('id', id).data('accion', 'activar');
+                $('#delAlert').hide().text('');
+                $('#adminPwdDelete').val('').attr('type', 'password');
+                $('#confirmarEliminarModal .modal-title').text('Confirmar activación');
+                $('#textoEliminar').text('¿Estás seguro de activar al usuario "' + user + '"?');
+                $('#btnConfirmarEliminar').text('Activar')
+                    .removeClass('btn-danger').addClass('btn-success');
+                $('#confirmarEliminarModal .btn-toggle-eye[data-target="#adminPwdDelete"] i')
+                    .removeClass('fa-eye').addClass('fa-eye-slash');
+                $('#confirmarEliminarModal').modal('show');
+            });
+
+            $('#btnConfirmarEliminar').on('click', function () {
+                const id = $('#confirmarEliminarModal').data('id');
+                const accion = $('#confirmarEliminarModal').data('accion');
+                const admin = $('#adminPwdDelete').val().trim();
+                if (!admin) { $('#adminPwdDelete')[0].reportValidity(); return; }
+
+                const $btn = $(this).prop('disabled', true);
+                $('#delAlert').hide().text('');
+
+                const url = accion === 'activar'
+                    ? '@Url.Action("Activar", "Usuarios")'
+                    : '@Url.Action("Desactivar", "Usuarios")';
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    headers: { 'RequestVerificationToken': csrf() },
+                    data: { id, adminPassword: admin },
+                    success: function (resp) {
+                        if (resp && resp.success) {
+                            $('#confirmarEliminarModal').modal('hide');
+
+                            const $row = $('#row-' + id);
+                            const estadoColIndex = headers.indexOf('estado');
+
+                            if ($row.length && estadoColIndex > -1) {
+                                if (accion === 'activar') {
+                                    $row.find('td').eq(estadoColIndex).html(
+                                        '<span class="badge-soft active"><i class="fas fa-check-circle text-success"></i> Activo</span>');
+                                    const $accBtns = $row.find('td.col-accion .action-buttons');
+                                    $accBtns.find('.btn-activar').remove();
+                                    const userLogin = $row.find('td').eq(headers.indexOf('usuario')).text().trim();
+                                    $accBtns.append(
+                                        '<button type="button" class="btn-icon-box btn-icon--xs btn-desactivar ' +
+                                        '" data-id="' + id + '" data-usuario="' + userLogin + '" title="Desactivar" data-toggle="tooltip">' +
+                                        '<i class="fas fa-user-slash text-danger"></i></button>');
+                                } else {
+                                    $row.find('td').eq(estadoColIndex).html(
+                                        '<span class="badge-soft inactive"><i class="fas fa-times-circle text-danger"></i> Inactivo</span>');
+                                    const $accBtns = $row.find('td.col-accion .action-buttons');
+                                    $accBtns.find('.btn-desactivar').remove();
+                                    const userLogin = $row.find('td').eq(headers.indexOf('usuario')).text().trim();
+                                    $accBtns.append(
+                                        '<button type="button" class="btn-icon-box btn-icon--xs btn-activar ' +
+                                        '" data-id="' + id + '" data-usuario="' + userLogin + '" title="Activar" data-toggle="tooltip">' +
+                                        '<i class="fas fa-user-check text-success"></i></button>');
+                                }
+                            }
+
+                            updateFooterCounts();
+                            updateHeaderInactivos();
+                        } else {
+                            $('#delAlert').text(
+                                (resp && resp.message) ||
+                                (accion === 'activar' ? 'No se pudo activar.' : 'No se pudo desactivar.')
+                            ).show();
+                            $('#adminPwdDelete').val('').attr('type', 'password').trigger('focus');
+                            $('#confirmarEliminarModal .btn-toggle-eye[data-target="#adminPwdDelete"] i')
+                                .removeClass('fa-eye').addClass('fa-eye-slash');
+                        }
+                    },
+                    error: function () {
+                        $('#delAlert').text('Error de red/servidor.').show();
+                    },
+                    complete: function () { $btn.prop('disabled', false); }
+                });
+            });
+
+            // ===== Enter por modal
+            function bindEnterAsDefault($modal) {
+                const selector = '[data-enter-default]';
+                function fireDefault() {
+                    const $b = $modal.find(selector).filter(':visible').first();
+                    if ($b.length && !$b.prop('disabled')) $b.trigger('click');
+                }
+                $modal.off('keydown._enterDefault').on('keydown._enterDefault', function (e) {
+                    if (e.key === 'Enter') { e.preventDefault(); fireDefault(); }
+                });
+            }
+            $('#adminGateModal').on('shown.bs.modal', function () {
+                const $inp = $('#adminGatePwd');
+                $inp.attr('type', 'password').trigger('focus').select();
+                bindEnterAsDefault($(this));
+            });
+            $('#resetPwdModal').on('shown.bs.modal', function () {
+                const $inp = $('#adminPwd');
+                $inp.attr('type', 'password').trigger('focus').select();
+                bindEnterAsDefault($(this));
+            });
+            $('#confirmarEliminarModal').on('shown.bs.modal', function () {
+                const $inp = $('#adminPwdDelete');
+                $inp.attr('type', 'password').trigger('focus').select();
+                bindEnterAsDefault($(this));
+            });
+
+            // Toggle ojo (mostrar/ocultar password)
+            $(document).on('click', '.btn-toggle-eye', function () {
+                const target = $(this).data('target');
+                const $inp = $(target);
+                if (!$inp.length) return;
+                const isPwd = $inp.attr('type') === 'password';
+                $inp.attr('type', isPwd ? 'text' : 'password').trigger('focus');
+                const $ico = $(this).find('i');
+                if (isPwd) { $ico.removeClass('fa-eye-slash').addClass('fa-eye'); }
+                else { $ico.removeClass('fa-eye').addClass('fa-eye-slash'); }
+            });
+
+            /* =========================
+               ENTER = GUARDAR / REGISTRAR (delegado)
+               ========================= */
+            (function () {
+                function getCsrf($scope) {
+                    return $('input[name="__RequestVerificationToken"]', $scope).first().val();
+                }
+                function showErr($form, msg) {
+                    let $box = $form.find('#errorMessagesUsuarioReg, #errorMessagesUsuarioEdit').first();
+                    if (!$box.length) {
+                        $box = $('<div class="form-error"></div>').prependTo($form);
+                    }
+                    $box.text(msg || 'Se produjo un error.').addClass('show');
+                }
+                function hideErr($form) {
+                    $form.find('#errorMessagesUsuarioReg, #errorMessagesUsuarioEdit')
+                         .removeClass('show').empty();
+                }
+
+                // REGISTRAR
+                $(document).off('click.usr', '#btnRegistrar')
+                    .on('click.usr', '#btnRegistrar', function (e) {
+                        e.preventDefault();
+                        const $form = $('#registroUsuarioForm');
+                        if ($form.length) $form.trigger('submit');
+                    });
+
+                $(document).off('submit.usr', '#registroUsuarioForm')
+                    .on('submit.usr', '#registroUsuarioForm', function (e) {
+                        e.preventDefault();
+                        const $form = $(this);
+                        hideErr($form);
+
+                        if (!$form[0].checkValidity()) {
+                            $form[0].reportValidity();
+                            return;
+                        }
+
+                        const $clave = $form.find('#Clave');
+                        const $conf = $form.find('#ConfirmarClave');
+                        if ($clave.length) {
+                            const rx = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/;
+                            if (!rx.test($clave.val() || '')) {
+                                showErr($form, 'La contraseña no cumple los requisitos.');
+                                return;
+                            }
+                            if (($clave.val() || '') !== ($conf.val() || '')) {
+                                showErr($form, 'Las contraseñas no coinciden.');
+                                return;
+                            }
+                        }
+
+                        const $btn = $('#btnRegistrar').prop('disabled', true);
+
+                        $.ajax({
+                            url: $form.attr('action'),
+                            type: 'POST',
+                            data: $form.serialize(),
+                            headers: { 'RequestVerificationToken': getCsrf($form) }
+                        }).done(function (resp) {
+                            if (resp && resp.success) {
+                                $('#registroModal').modal('hide');
+                                location.reload();
+                            } else {
+                                showErr($form, (resp && resp.message) || 'No se pudo registrar.');
+                            }
+                        }).fail(function () {
+                            showErr($form, 'Error del servidor.');
+                        }).always(function () {
+                            $btn.prop('disabled', false);
+                        });
+                    });
+
+                // EDITAR
+                $(document).off('click.usr', '#btnEditar')
+                    .on('click.usr', '#btnEditar', function (e) {
+                        e.preventDefault();
+                        const $form = $('#editarUsuarioForm');
+                        if ($form.length) $form.trigger('submit');
+                    });
+
+                $(document).off('submit.usr', '#editarUsuarioForm')
+                    .on('submit.usr', '#editarUsuarioForm', function (e) {
+                        e.preventDefault();
+                        const $form = $(this);
+                        hideErr($form);
+
+                        if (!$form[0].checkValidity()) {
+                            $form[0].reportValidity();
+                            return;
+                        }
+
+                        const $btn = $('#btnEditar').prop('disabled', true);
+
+                        $.ajax({
+                            url: $form.attr('action'),
+                            type: 'POST',
+                            data: $form.serialize(),
+                            headers: { 'RequestVerificationToken': getCsrf($form) }
+                        }).done(function (resp) {
+                            if (resp && resp.success) {
+                                $('#editarModal').modal('hide');
+                                location.reload();
+                            } else {
+                                showErr($form, (resp && resp.message) || 'No se pudo guardar.');
+                            }
+                        }).fail(function () {
+                            showErr($form, 'Error del servidor.');
+                        }).always(function () {
+                            $btn.prop('disabled', false);
+                        });
+                    });
+            })();
+
+        })(); // fin IIFE principal
+    </script>
+}

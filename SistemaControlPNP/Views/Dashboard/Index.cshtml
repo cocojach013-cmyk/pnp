@@ -1,0 +1,521 @@
+﻿@model ControlPNP.ViewModels.DashboardVM
+@using System.Security.Claims
+
+<!-- FontAwesome (solo CSS, tu layout ya trae Bootstrap 4 JS/CSS) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<div class="dashboard-container">
+    <div class="page-zoom">
+        <div class="container-fluid pt-1 pb-5 px-3 px-sm-4">
+
+            <!-- ===== Títulos institucionales ===== -->
+            <h1 class="text-center mb-2 dashboard-title">
+                <span class="title-line-1">POLICÍA NACIONAL DEL PERÚ</span>
+                <span class="title-line-2">Sistema de Control de asistencia del personal policial</span>
+                <span class="title-line-3">COMISARÍA DE TURISMO CAJAMARCA</span>
+            </h1>
+
+            <div class="alert alert-success text-center fw-bold welcome-strip mb-3">
+                Bienvenido, @User?.Identity?.Name
+            </div>
+
+            <!-- ===== KPIs ===== -->
+            <div class="row text-center mb-4 g-3">
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="card kpi shadow-sm">
+                        <div class="card-body">
+                            <i class="fas fa-id-badge fa-lg mb-2 text-success"></i>
+                            <h6 class="text-success m-0">Personal activos</h6>
+                            <div class="kpi-value">@Model.PersonalActivos</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="card kpi shadow-sm">
+                        <div class="card-body">
+                            <i class="fas fa-user-shield fa-lg mb-2 text-success"></i>
+                            <h6 class="text-success m-0">Usuarios activos</h6>
+                            <div class="kpi-value">@Model.UsuariosActivos</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="card kpi shadow-sm">
+                        <div class="card-body">
+                            <i class="fas fa-user-check fa-lg mb-2 text-success"></i>
+                            <h6 class="text-success m-0">Asistencias (hoy)</h6>
+                            <div class="kpi-value">@Model.AsistenciasHoy</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="card kpi shadow-sm">
+                        <div class="card-body">
+                            <i class="fas fa-route fa-lg mb-2 text-success"></i>
+                            <h6 class="text-success m-0">Movimientos abiertos</h6>
+                            <div class="kpi-value">@Model.MovimientosAbiertos</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Accesos rápidos ===== -->
+            <div class="row text-center g-3 mb-4">
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <a href="@Url.Action("ListaPersonal", "Personal")" class="btn dashboard-btn w-100 py-3">
+                        <i class="fas fa-id-badge fa-2x mb-2"></i><br />
+                        Gestión de Personal
+                    </a>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <a href="@Url.Action("ListaUsuarios", "Usuarios")" class="btn dashboard-btn w-100 py-3">
+                        <i class="fas fa-users-cog fa-2x mb-2"></i><br />
+                        Gestión de Usuarios
+                    </a>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <a href="@Url.Action("ListaAuditoria", "Auditoria")" class="btn dashboard-btn w-100 py-3">
+                        <i class="fas fa-history fa-2x mb-2"></i><br />
+                        Bitácora / Auditoría
+                    </a>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <a href='@Url.Action("ListaAsistencia", "Asistencia")#asistencia' class="btn dashboard-btn w-100 py-3">
+                        <i class="fas fa-user-check fa-2x mb-2"></i><br />
+                        Control de Asistencia
+                    </a>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <a href='@Url.Action("ListaMovimiento", "Movimiento")' class="btn dashboard-btn w-100 py-3" title="Movimiento de personal">
+                        <i class="fas fa-person-walking fa-2x mb-2"></i><br />
+                        Movimiento de personal
+                    </a>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <a href="@Url.Action("Ayuda", "Dashboard")" class="btn dashboard-btn w-100 py-3">
+                        <i class="fas fa-circle-question fa-2x mb-2"></i><br />
+                        Ayuda
+                    </a>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <!-- ===== Últimas Asistencias ===== -->
+                <div class="col-12 col-lg-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header fw-bold">
+                            <i class="fas fa-user-check me-2"></i> Últimas asistencias
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Personal</th>
+                                            <th class="text-nowrap">Unidad</th>
+                                            <th>Ingreso</th>
+                                            <th>Salida</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.UltimasAsistencias.Count == 0)
+                                        {
+                                            <tr><td colspan="4" class="text-center text-muted py-3">Sin registros</td></tr>
+                                        }
+                                        else
+                                        {
+                                            foreach (var a in Model.UltimasAsistencias)
+                                            {
+                                                <tr>
+                                                    <td>@a.PersonalNombre</td>
+                                                    <td class="text-nowrap">@a.Unidad</td>
+                                                    <td class="text-nowrap">@a.Ingreso.ToString("dd/MM/yyyy HH:mm")</td>
+                                                    <td class="text-nowrap">
+                                                        @(a.Salida.HasValue? a.Salida.Value.ToString("dd/MM/yyyy HH:mm") : "-")
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Últimos Movimientos ===== -->
+                <div class="col-12 col-lg-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header fw-bold">
+                            <i class="fas fa-route me-2"></i> Últimos movimientos
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Personal</th>
+                                            <th>Motivo</th>
+                                            <th>Destino</th>
+                                            <th>Salida</th>
+                                            <th>Retorno</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.UltimosMovimientos.Count == 0)
+                                        {
+                                            <tr><td colspan="5" class="text-center text-muted py-3">Sin registros</td></tr>
+                                        }
+                                        else
+                                        {
+                                            foreach (var m in Model.UltimosMovimientos)
+                                            {
+                                                <tr>
+                                                    <td>@m.PersonalNombre</td>
+                                                    <td>@m.Motivo</td>
+                                                    <td class="text-nowrap">@m.Destino</td>
+                                                    <td class="text-nowrap">@m.Salida.ToString("dd/MM/yyyy HH:mm")</td>
+                                                    <td class="text-nowrap">@(m.Retorno.HasValue? m.Retorno.Value.ToString("dd/MM/yyyy HH:mm") : "-")</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Últimas acciones (Auditoría) ===== -->
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header fw-bold">
+                            <i class="fas fa-history me-2"></i> Últimas acciones del sistema
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Fecha/Hora</th>
+                                            <th>Usuario</th>
+                                            <th>Acción</th>
+                                            <th>Detalle</th>
+                                            <th>IP</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.UltimasAcciones.Count == 0)
+                                        {
+                                            <tr><td colspan="5" class="text-center text-muted py-3">Sin registros</td></tr>
+                                        }
+                                        else
+                                        {
+                                            foreach (var ac in Model.UltimasAcciones)
+                                            {
+                                                <tr>
+                                                    <td class="text-nowrap">@ac.FechaHora.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                                    <td>@ac.Usuario</td>
+                                                    <td class="text-nowrap">@ac.Accion</td>
+                                                    <td>@ac.Descripcion</td>
+                                                    <td class="text-nowrap">@ac.Ip</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /row -->
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --pnp-green: #00471B;
+        --pnp-green-700: #003715;
+        --pnp-gold: #FFD700;
+        --ring: rgba(0,122,51,.18);
+    }
+
+    /* ===== Zoom controlado (respeta tu _Layout) ===== */
+    @@media (min-width:993px) {
+        .page-zoom {
+            transform: scale(.9);
+            transform-origin: top center;
+            width: calc(100% / .9);
+        }
+    }
+
+    @@media (max-width:992px) {
+        .page-zoom {
+            transform: none !important;
+            width: 100% !important;
+        }
+    }
+
+    /* ===== Títulos (3 líneas) ===== */
+    .dashboard-title {
+        color: var(--pnp-green);
+        font-weight: 900;
+        letter-spacing: .6px;
+        line-height: 1.15;
+        margin-top: .15rem;
+        margin-bottom: .35rem;
+        text-transform: uppercase;
+        text-shadow: 0 1px 0 #cfe5d3;
+    }
+
+        .dashboard-title .title-line-1 {
+            display: block;
+            font-size: clamp(1.15rem,2.6vw,1.6rem);
+        }
+
+        .dashboard-title .title-line-2 {
+            display: block;
+            font-size: clamp(.92rem,2.0vw,1.05rem);
+            font-weight: 800;
+            text-transform: none;
+            color: #2E3B3E;
+            margin-top: .05rem;
+        }
+
+        .dashboard-title .title-line-3 {
+            display: block;
+            font-size: clamp(1.0rem,2.2vw,1.2rem);
+            font-weight: 900;
+            margin-top: .10rem;
+        }
+
+    /* ===== Bienvenida ===== */
+    .welcome-strip {
+        color: #00471B;
+        background: #eaf5ec;
+        border: 1px solid #c8e3cc;
+        padding: .5rem .75rem;
+        font-size: clamp(.88rem,1.8vw,.98rem);
+    }
+
+    /* ===== KPIs ===== */
+    .card.kpi {
+        border: 1px solid #d7e8da;
+        background: #ffffffee;
+        border-radius: 14px;
+    }
+
+        .card.kpi .card-body {
+            padding: .75rem .85rem !important;
+        }
+
+        .card.kpi i {
+            font-size: 1.05rem !important;
+            margin-bottom: .35rem !important;
+        }
+
+        .card.kpi h6 {
+            font-size: .9rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+    .kpi .kpi-value {
+        font-size: 24px !important;
+        margin-top: 4px !important;
+        color: #00471B;
+        font-weight: 800;
+    }
+
+    @@media (max-width:420px) {
+        .card.kpi .card-body {
+            padding: .6rem .7rem !important;
+        }
+
+        .kpi .kpi-value {
+            font-size: 21px !important;
+        }
+    }
+
+    /* ===== Accesos rápidos ===== */
+    .dashboard-btn {
+        padding: .75rem 1rem !important;
+        font-size: .95rem !important;
+        border: 2px solid #00471B;
+        color: #00471B;
+        background: #ffffffcc;
+        transition: all .2s ease-in-out;
+        font-weight: 700;
+        letter-spacing: .3px;
+    }
+
+        .dashboard-btn i {
+            font-size: 1.5rem !important;
+            margin-bottom: .25rem !important;
+        }
+
+        .dashboard-btn:hover {
+            background: #00471B;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(0,0,0,.08),0 0 0 .2rem var(--ring);
+        }
+
+    .btn:focus {
+        box-shadow: 0 0 0 .2rem var(--ring) !important;
+    }
+
+    @@media (max-width:576px) {
+        .row.g-3.mb-4 .col-12 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+
+        .dashboard-btn {
+            padding: .6rem .85rem !important;
+        }
+
+            .dashboard-btn i {
+                font-size: 1.25rem !important;
+            }
+    }
+
+    /* ===== Tablas (una debajo de otra en cualquier ancho) ===== */
+    .dashboard-container .row.g-3 > .col-lg-6 {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+
+    .dashboard-container .row.g-3 > .col-12,
+    .dashboard-container .row.g-3 > .col-lg-6 {
+        margin-bottom: .5rem;
+    }
+
+    .table.table-sm td, .table.table-sm th {
+        padding-top: .35rem !important;
+        padding-bottom: .35rem !important;
+        vertical-align: middle;
+        font-size: .92rem;
+        line-height: 1.25;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    .card .card-header.fw-bold {
+        padding: .5rem .85rem !important;
+        font-size: .95rem;
+    }
+
+    @@media (max-width:576px) {
+        .table.table-sm td, .table.table-sm th {
+            font-size: .88rem;
+        }
+    }
+
+    .table-responsive {
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* ===== Ajustes finos ===== */
+    @@media (min-width:576px) {
+        .container-fluid.pt-1.pb-5 {
+            padding-top: .25rem !important;
+        }
+    }
+
+    .dashboard-container, .dashboard-container * {
+        word-wrap: break-word;
+        overflow-wrap: anywhere;
+        max-width: 100%;
+    }
+
+        /* Últimos movimientos: que Motivo/Destino envuelvan, fechas en nowrap */
+        .dashboard-container .row.g-3 > .col-lg-6:nth-of-type(2) table {
+            table-layout: auto;
+            width: 100%;
+        }
+
+            .dashboard-container .row.g-3 > .col-lg-6:nth-of-type(2) table th,
+            .dashboard-container .row.g-3 > .col-lg-6:nth-of-type(2) table td {
+                white-space: normal !important;
+                word-break: break-word;
+                overflow-wrap: anywhere;
+            }
+
+                .dashboard-container .row.g-3 > .col-lg-6:nth-of-type(2) table th:nth-child(4),
+                .dashboard-container .row.g-3 > .col-lg-6:nth-of-type(2) table td:nth-child(4),
+                .dashboard-container .row.g-3 > .col-lg-6:nth-of-type(2) table th:nth-child(5),
+                .dashboard-container .row.g-3 > .col-lg-6:nth-of-type(2) table td:nth-child(5) {
+                    white-space: nowrap !important;
+                }
+
+    @@media (min-width:576px) {
+        .dashboard-container .row.g-3 > .col-lg-6:nth-of-type(2) table th:nth-child(2),
+        .dashboard-container .row.g-3 > .col-lg-6:nth-of-type(2) table td:nth-child(2) {
+            max-width: 24ch;
+        }
+
+        .dashboard-container .row.g-3 > .col-lg-6:nth-of-type(2) table th:nth-child(3),
+        .dashboard-container .row.g-3 > .col-lg-6:nth-of-type(2) table td:nth-child(3) {
+            max-width: 28ch;
+        }
+    }
+
+    /* ===== Encabezados de tablas (PNP verde + sticky + scroll solo cuerpo) ===== */
+    .dashboard-container .card .table thead th {
+        background: linear-gradient(180deg,var(--pnp-green),var(--pnp-green-700)) !important;
+        color: #fff !important;
+        border-bottom: 0 !important;
+        letter-spacing: .2px;
+        font-weight: 800;
+        padding-top: .45rem !important;
+        padding-bottom: .45rem !important;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+
+    .dashboard-container .card .table thead tr {
+        border-bottom: 1px solid rgba(255,255,255,.15) !important;
+    }
+
+    /* Scroll solo en el cuerpo de cada tabla */
+    .dashboard-container .card .table-responsive {
+        position: relative;
+        max-height: 420px;
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Zebra + hover sutil */
+    .dashboard-container .card .table.table-sm tbody tr:nth-of-type(even) {
+        background-color: #f8faf9;
+    }
+
+    .dashboard-container .card .table.table-sm tbody tr:hover {
+        background-color: #eef6f0;
+    }
+
+    /* Respeto de nowrap utilitario */
+    .dashboard-container .card .table td,
+    .dashboard-container .card .table th {
+        white-space: normal;
+        word-break: break-word;
+    }
+
+        .dashboard-container .card .table th.text-nowrap,
+        .dashboard-container .card .table td.text-nowrap {
+            white-space: nowrap !important;
+        }
+</style>

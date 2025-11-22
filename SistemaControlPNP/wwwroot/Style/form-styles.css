@@ -1,0 +1,1434 @@
+﻿/* =========================================================
+   PALETA BASE PNP
+   ========================================================= */
+:root {
+    --pnp-green: #00471B;
+    --pnp-green-700: #003715;
+    --pnp-gold: #FFD700;
+    --surface-2: #e4ebe7;
+    --chip: #e1eae5;
+    --line: #dce3df;
+    --ink: #0f1a14;
+    --card-bg: #ffffff;
+}
+
+/* =========================================================
+   CONTENEDOR VISTA USUARIOS (usa 100% del ancho)
+   ========================================================= */
+.vista-crud.container.page-wrap.content-stretch {
+    width: 100% !important;
+    max-width: 100% !important; /* nada de 1100px */
+    padding-left: .75rem !important; /* pequeño margen lateral */
+    padding-right: .75rem !important;
+}
+
+/* Las tarjetas ocupan todo el ancho del contenedor */
+.vista-crud .header-card,
+.vista-crud .table-card {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* =========================================================
+   HEADER-CARD (bloque blanco con título + filtros)
+   ========================================================= */
+.header-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,.05);
+}
+
+    .header-card .page-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--pnp-green);
+        margin: 0;
+    }
+
+    .header-card .page-subtle {
+        font-size: .9rem;
+        color: #66736b;
+        margin-top: .15rem;
+    }
+
+    /* Pastillas (Total / Inactivos) */
+    .header-card .stat-pill {
+        background: var(--chip);
+        border-radius: 20px;
+        padding: .25rem .6rem;
+        font-size: .85rem;
+        font-weight: 600;
+        color: var(--pnp-green);
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        line-height: 1;
+        cursor: default;
+        transition: background .15s ease, box-shadow .15s ease, transform .12s ease;
+    }
+
+        /* Hover de pastillas */
+        .header-card .stat-pill:hover {
+            background: #d8e4dd;
+            box-shadow: 0 0 0 1px rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.08);
+            transform: translateY(-1px);
+        }
+
+        /* Tooltips */
+        .header-card .stat-pill[data-toggle="tooltip"],
+        .header-card .stat-pill[data-bs-toggle="tooltip"] {
+            cursor: pointer;
+        }
+
+.vista-crud .header-card .header-actions {
+    margin-top: .4rem;
+}
+
+/* Compacto en móviles (solo header-card) */
+@media (max-width: 768px) {
+    .header-card {
+        padding: .75rem .9rem;
+        border-radius: 14px;
+    }
+
+        .header-card .page-title {
+            font-size: 1.1rem;
+        }
+
+        .header-card .page-subtle {
+            font-size: .82rem;
+        }
+}
+
+/* =========================================================
+   VISTA USUARIOS — CABECERA
+   ========================================================= */
+
+/* Fila de acciones (base / desktop) */
+.vista-crud .header-actions {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    width: auto; /* en desktop NO 100% */
+}
+
+    /* Píldoras dentro de la vista usuarios */
+    .vista-crud .header-actions .stat-pill {
+        flex: 0 0 auto;
+        white-space: nowrap;
+    }
+
+    /* Controles (buscador + filtros + botones) */
+    .vista-crud .header-actions .search-wrap {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        flex-wrap: wrap;
+        max-width: 100%;
+    }
+
+        /* Input con ícono */
+        .vista-crud .header-actions .search-wrap .input-ico {
+            position: relative;
+        }
+
+            .vista-crud .header-actions .search-wrap .input-ico i {
+                position: absolute;
+                left: .55rem;
+                top: 50%;
+                transform: translateY(-50%);
+                opacity: .65;
+            }
+
+            .vista-crud .header-actions .search-wrap .input-ico input {
+                padding-left: 1.85rem;
+            }
+
+/* =========================================================
+   DESKTOP: título + fila de filtros en UNA sola línea
+   ========================================================= */
+@media (min-width: 992px) {
+
+    /* Contenedor del header-card */
+    .vista-crud .header-card > .d-flex {
+        display: flex;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        gap: .75rem;
+    }
+
+    /* Acciones a la derecha, misma fila que el título */
+    .vista-crud .header-actions {
+        margin-left: auto !important;
+        width: auto !important;
+    }
+
+        .vista-crud .header-actions .search-wrap {
+            flex-wrap: nowrap;
+            overflow-x: visible;
+        }
+
+            .vista-crud .header-actions .search-wrap .btn,
+            .vista-crud .header-actions .search-wrap a.btn,
+            .vista-crud .header-actions .search-wrap .form-select,
+            .vista-crud .header-actions .search-wrap .date-range {
+                flex: 0 0 auto;
+                white-space: nowrap;
+            }
+
+            .vista-crud .header-actions .search-wrap .input-ico {
+                flex: 0 1 260px;
+                min-width: 220px;
+                max-width: 360px;
+            }
+}
+
+/* =========================================================
+   MÓVIL/TABLET: FILTROS EN UNA SOLA FILA CON SCROLL
+   ========================================================= */
+@media (max-width: 991.98px) {
+
+    .vista-crud .header-card .page-title,
+    .vista-crud .page-subtle {
+        width: 100% !important;
+        text-align: center !important;
+        justify-content: center !important;
+        padding-inline: 44px !important;
+    }
+
+    /* Acciones ocupan el ancho */
+    .vista-crud .header-actions {
+        width: 100% !important;
+    }
+
+        .vista-crud .header-actions .stat-pill {
+            flex: 0 0 auto;
+            white-space: nowrap;
+        }
+
+        /* Una sola fila desplazable horizontalmente */
+        .vista-crud .header-actions .search-wrap {
+            order: 2 !important;
+            flex: 0 0 100% !important;
+            display: flex;
+            align-items: center;
+            gap: .35rem !important;
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-gutter: stable both-edges;
+            justify-content: flex-start !important;
+        }
+
+            /* Input de búsqueda flexible */
+            .vista-crud .header-actions .search-wrap .input-ico {
+                flex: 1 0 150px !important;
+                min-width: 150px !important;
+                max-width: 230px !important;
+            }
+
+                .vista-crud .header-actions .search-wrap .input-ico input {
+                    height: 28px !important;
+                    padding-left: 1.65rem !important;
+                    font-size: .84rem !important;
+                    white-space: nowrap;
+                }
+
+                .vista-crud .header-actions .search-wrap .input-ico i {
+                    left: .45rem !important;
+                }
+
+            /* Select FILTRAR más angosto en móvil */
+            .vista-crud .header-actions .search-wrap .form-select {
+                flex: 0 0 90px !important;
+                min-width: 90px !important;
+                max-width: 100px !important;
+                height: 28px !important;
+                padding: .22rem .55rem !important;
+                font-size: .84rem !important;
+                white-space: nowrap !important;
+            }
+
+            /* Botones Nuevo / Imprimir compactos SOLO en móvil */
+            .vista-crud .header-actions .search-wrap .btn,
+            .vista-crud .header-actions .search-wrap .btn-sm {
+                flex: 0 0 auto !important;
+                height: 28px !important;
+                padding: .22rem .55rem !important;
+                font-size: .84rem !important;
+                white-space: nowrap !important;
+            }
+
+            /* Scrollbar discreto */
+            .vista-crud .header-actions .search-wrap::-webkit-scrollbar {
+                height: 6px;
+            }
+
+            .vista-crud .header-actions .search-wrap::-webkit-scrollbar-thumb {
+                background: #cfd8d3;
+                border-radius: 6px;
+            }
+}
+
+/* =========================================================
+   TABLA USUARIOS (RESPONSIVA + SCROLL HORIZONTAL)
+   ========================================================= */
+
+/* Encabezado sticky con degradado PNP */
+.vista-crud .table-fixed-head thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: linear-gradient(180deg, var(--pnp-green), var(--pnp-green-700)) !important;
+    color: #fff !important;
+}
+
+/* Encabezado de la tabla USUARIOS más grande */
+.vista-crud .table-wide thead th {
+    padding-top: .3rem;
+    padding-bottom: .3rem;
+    padding-left: .4rem;
+    padding-right: .4rem;
+    font-size: .80rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+}
+
+/* Contenedor que maneja el scroll horizontal SOLO en la tabla */
+.vista-crud .table-scroll-x {
+    width: 100%;
+    overflow-x: auto !important;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable both-edges;
+}
+
+    /* La tabla puede crecer tanto como necesite */
+    .vista-crud .table-scroll-x .table-wide {
+        width: max-content !important;
+        min-width: 100% !important;
+        table-layout: auto !important;
+    }
+
+/* Celdas: NO pasan a la otra columna, cortan con ... */
+.vista-crud .table-wide th,
+.vista-crud .table-wide td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =========================================================
+   FILA SELECCIONADA (permite selección múltiple)
+   ========================================================= */
+.vista-crud tr.row-selected {
+    background: rgba(0, 122, 51, 0.16) !important;
+}
+
+    .vista-crud tr.row-selected td {
+        background: rgba(0, 122, 51, 0.16) !important;
+        color: #00471B !important;
+        font-weight: 600;
+    }
+
+/* =========================================================
+   COLUMNA ACCIÓN + BOTONES
+   ========================================================= */
+.vista-crud th.col-accion,
+.vista-crud td.col-accion {
+    width: 80px;
+    max-width: 80px;
+    text-align: center;
+}
+
+/* GRID para alinear Editar / Reset / Activar en columnas */
+.vista-crud .col-accion .action-buttons {
+    display: grid !important;
+    grid-template-columns: repeat(3, 26px);
+    justify-content: center;
+    align-items: center;
+    column-gap: .45rem !important;
+    row-gap: .18rem;
+    width: 100%;
+}
+
+/* Marco base de todos los botones */
+.vista-crud .btn-icon-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: #ffffff;
+    border: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12);
+    font-size: .8rem;
+    padding: 0;
+}
+
+    .vista-crud .btn-icon-box:hover {
+        box-shadow: 0 0 0 1px rgba(0,0,0,.06), 0 2px 6px rgba(0,0,0,.14);
+        transform: translateY(-1px);
+    }
+
+/* Columnas fijas */
+.vista-crud .action-buttons .btn-editar {
+    grid-column: 1;
+}
+
+.vista-crud .action-buttons .btn-reset {
+    grid-column: 2;
+}
+
+.vista-crud .action-buttons .btn-desactivar,
+.vista-crud .action-buttons .btn-activar {
+    grid-column: 3;
+}
+
+/* SOLO el marco del botón reset (fa-key) se hace más pequeño */
+.vista-crud .btn-reset {
+    width: 22px !important;
+    height: 22px !important;
+    border-radius: 5px !important;
+}
+
+    .vista-crud .btn-reset i {
+        font-size: 0.75rem !important;
+        transform: translateY(0.5px);
+    }
+
+/* Footer tabla -> BLANCO */
+.vista-crud .table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .75rem;
+    padding: .55rem .8rem;
+    background: #ffffff !important;
+    font-size: .86rem;
+}
+
+/* =========================================================
+   USUARIOS: FORZAR SCROLL HORIZONTAL EN PANTALLAS MUY PEQUEÑAS
+   ========================================================= */
+@media (max-width: 575.98px) {
+
+    .vista-crud .table-scroll-x {
+        display: block;
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: auto !important;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+    }
+
+        /* Se asegura que la tabla sea más ancha que el móvil → barra */
+        .vista-crud .table-scroll-x .table-wide {
+            min-width: 650px !important;
+            width: max-content !important;
+        }
+}
+
+/* =========================================================
+   MODALES ADAPTATIVOS PNP (BASE)
+   ========================================================= */
+.modal {
+    padding: 0 !important;
+}
+
+.modal-dialog {
+    margin: .75rem auto;
+    width: 100%;
+    max-width: 95vw;
+}
+
+.modal-content {
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    background: #ffffff;
+    box-shadow: 0 20px 48px rgba(0,0,0,.22);
+    overflow: hidden;
+}
+
+/* Header */
+.modal-header {
+    background: linear-gradient(180deg, var(--pnp-green), var(--pnp-green-700));
+    color: #fff;
+    padding: .75rem 1rem;
+}
+
+/* Body */
+.modal-body {
+    background: var(--form-bg, #f3f8f8);
+    padding: .9rem;
+    max-height: calc(100dvh - 180px);
+    overflow-y: auto;
+}
+
+/* ---- MODALES GRANDES (Registrar / Editar) ---- */
+.modal-lg .modal-dialog {
+    max-width: min(90vw, 750px);
+}
+
+/* ---- MODALES XS (AdminGate, Reset, Activar/Desactivar) ---- */
+.modal-xs .modal-dialog,
+.modal-slim .modal-dialog {
+    max-width: min(86vw, 380px);
+}
+
+/* ---- PANTALLAS MUY PEQUEÑAS (<576px) ---- */
+@media (max-width: 575.98px) {
+
+    .modal-dialog {
+        width: 92vw !important;
+        max-width: 92vw !important;
+        margin: .5rem auto !important;
+    }
+
+    .modal-content {
+        border-radius: 16px !important;
+    }
+
+    .modal-body {
+        max-height: calc(100dvh - 140px) !important;
+        padding: .75rem !important;
+    }
+
+    .modal-footer .btn {
+        padding: .35rem .75rem !important;
+        font-size: .85rem !important;
+    }
+}
+
+/* ---- PANTALLA ULTRA PEQUEÑA (<400px) ---- */
+@media (max-width: 400px) {
+    .modal-dialog {
+        max-width: 96vw !important;
+    }
+
+    .modal-body {
+        max-height: calc(100dvh - 120px) !important;
+    }
+}
+
+
+
+/* =========================================================
+   IMPRESIÓN – SOLO TÍTULO + TABLA, SIN MENÚ NI TARJETA
+   ========================================================= */
+@media print {
+
+    html, body {
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    .print-scope, .print-scope * {
+        background: #fff !important;
+        box-shadow: none !important;
+        filter: none !important;
+    }
+
+    /* Ocultar completamente menú, header general, botones e iconos de acción */
+    .header-actions,
+    .btn,
+    [data-toggle="tooltip"],
+    .col-accion, th.col-accion, td.col-accion, .action-buttons,
+    #sidebarToggle,
+    .sidebar-toggle,
+    .menu-toggle,
+    .btn-menu,
+    .toggle-button,
+    .sidebar,
+    header .menu,
+    nav .menu,
+    nav,
+    header,
+    .navbar-toggler,
+    .navbar-toggler-icon,
+    #btnMenuMobile,
+    #mobileMenuButton {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    /* 🔥 Mata cualquier cosa flotante (como ese cuadro blanco) */
+    *[style*="position: fixed"],
+    *[style*="position: absolute"],
+    .position-fixed,
+    .position-absolute {
+        display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    /* Quitar espacio de contenedores superiores */
+    body, .container, .page-wrap, .vista-crud {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+        /* Quitar la tarjeta blanca y dejar solo el título */
+        .vista-crud .header-card {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            padding: 0 !important;
+            margin: 0 0 8px 0 !important;
+        }
+
+        /* No imprimir la descripción bajo el título */
+        .vista-crud .page-subtle {
+            display: none !important;
+        }
+
+        /* No imprimir el ícono del título */
+        .vista-crud .page-title i {
+            display: none !important;
+        }
+
+    /* Título centrado y limpio */
+    .page-title {
+        display: block !important;
+        text-align: center !important;
+        font-size: 18px !important;
+        font-weight: 800 !important;
+        color: #000 !important;
+        margin: 0 0 10px !important;
+    }
+
+    /* Tabla ordenada para impresión */
+    .tabla-crud {
+        width: 100% !important;
+        table-layout: fixed !important;
+        border-collapse: collapse !important;
+        font-size: 11px !important;
+    }
+
+        .tabla-crud th,
+        .tabla-crud td {
+            padding: 4px 6px !important;
+            white-space: normal !important;
+            word-break: break-word !important;
+            color: #000 !important;
+            background: #fff !important;
+            border-color: #000 !important;
+        }
+}
+
+/* Quitar márgenes del contenedor general para que no quede hueco en impresión */
+body, .container, .page-wrap, .vista-crud {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+
+
+
+
+/* =========================================================
+   MODAL — Confirmación de Administrador (RESPONSIVO COMPACTO)
+   ========================================================= */
+
+/* Tamaño base en escritorio / pantallas grandes */
+.modal-crud-admingate .modal-dialog {
+    max-width: 300px !important;
+    width: 50vw !important;
+    margin: 1rem auto !important;
+}
+
+/* Contenido */
+.modal-crud-admingate .modal-content {
+    border-radius: 12px !important;
+    border: 1px solid var(--line);
+    background: #ffffff;
+    box-shadow: 0 20px 48px rgba(0,0,0,.22);
+    overflow: hidden;
+}
+
+/* Header compacto */
+.modal-crud-admingate .modal-header {
+    padding: .45rem .9rem !important;
+    font-size: .85rem !important;
+}
+
+/* Título */
+.modal-crud-admingate .modal-title {
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+}
+
+/* Body compacto */
+.modal-crud-admingate .modal-body {
+    padding: .75rem !important;
+    background: #f5f7f7 !important;
+    max-height: calc(100dvh - 180px);
+    overflow-y: auto;
+    font-size: .9rem !important;
+}
+
+/* Input de contraseña */
+.modal-crud-admingate input[type="password"],
+.modal-crud-admingate input[type="text"] {
+    height: 32px !important;
+    font-size: .9rem !important;
+}
+
+/* Botón del ojo */
+.modal-crud-admingate .btn-toggle-eye {
+    padding: .25rem .5rem !important;
+}
+
+/* Footer compacto */
+.modal-crud-admingate .modal-footer {
+    padding: .5rem .75rem !important;
+}
+
+    .modal-crud-admingate .modal-footer .btn {
+        padding: .35rem .9rem !important;
+        font-size: .85rem !important;
+    }
+
+/* Pantallas pequeñas: ir reduciendo tamaño */
+@media (max-width: 575.98px) {
+    .modal-crud-admingate .modal-dialog {
+        max-width: 260px !important;
+        width: 80vw !important;
+        margin: .75rem auto !important;
+    }
+}
+
+@media (max-width: 400px) {
+    .modal-crud-admingate .modal-dialog {
+        max-width: 230px !important;
+        width: 86vw !important;
+    }
+}
+
+@media (max-width: 340px) {
+    .modal-crud-admingate .modal-dialog {
+        max-width: 210px !important;
+        width: 90vw !important;
+    }
+}
+/* =========================================================
+   MODALES IGUALES: AdminGate y ResetPwd
+   Compactos, elegantes y consistentes
+   ========================================================= */
+
+/* ===== Tamaño base en escritorio ===== */
+.modal-crud-admingate .modal-dialog,
+.modal-crud-resetpwd .modal-dialog {
+    max-width: 300px !important; /* tamaño compacto */
+    width: 50vw !important; /* mitad del ancho */
+    margin: 1rem auto !important;
+}
+
+/* ===== Contenido unificado ===== */
+.modal-crud-admingate .modal-content,
+.modal-crud-resetpwd .modal-content {
+    border-radius: 12px !important;
+    border: 1px solid var(--line);
+    background: #ffffff;
+    box-shadow: 0 20px 48px rgba(0,0,0,.22);
+    overflow: hidden;
+}
+
+/* ===== Header compacto ===== */
+.modal-crud-admingate .modal-header,
+.modal-crud-resetpwd .modal-header {
+    padding: .45rem .9rem !important;
+    background: linear-gradient(180deg, var(--pnp-green), var(--pnp-green-700)) !important;
+    color: #fff !important;
+}
+
+.modal-crud-admingate .modal-title,
+.modal-crud-resetpwd .modal-title {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+}
+
+/* ===== Body compacto ===== */
+.modal-crud-admingate .modal-body,
+.modal-crud-resetpwd .modal-body {
+    padding: .75rem !important;
+    background: #f5f7f7 !important;
+    font-size: .9rem !important;
+    max-height: calc(100dvh - 180px) !important;
+    overflow-y: auto !important;
+}
+
+/* ===== Inputs compactos ===== */
+.modal-crud-admingate input[type="password"],
+.modal-crud-admingate input[type="text"],
+.modal-crud-resetpwd input[type="password"],
+.modal-crud-resetpwd input[type="text"] {
+    height: 32px !important;
+    font-size: .9rem !important;
+}
+
+.modal-crud-admingate .btn-toggle-eye,
+.modal-crud-resetpwd .btn-toggle-eye {
+    padding: .25rem .5rem !important;
+}
+
+/* ===== Footer compacto ===== */
+.modal-crud-admingate .modal-footer,
+.modal-crud-resetpwd .modal-footer {
+    padding: .5rem .75rem !important;
+}
+
+    .modal-crud-admingate .modal-footer .btn,
+    .modal-crud-resetpwd .modal-footer .btn {
+        padding: .35rem .9rem !important;
+        font-size: .85rem !important;
+    }
+
+/* =========================================================
+   RESPONSIVE: REDUCIR TAMAÑO EN PANTALLAS PEQUEÑAS
+   ========================================================= */
+@media (max-width: 575.98px) {
+    .modal-crud-admingate .modal-dialog,
+    .modal-crud-resetpwd .modal-dialog {
+        max-width: 260px !important;
+        width: 80vw !important;
+        margin: .75rem auto !important;
+    }
+}
+
+@media (max-width: 400px) {
+    .modal-crud-admingate .modal-dialog,
+    .modal-crud-resetpwd .modal-dialog {
+        max-width: 230px !important;
+        width: 86vw !important;
+    }
+}
+
+@media (max-width: 340px) {
+    .modal-crud-admingate .modal-dialog,
+    .modal-crud-resetpwd .modal-dialog {
+        max-width: 210px !important;
+    }
+}
+
+
+/* =========================================================
+   MODALES — Registrar y Editar Usuario (ULTRA COMPACTOS)
+   ========================================================= */
+
+/* CONTENEDOR: tamaño idéntico para registrar/editar */
+.modal-crud-registro .modal-dialog,
+.modal-crud-editar .modal-dialog {
+    max-width: 650px !important;
+    width: 92vw !important;
+    margin: 1.5rem auto !important;
+}
+
+/* CONTENIDO */
+.modal-crud-registro .modal-content,
+.modal-crud-editar .modal-content {
+    border-radius: 16px !important;
+    border: 1px solid var(--line);
+    background: #ffffff;
+    box-shadow: 0 20px 48px rgba(0,0,0,.22);
+    overflow: hidden;
+}
+
+/* HEADER */
+.modal-crud-registro .modal-header,
+.modal-crud-editar .modal-header {
+    padding: .55rem .8rem !important;
+}
+
+.modal-crud-registro .modal-title,
+.modal-crud-editar .modal-title {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+}
+
+/* BODY compacto */
+.modal-crud-registro .modal-body,
+.modal-crud-editar .modal-body {
+    padding: .75rem !important;
+    background: #f5f7f7 !important;
+    max-height: calc(100dvh - 180px) !important;
+    overflow-y: auto !important;
+    font-size: .9rem !important;
+}
+
+/* INPUTS más pequeños */
+.modal-crud-registro input,
+.modal-crud-registro select,
+.modal-crud-editar input,
+.modal-crud-editar select {
+    height: 30px !important;
+    font-size: .88rem !important;
+    padding: .25rem .45rem !important;
+}
+
+/* FOOTER compacto */
+.modal-crud-registro .modal-footer,
+.modal-crud-editar .modal-footer {
+    padding: .5rem .75rem !important;
+}
+
+    .modal-crud-registro .modal-footer .btn,
+    .modal-crud-editar .modal-footer .btn {
+        padding: .35rem .8rem !important;
+        font-size: .82rem !important;
+    }
+
+/* ====== Pantallas pequeñas ====== */
+@media (max-width: 480px) {
+
+    .modal-crud-registro .modal-dialog,
+    .modal-crud-editar .modal-dialog {
+        max-width: 94vw !important;
+    }
+
+    .modal-crud-registro .modal-body,
+    .modal-crud-editar .modal-body {
+        padding: .6rem !important;
+        max-height: calc(100dvh - 150px) !important;
+    }
+
+    .modal-crud-registro .modal-footer .btn,
+    .modal-crud-editar .modal-footer .btn {
+        padding: .3rem .7rem !important;
+        font-size: .78rem !important;
+    }
+}
+
+/* =========================================================
+   TABLA: COMPORTAMIENTO GENERAL (MÓVIL FIRST)
+   ========================================================= */
+
+/* Contenedor con scroll horizontal SOLO por defecto (móvil/tablet) */
+.vista-crud .table-scroll-x {
+    width: 100%;
+    overflow-x: auto !important;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable both-edges;
+}
+
+    /* La tabla puede crecer y ser más ancha en móvil */
+    .vista-crud .table-scroll-x .table-wide {
+        width: max-content !important;
+        min-width: 100% !important;
+        table-layout: auto !important;
+    }
+
+/* Celdas compactas por defecto */
+.vista-crud .table-wide th,
+.vista-crud .table-wide td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =========================================================
+   DESKTOP (>= 992px): AJUSTAR SIN BARRA INFERIOR
+   ========================================================= */
+@media (min-width: 992px) {
+
+    /* En escritorio, la tabla se adapta al ancho del contenedor */
+    .vista-crud .table-scroll-x {
+        overflow-x: hidden !important; /* sin barra horizontal */
+    }
+
+        .vista-crud .table-scroll-x .table-wide {
+            width: 100% !important; /* llena el contenedor */
+            min-width: 100% !important;
+            table-layout: fixed !important; /* reparte el ancho entre columnas */
+        }
+
+    /* Permitimos que el texto baje de línea para evitar scroll */
+    .vista-crud .table-wide th,
+    .vista-crud .table-wide td {
+        white-space: normal !important; /* 🔴 clave para no desbordar */
+        text-overflow: clip !important;
+        word-break: break-word !important;
+    }
+}
+
+/* =========================================================
+   FORZAR SCROLL SOLO EN MÓVIL MUY PEQUEÑO (ya lo tenías)
+   ========================================================= */
+@media (max-width: 575.98px) {
+
+    .vista-crud .table-scroll-x {
+        display: block;
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: auto !important;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+    }
+
+        .vista-crud .table-scroll-x .table-wide {
+            min-width: 650px !important;
+            width: max-content !important;
+        }
+}
+
+/* =========================================================
+   MODAL — Confirmar Salida (mismo estilo que AdminGate)
+   ========================================================= */
+
+/* Tamaño base en escritorio / pantallas grandes */
+#confirmarSalidaModal .modal-dialog {
+    max-width: 300px !important;
+    width: 50vw !important;
+    margin: 1rem auto !important;
+}
+
+/* Contenido */
+#confirmarSalidaModal .modal-content {
+    border-radius: 12px !important;
+    border: 1px solid var(--line);
+    background: #ffffff;
+    box-shadow: 0 20px 48px rgba(0,0,0,.22);
+    overflow: hidden;
+}
+
+/* Header compacto (ya hereda el degradado global de .modal-header) */
+#confirmarSalidaModal .modal-header {
+    padding: .45rem .9rem !important;
+    font-size: .85rem !important;
+}
+
+/* Título */
+#confirmarSalidaModal .modal-title {
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+}
+
+/* Body compacto */
+#confirmarSalidaModal .modal-body {
+    padding: .75rem !important;
+    background: #f5f7f7 !important;
+    max-height: calc(100dvh - 180px);
+    overflow-y: auto;
+    font-size: .9rem !important;
+}
+
+/* Footer compacto */
+#confirmarSalidaModal .modal-footer {
+    padding: .5rem .75rem !important;
+}
+
+    #confirmarSalidaModal .modal-footer .btn {
+        padding: .35rem .9rem !important;
+        font-size: .85rem !important;
+    }
+
+/* Pantallas pequeñas: ir reduciendo tamaño */
+@media (max-width: 575.98px) {
+    #confirmarSalidaModal .modal-dialog {
+        max-width: 260px !important;
+        width: 80vw !important;
+        margin: .75rem auto !important;
+    }
+}
+
+@media (max-width: 400px) {
+    #confirmarSalidaModal .modal-dialog {
+        max-width: 230px !important;
+        width: 86vw !important;
+    }
+}
+
+@media (max-width: 340px) {
+    #confirmarSalidaModal .modal-dialog {
+        max-width: 210px !important;
+        width: 90vw !important;
+    }
+}
+
+/* =========================================================
+   MODALES CHIQUITOS: AdminGate + Confirmar Activar/Desactivar
+   ========================================================= */
+
+/* Tamaño base en escritorio / pantallas grandes */
+.modal-crud-admingate .modal-dialog,
+.modal-crud-confirm .modal-dialog {
+    max-width: 300px !important;
+    width: 50vw !important;
+    margin: 1rem auto !important;
+}
+
+/* Contenido */
+.modal-crud-admingate .modal-content,
+.modal-crud-confirm .modal-content {
+    border-radius: 12px !important;
+    border: 1px solid var(--line);
+    background: #ffffff;
+    box-shadow: 0 20px 48px rgba(0,0,0,.22);
+    overflow: hidden;
+}
+
+/* Header compacto */
+.modal-crud-admingate .modal-header,
+.modal-crud-confirm .modal-header {
+    padding: .45rem .9rem !important;
+    font-size: .85rem !important;
+}
+
+/* Título */
+.modal-crud-admingate .modal-title,
+.modal-crud-confirm .modal-title {
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+}
+
+/* Body compacto */
+.modal-crud-admingate .modal-body,
+.modal-crud-confirm .modal-body {
+    padding: .75rem !important;
+    background: #f5f7f7 !important;
+    max-height: calc(100dvh - 180px);
+    overflow-y: auto;
+    font-size: .9rem !important;
+}
+
+/* Input de contraseña */
+.modal-crud-admingate input[type="password"],
+.modal-crud-admingate input[type="text"],
+.modal-crud-confirm input[type="password"],
+.modal-crud-confirm input[type="text"] {
+    height: 32px !important;
+    font-size: .9rem !important;
+}
+
+/* Botón del ojo */
+.modal-crud-admingate .btn-toggle-eye,
+.modal-crud-confirm .btn-toggle-eye {
+    padding: .25rem .5rem !important;
+}
+
+/* Footer compacto */
+.modal-crud-admingate .modal-footer,
+.modal-crud-confirm .modal-footer {
+    padding: .5rem .75rem !important;
+}
+
+    .modal-crud-admingate .modal-footer .btn,
+    .modal-crud-confirm .modal-footer .btn {
+        padding: .35rem .9rem !important;
+        font-size: .85rem !important;
+    }
+
+/* Pantallas pequeñas: ir reduciendo tamaño */
+@media (max-width: 575.98px) {
+    .modal-crud-admingate .modal-dialog,
+    .modal-crud-confirm .modal-dialog {
+        max-width: 260px !important;
+        width: 80vw !important;
+        margin: .75rem auto !important;
+    }
+}
+
+@media (max-width: 400px) {
+    .modal-crud-admingate .modal-dialog,
+    .modal-crud-confirm .modal-dialog {
+        max-width: 230px !important;
+        width: 86vw !important;
+    }
+}
+
+@media (max-width: 340px) {
+    .modal-crud-admingate .modal-dialog,
+    .modal-crud-confirm .modal-dialog {
+        max-width: 210px !important;
+        width: 90vw !important;
+    }
+}
+
+
+
+/* =========================================================
+   PERSONAL: FOTO EN TABLA (CIRCULAR 45x45 + "Ver foto")
+   ========================================================= */
+.vista-crud .avatar-cell {
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+/* Botón "plano" para la foto (sin bordes raros) */
+.vista-crud .btn-icon-plain {
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+    cursor: pointer;
+}
+
+/* Marco circular de la foto */
+.vista-crud .avatar-frame {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--surface-2, #e4ebe7);
+    border: 2px solid var(--line, #dce3df);
+    box-shadow: 0 1px 3px rgba(0,0,0,.18);
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+/* Imagen dentro del marco (rellena el círculo) */
+.vista-crud .avatar-sm {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 50%;
+}
+
+/* Capa "Ver foto" (oculta por defecto) */
+.vista-crud .avatar-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0,0,0,.6);
+    background: linear-gradient( to bottom, rgba(0,0,0,.10), rgba(0,0,0,.65) );
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease;
+}
+
+/* Hover / focus: resaltar marco y mostrar "Ver foto" */
+.vista-crud .btn-icon-plain:hover .avatar-frame,
+.vista-crud .btn-icon-plain:focus-visible .avatar-frame {
+    transform: translateY(-1px) scale(1.02);
+    border-color: var(--pnp-green, #00471B);
+    box-shadow: 0 2px 6px rgba(0,0,0,.25);
+}
+
+.vista-crud .btn-icon-plain:hover .avatar-overlay,
+.vista-crud .btn-icon-plain:focus-visible .avatar-overlay {
+    opacity: 1;
+}
+/* =========================================================
+   FIX ESPECÍFICO PARA EL COMBO DE PERSONAL
+   (se abre siempre como dropdown debajo del combo)
+   ========================================================= */
+
+/* Panel flotante (donde está "Escribe nombre o apellidos..." y la lista) */
+#comboPanelPersonal {
+    position: fixed !important; /* el JS le pone left/top/width */
+    margin: 0 !important;
+    padding: 0;
+    background: #ffffff;
+    border-radius: .6rem;
+    border: 1px solid var(--line, #dce3df);
+    box-shadow: 0 18px 40px rgba(15, 26, 20, .25);
+    max-height: 320px;
+    overflow: hidden;
+    z-index: 3000;
+    display: none; /* el JS cambia a block */
+}
+
+    /* cuando está abierto */
+    #comboPanelPersonal.open {
+        display: block;
+    }
+
+    /* buscador interno del combo */
+    #comboPanelPersonal .combo-search {
+        width: 100%;
+        border: 0;
+        border-bottom: 1px solid #e5e7eb;
+        padding: .45rem .6rem;
+        font-size: .84rem;
+        background: #f9fafb;
+    }
+
+        #comboPanelPersonal .combo-search::placeholder {
+            color: #9ca3af;
+        }
+
+    /* lista de opciones: sin viñetas ni márgenes raros */
+    #comboPanelPersonal .combo-list {
+        max-height: 280px;
+        overflow-y: auto;
+        list-style: none;
+        margin: 0;
+        padding: .25rem 0;
+    }
+
+        /* scroll discreto */
+        #comboPanelPersonal .combo-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #comboPanelPersonal .combo-list::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 999px;
+        }
+
+    /* cada opción */
+    #comboPanelPersonal .combo-item {
+        padding: .35rem .7rem;
+        font-size: .85rem;
+        cursor: pointer;
+        color: #111827;
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        transition: background-color .12s ease, color .12s ease;
+    }
+
+        #comboPanelPersonal .combo-item[aria-selected="true"] {
+            background: #eef5ff;
+            font-weight: 600;
+            color: var(--pnp-green, #00471B);
+        }
+
+        #comboPanelPersonal .combo-item:hover {
+            background: #f3f4f6;
+        }
+
+    /* mensaje “Sin coincidencias” */
+    #comboPanelPersonal .combo-empty {
+        padding: .5rem .75rem;
+        font-size: .82rem;
+        color: #6b7280;
+    }
+
+
+
+/* Evitar que la vista se mueva cuando se abre un modal */
+body.modal-open {
+    overflow: hidden !important; /* bloquea scroll del body */
+    padding-right: 0 !important; /* sin salto lateral */
+}
+
+/* Siempre reservar espacio para el scroll vertical */
+html {
+    overflow-y: scroll;
+}
+
+
+
+
+
+
+
+/* =========================================================
+   MODALES — Registrar y Editar Personal (ULTRA COMPACTOS)
+   ========================================================= */
+
+/* CONTENEDOR: tamaño idéntico para registrar/editar */
+.modal-crud-registroPersonal .modal-dialog,
+.modal-crud-editarPersnal .modal-dialog {
+    max-width: 750px !important;
+    width: 92vw !important;
+    margin: 1.5rem auto !important;
+}
+
+/* CONTENIDO */
+.modal-crud-registroPersonal .modal-content,
+.modal-crud-editarPersnal .modal-content {
+    border-radius: 16px !important;
+    border: 1px solid var(--line);
+    background: #ffffff;
+    box-shadow: 0 20px 48px rgba(0,0,0,.22);
+    overflow: hidden;
+}
+
+/* HEADER */
+.modal-crud-registroPersonal .modal-header,
+.modal-crud-editarPersnal .modal-header {
+    padding: .55rem .8rem !important;
+}
+
+.modal-crud-registroPersonal .modal-title,
+.modal-crud-editarPersnal .modal-title {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+}
+
+/* BODY compacto */
+.modal-crud-registroPersonal .modal-body,
+.modal-crud-editarPersnal .modal-body {
+    padding: .75rem !important;
+    background: #f5f7f7 !important;
+    max-height: calc(100dvh - 180px) !important;
+    overflow-y: auto !important;
+    font-size: .9rem !important;
+}
+
+/* INPUTS más pequeños dentro del modal */
+.modal-crud-registroPersonal input,
+.modal-crud-registroPersonal select,
+.modal-crud-editarPersnal input,
+.modal-crud-editarPersnal select {
+    height: 30px !important;
+    font-size: .88rem !important;
+    padding: .25rem .45rem !important;
+}
+
+/* FOOTER compacto */
+.modal-crud-registroPersonal .modal-footer,
+.modal-crud-editarPersnal .modal-footer {
+    padding: .5rem .75rem !important;
+}
+
+    .modal-crud-registroPersonal .modal-footer .btn,
+    .modal-crud-editarPersnal .modal-footer .btn {
+        padding: .35rem .8rem !important;
+        font-size: .82rem !important;
+    }
+
+/* ====== Pantallas pequeñas ====== */
+@media (max-width: 480px) {
+
+    .modal-crud-registroPersonal .modal-dialog,
+    .modal-crud-editarPersnal .modal-dialog {
+        max-width: 94vw !important;
+    }
+
+    .modal-crud-registroPersonal .modal-body,
+    .modal-crud-editarPersnal .modal-body {
+        padding: .6rem !important;
+        max-height: calc(100dvh - 100px) !important;
+    }
+
+    .modal-crud-registroPersonal .modal-footer .btn,
+    .modal-crud-editarPersnal .modal-footer .btn {
+        padding: .3rem .7rem !important;
+        font-size: .78rem !important;
+    }
+}

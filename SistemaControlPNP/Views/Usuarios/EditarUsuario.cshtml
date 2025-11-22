@@ -1,0 +1,717 @@
+﻿@model ControlPNP.ViewModels.UsuarioVM
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    Layout = null;
+    // Espera: ViewBag.PersonalFull = IEnumerable<dynamic> con { IdPersonal, Text, Cip }
+}
+
+<link rel="stylesheet" href="~/Style/modales-styles.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/Style/form-styles.css" asp-append-version="true" />
+<style>
+    /* =========================================================
+       EDITAR USUARIO – ESTILO MODERNO 3D (SOLO ESTE MODAL)
+       ========================================================= */
+
+    .modal-crud-editar .pnp-form {
+        --pnp-green: #00471b;
+        --pnp-gold: #b8963b;
+        --pnp-soft: #f3f6f8;
+        --tile-border: rgba(10, 24, 18, 0.06);
+        background: radial-gradient(circle at top left, #f7fafc 0, #e4edf3 28%, #dde7ec 55%, #d4e0e7 100%);
+        border-radius: 16px;
+        padding: 0.65rem 0.75rem 0.8rem;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+        border: 1px solid rgba(15, 26, 20, 0.16);
+        position: relative;
+        overflow: hidden;
+        max-width: 100%;
+    }
+
+        .modal-crud-editar .pnp-form::before {
+            content: "";
+            position: absolute;
+            inset: -40%;
+            background: radial-gradient(circle at 0 0, rgba(185, 150, 59, 0.16) 0, transparent 55%), radial-gradient(circle at 100% 0, rgba(0, 71, 27, 0.16) 0, transparent 60%);
+            opacity: 0.9;
+            pointer-events: none;
+        }
+
+    .modal-crud-editar .pnp-body {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Quitar espacios laterales extra en el grid interno */
+    .modal-crud-editar .pnp-form .row.g-0 > [class*="col"] {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    .modal-crud-editar .pnp-form .row.g-0 {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    /* =========================================================
+       DISTRIBUCIÓN COLUMNAS: IZQ GRANDE / DER PEQUEÑA
+       ========================================================= */
+
+    @@media (min-width: 768px) {
+        /* Fila principal del formulario (dos columnas) */
+        .modal-crud-editar .pnp-form .row.g-0.align-items-start.pt-0 > .col-12.col-md-6:first-child
+
+    {
+        flex: 0 0 68%;
+        max-width: 68%;
+    }
+
+    .modal-crud-editar .pnp-form .row.g-0.align-items-start.pt-0 > .col-12.col-md-6:last-child {
+        flex: 0 0 32%;
+        max-width: 32%;
+    }
+
+    }
+
+    /* =========================================================
+       TILES / CONTROLES 3D – BASE
+       ========================================================= */
+
+    .modal-crud-editar .pnp-form .control-tile {
+        background: linear-gradient(145deg, #ffffff, #ecf2f4);
+        border-radius: 12px;
+        border: 1px solid var(--tile-border);
+        padding: .35rem .55rem .45rem;
+        margin-bottom: .3rem;
+        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .modal-crud-editar .pnp-form .control-tile::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient( 120deg, rgba(148, 163, 184, 0.28), transparent 40%, transparent 60%, rgba(148, 163, 184, 0.16) );
+            mix-blend-mode: soft-light;
+            opacity: 0;
+            transition: opacity .18s ease-out;
+            pointer-events: none;
+        }
+
+        .modal-crud-editar .pnp-form .control-tile:hover::before {
+            opacity: 0.55;
+        }
+
+    /* Etiquetas */
+    .modal-crud-editar .pnp-form .form-label {
+        font-size: .72rem;
+        font-weight: 600;
+        color: var(--pnp-green);
+        margin-bottom: .15rem;
+        letter-spacing: .02em;
+        text-transform: uppercase;
+    }
+
+    .modal-crud-editar .pnp-form .req {
+        color: #b91c1c;
+        margin-left: 2px;
+        font-weight: 700;
+    }
+
+    /* =========================================================
+       INPUT GROUP / SELECT – BASE
+       ========================================================= */
+
+    .modal-crud-editar .pnp-form .input-group.soft {
+        background: #f9fafb;
+        border-radius: 999px;
+        overflow: hidden;
+        border: 1px solid rgba(148, 163, 184, 0.6);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        height: 30px;
+    }
+
+    .modal-crud-editar .pnp-form .input-group-text {
+        border: none;
+        background: linear-gradient(135deg, #ffffff, #e5e7eb);
+        color: var(--pnp-green);
+        border-right: 1px solid rgba(148, 163, 184, 0.45);
+        min-width: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: .1rem .4rem;
+        font-size: .7rem;
+    }
+
+    .modal-crud-editar .pnp-form .form-control,
+    .modal-crud-editar .pnp-form .form-select {
+        border: none;
+        background: transparent;
+        font-size: .73rem;
+        padding-top: .05rem;
+        padding-bottom: .05rem;
+        padding-left: .3rem;
+        padding-right: .5rem;
+        box-shadow: none !important;
+        min-height: 26px;
+    }
+
+        .modal-crud-editar .pnp-form .form-control:focus,
+        .modal-crud-editar .pnp-form .form-select:focus {
+            background: #f1f5f9;
+            box-shadow: none;
+        }
+
+    /* Texto de ayuda */
+    .modal-crud-editar .pnp-form small.text-muted {
+        font-size: .68rem;
+    }
+
+    /* =========================================================
+       AJUSTE TAMAÑOS: IZQUIERDA GRANDE / DERECHA PEQUEÑA
+       ========================================================= */
+
+    /* -------- IZQUIERDA: campos más grandes -------- */
+    .modal-crud-editar .pnp-form .row.g-0.align-items-start.pt-0 > .col-12.col-md-6:first-child .control-tile {
+        padding: .48rem .7rem .55rem;
+    }
+
+    .modal-crud-editar .pnp-form .row.g-0.align-items-start.pt-0 > .col-12.col-md-6:first-child .form-control,
+    .modal-crud-editar .pnp-form .row.g-0.align-items-start.pt-0 > .col-12.col-md-6:first-child .form-select {
+        font-size: .85rem;
+        min-height: 34px;
+        padding-top: .2rem;
+        padding-bottom: .2rem;
+    }
+
+    /* Input-group de la izquierda más alto para igualar ícono y combo */
+    .modal-crud-editar .pnp-form .row.g-0.align-items-start.pt-0 > .col-12.col-md-6:first-child .input-group.soft {
+        height: 36px;
+    }
+
+    /* Combo PERSONAL (solo lectura) grande */
+    .modal-crud-editar .pnp-form #IdPersonal_display {
+        font-size: .88rem !important;
+        min-height: 36px !important;
+        padding-left: .55rem;
+        padding-right: .55rem;
+        white-space: normal; /* por si el texto es largo */
+    }
+
+        /* Mostrar deshabilitado pero legible */
+        .modal-crud-editar .pnp-form #IdPersonal_display:disabled {
+            color: #374151;
+            opacity: 0.95;
+            background: transparent;
+        }
+
+    /* Usuario CIP un poco más ancho que antes */
+    .modal-crud-editar .pnp-form #UsuarioDisplay {
+        max-width: 70% !important;
+        min-height: 32px;
+        font-size: .8rem;
+    }
+
+    /* -------- DERECHA: campos más compactos -------- */
+    .modal-crud-editar .pnp-form .row.g-0.align-items-start.pt-0 > .col-12.col-md-6:last-child .control-tile {
+        padding: .28rem .45rem .35rem;
+    }
+
+    .modal-crud-editar .pnp-form .row.g-0.align-items-start.pt-0 > .col-12.col-md-6:last-child .form-control,
+    .modal-crud-editar .pnp-form .row.g-0.align-items-start.pt-0 > .col-12.col-md-6:last-child .form-select {
+        font-size: .72rem;
+        min-height: 26px;
+        padding-top: .08rem;
+        padding-bottom: .08rem;
+        padding-left: .25rem;
+        padding-right: .35rem;
+    }
+
+    /* Select de Rol más pequeño */
+    .modal-crud-editar .pnp-form #Rol {
+        font-size: .72rem;
+        min-height: 26px;
+    }
+
+    /* =========================================================
+       SWITCH ESTADO (rojo OFF, verde ON)
+       ========================================================= */
+
+    .modal-crud-editar .pnp-form .switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 22px;
+    }
+
+    /* En la columna derecha lo hacemos un poco más compacto visualmente */
+    .modal-crud-editar .pnp-form .row.g-0.align-items-start.pt-0 > .col-12.col-md-6:last-child .switch {
+        transform: scale(.9);
+        transform-origin: left center;
+    }
+
+    .modal-crud-editar .pnp-form .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .modal-crud-editar .pnp-form .switch .slider {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        /* OFF = rojo */
+        background: linear-gradient(135deg, #f97373, #dc2626);
+        transition: .2s;
+        border-radius: 999px;
+        box-shadow: inset 0 0 0 1px rgba(248, 113, 113, .7);
+    }
+
+        .modal-crud-editar .pnp-form .switch .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #ffffff;
+            transition: .2s;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(15, 23, 42, .35);
+        }
+
+    /* ON = verde */
+    .modal-crud-editar .pnp-form .switch input:checked + .slider {
+        background: linear-gradient(135deg, #16a34a, #15803d);
+        box-shadow: inset 0 0 0 1px rgba(34, 197, 94, .7);
+    }
+
+        .modal-crud-editar .pnp-form .switch input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+    /* Texto de estado */
+    .modal-crud-editar .pnp-form #estadoText {
+        font-size: .74rem;
+        margin-left: .45rem;
+        font-weight: 600;
+    }
+
+        .modal-crud-editar .pnp-form #estadoText.estado-on {
+            color: #15803d;
+        }
+
+        .modal-crud-editar .pnp-form #estadoText.estado-off {
+            color: #b91c1c;
+        }
+
+    /* En la columna derecha, ligeramente más pequeño */
+    .modal-crud-editar .pnp-form .row.g-0.align-items-start.pt-0 > .col-12.col-md-6:last-child #estadoText {
+        font-size: .68rem;
+    }
+
+    /* =========================================================
+       BOTONES BARRA ACCIONES
+       ========================================================= */
+
+    .modal-crud-editar .pnp-form .col-actions .btn-bar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: .45rem;
+        margin-top: .2rem;
+    }
+
+    .modal-crud-editar .pnp-form .btn-bar .btn {
+        border-radius: 999px !important;
+        padding: .22rem .7rem !important;
+        font-size: .78rem !important;
+        display: inline-flex;
+        align-items: center;
+        gap: .28rem;
+    }
+
+    /* Botones un poco más compactos en la derecha */
+    .modal-crud-editar .pnp-form .col-actions .btn {
+        font-size: .75rem !important;
+        padding: .2rem .6rem !important;
+    }
+
+    /* Botón Guardar con 3D suave */
+    .modal-crud-editar .pnp-form #btnGuardarUsuario {
+        box-shadow: 0 8px 18px rgba(37, 99, 235, 0.5);
+        transform: translateY(0);
+        transition: transform .1s ease-out, box-shadow .1s ease-out;
+    }
+
+        .modal-crud-editar .pnp-form #btnGuardarUsuario:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.65);
+        }
+
+        .modal-crud-editar .pnp-form #btnGuardarUsuario:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.6);
+        }
+
+    /* =========================================================
+       MENSAJE DE ERROR
+       ========================================================= */
+
+    .modal-crud-editar .pnp-form .form-error {
+        margin: .3rem 0 .45rem;
+        padding: .22rem .65rem;
+        border-radius: 999px;
+        font-size: .76rem;
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+        display: none;
+    }
+
+        .modal-crud-editar .pnp-form .form-error.show {
+            display: block;
+        }
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
+    @@media (max-width: 768px) {
+        .modal-crud-editar .pnp-form
+
+    {
+        padding: .55rem .55rem .7rem;
+    }
+
+    .modal-crud-editar .pnp-form .btn-bar {
+        justify-content: flex-start;
+    }
+
+    }
+
+    @@media (max-width: 576px) {
+        .modal-crud-editar .pnp-form .control-tile
+
+    {
+        padding: .38rem .5rem .4rem;
+    }
+
+    .modal-crud-editar .pnp-form .form-control,
+    .modal-crud-editar .pnp-form .form-select {
+        font-size: .74rem;
+    }
+
+    }
+
+    /* =========================================================
+       AJUSTE FINAL – IZQUIERDA MÁS PEQUEÑA Y BOTONES MÁS GRANDES
+       ========================================================= */
+
+    /* -------- IZQUIERDA: reducir ligeramente tamaño -------- */
+    .modal-crud-editar .pnp-form .row.g-0.align-items-start.pt-0 > .col-12.col-md-6:first-child .form-control,
+    .modal-crud-editar .pnp-form .row.g-0.align-items-start.pt-0 > .col-12.col-md-6:first-child .form-select {
+        font-size: .80rem; /* antes .85 */
+        min-height: 30px; /* antes 34px */
+        padding-top: .15rem;
+        padding-bottom: .15rem;
+    }
+
+    /* Input-group izquierda un poco más bajo */
+    .modal-crud-editar .pnp-form .row.g-0.align-items-start.pt-0 > .col-12.col-md-6:first-child .input-group.soft {
+        height: 32px; /* antes 36px */
+    }
+
+    /* Combo PERSONAL levemente reducido pero aún cómodo */
+    .modal-crud-editar .pnp-form #IdPersonal_display {
+        font-size: .82rem !important; /* antes .88 */
+        min-height: 32px !important; /* antes 36 */
+    }
+
+
+    /* -------- BOTONES: hacerlos más grandes -------- */
+    .modal-crud-editar .pnp-form .col-actions .btn {
+        font-size: .85rem !important; /* antes .75 */
+        padding: .35rem .9rem !important; /* antes .2 .6 */
+        border-radius: 14px !important;
+    }
+
+    /* Mejorar el botón GUARDAR */
+    .modal-crud-editar .pnp-form #btnGuardarUsuario {
+        font-size: .88rem !important;
+        padding: .38rem 1rem !important;
+        box-shadow: 0 10px 22px rgba(37, 99, 235, 0.45);
+    }
+
+        /* En hover aún mejor */
+        .modal-crud-editar .pnp-form #btnGuardarUsuario:hover {
+            box-shadow: 0 14px 26px rgba(37, 99, 235, 0.55);
+        }
+    /* ===== FIX REAL: evitar que el modal de éxito aparezca grande ===== */
+
+    /* Antes de que Bootstrap lo muestre, el dialog DEBE YA tener tamaño pequeño */
+    #modalEdicionExitosa .modal-dialog {
+        max-width: 310px !important;
+        width: 100% !important;
+        margin: 1.25rem auto !important;
+        transform: translateY(0) !important; /* evita animación rara */
+    }
+
+    /* Evita expansión previa del contenido */
+    #modalEdicionExitosa .modal-content {
+        width: 100% !important;
+        transform: none !important;
+        transition: none !important; /* sin reflow visual */
+        animation: none !important;
+    }
+
+    /* Evita la animación fade inicial que causa el “salto” */
+    #modalEdicionExitosa.modal.fade .modal-dialog {
+        transition: none !important;
+        transform: none !important;
+    }
+
+
+</style>
+<div class="pnp-form">
+  <div class="pnp-body">
+    <form id="editarUsuarioForm"
+          asp-controller="Usuarios"
+          asp-action="EditarUsuario"
+          method="post"
+          autocomplete="off"
+          novalidate>
+      @Html.AntiForgeryToken()
+
+      <div id="errorMessagesUsuarioEdit" class="form-error" role="alert"></div>
+
+      <!-- Campos internos -->
+      <input type="hidden" asp-for="IdUsuario" />
+
+      <!-- ===== DOS COLUMNAS ===== -->
+      <div class="row g-0 align-items-start pt-0">
+        <!-- IZQUIERDA -->
+        <div class="col-12 col-md-6">
+          <div class="row g-0">
+            <!-- PERSONAL (solo lectura, no desplegable) -->
+<div class="col-12">
+  <div class="control-tile">
+    <label class="form-label" for="IdPersonal_display">Personal</label>
+    <div class="input-group input-group-sm soft">
+      <span class="input-group-text"><i class="fas fa-users"></i></span>
+
+      <!-- Combo deshabilitado (solo lectura) -->
+      <select id="IdPersonal_display" class="form-select form-select-sm" disabled>
+        @foreach (var p in (IEnumerable<dynamic>)ViewBag.PersonalFull)
+        {
+            var selected = (Model.IdPersonal.ToString() == ((int)p.IdPersonal).ToString()) ? "selected" : "";
+            <option value="@p.IdPersonal" data-cip="@p.Cip" @@selected>@p.Text</option>
+        }
+      </select>
+
+      <!-- Campo oculto para enviar valor real al servidor -->
+      <input type="hidden" asp-for="IdPersonal" />
+    </div>
+   
+  </div>
+</div>
+
+
+            <!-- USUARIO (CIP readonly) -->
+            <div class="col-12 mt-1">
+              <div class="control-tile">
+                <label class="form-label" for="UsuarioDisplay">Usuario (CIP)</label>
+                <div class="input-group input-group-sm soft">
+                  <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                  <input id="UsuarioDisplay" class="form-control" type="text" readonly value="@Model.Usuario" />
+                  <input type="hidden" name="Usuario" id="UsuarioHidden" value="@Model.Usuario" />
+                </div>
+                <small class="text-muted">El login es el CIP del personal y no puede modificarse.</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DERECHA -->
+        <div class="col-12 col-md-6">
+          <div class="row g-0">
+            <!-- ROL -->
+            <div class="col-12">
+              <div class="control-tile">
+                <label class="form-label" for="Rol">Rol<span class="req">*</span></label>
+                <div class="input-group input-group-sm soft">
+                  <span class="input-group-text"><i class="fas fa-user-shield"></i></span>
+                  @Html.DropDownListFor(m => m.Rol,
+                      (IEnumerable<SelectListItem>)ViewBag.PermisoList,
+                      new { @class = "form-select form-select-sm", required = "required" })
+                </div>
+              </div>
+            </div>
+
+            <!-- ESTADO -->
+            <div class="col-12 mt-1">
+              <div class="control-tile">
+                <label class="form-label d-block">Estado</label>
+                <div class="d-flex align-items-center mt-1">
+                  <label class="switch mb-0">
+                    <input asp-for="Estado" type="checkbox" id="chkActivo" class="js-estado" />
+                    <span class="slider"></span>
+                  </label>
+                  <span id="estadoText" class="estado-text ml-2"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTONES -->
+      <div class="row g-0 align-items-start mt-2">
+        <div class="col-12 col-md-6"></div>
+        <div class="col-12 col-md-6 col-actions">
+          <div class="btn-bar">
+            <a class="btn btn-warning btn-sm" data-dismiss="modal"><i class="fas fa-arrow-circle-left"></i> Atrás</a>
+            <button type="button" id="btnGuardarUsuario" class="btn btn-primary btn-sm">
+              <i class="fas fa-save"></i> Guardar
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal éxito: Edición -->
+<div id="modalEdicionExitosa" class="modal fade modal-center modal-xs" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog">
+    <div class="modal-content" role="status" aria-live="polite">
+      <div class="modal-body text-center py-4">
+        <div class="mb-2" style="font-size:3rem; line-height:1;">
+          <i class="fas fa-check-circle text-success" aria-hidden="true"></i>
+        </div>
+        <h5 class="mb-1">¡Cambios guardados!</h5>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // Error UI
+  const $err = document.getElementById('errorMessagesUsuarioEdit');
+  function showErr(m){ if($err){ $err.textContent = m || 'Se produjo un error.'; $err.classList.add('show'); $err.setAttribute('role','alert'); } }
+  function hideErr(){ if($err){ $err.classList.remove('show'); $err.textContent = ''; } }
+
+  // Estado
+  function actualizarEstadoText(){
+    const on = document.getElementById('chkActivo')?.checked;
+    const t = document.getElementById('estadoText');
+    if(!t) return;
+    t.textContent = on ? 'Activo' : 'Desactivado';
+    t.classList.remove('estado-on','estado-off');
+    t.classList.add(on ? 'estado-on' : 'estado-off');
+  }
+  document.addEventListener('DOMContentLoaded', actualizarEstadoText);
+  document.getElementById('chkActivo')?.addEventListener('change', actualizarEstadoText);
+
+  // CIP sync
+  const sel = document.getElementById('IdPersonal');
+  const disp = document.getElementById('UsuarioDisplay');
+  const hid  = document.getElementById('UsuarioHidden');
+
+  function syncCip(){
+    const opt = sel && sel.selectedOptions && sel.selectedOptions[0];
+    const cip = (opt && opt.dataset ? (opt.dataset.cip || '') : '');
+    if(disp) disp.value = cip || '';
+    if(hid)  hid.value  = cip || '';
+  }
+  sel?.addEventListener('change', syncCip);
+
+  // Serializador para detectar cambios
+  function serializeForm(f){
+    const data = {};
+    (f.querySelectorAll('input,select,textarea') || []).forEach(function(el){
+      if(!el.name) return;
+      if(el.type === 'checkbox' || el.type === 'radio'){ data[el.name] = el.checked; }
+      else { data[el.name] = (el.value ?? '').toString(); }
+    });
+    return data;
+  }
+  function shallowEqual(a,b){
+    const ka = Object.keys(a), kb = Object.keys(b);
+    if(ka.length !== kb.length) return false;
+    for(const k of ka) if(a[k] !== b[k]) return false;
+    return true;
+  }
+
+  // Modal éxito util
+  function showSuccessModalById(modalSelector, opts){
+    opts = Object.assign({ parentModalSelector: null, reload: true, timeout: 900 }, opts || {});
+    var $m = $(modalSelector);
+    if(!$m || !$m.length) { console.warn('Modal no encontrado:', modalSelector); return; }
+    try { $m.modal({ backdrop: 'static', keyboard: false, show: true }); } catch(e){}
+    setTimeout(function(){
+      try{ if(opts.parentModalSelector) $(opts.parentModalSelector).modal('hide'); } catch(e){}
+      try{ $m.modal('hide'); } catch(e){}
+      if(opts.reload) location.reload();
+    }, opts.timeout);
+  }
+
+  const form = document.getElementById('editarUsuarioForm');
+  const btn  = document.getElementById('btnGuardarUsuario');
+
+  const initialSnapshot = form ? (function(){ const d = serializeForm(form); delete d['__RequestVerificationToken']; return d; })() : {};
+
+  function doGuardar(e){
+    e?.preventDefault();
+    hideErr();
+
+    if(!form) return;
+
+    if(!form.checkValidity()){
+      const firstInvalid = form.querySelector(':invalid');
+      try{ firstInvalid?.focus(); }catch(e){}
+      if(typeof form.reportValidity === 'function'){ form.reportValidity(); }
+      else { showErr('Complete los campos obligatorios.'); }
+      return;
+    }
+
+    const current = serializeForm(form);
+    delete current['__RequestVerificationToken'];
+
+    if(shallowEqual(initialSnapshot, current)){
+      showErr('No se han realizado modificaciones.');
+      return;
+    }
+
+    if(typeof jQuery === 'undefined'){ form.submit(); return; }
+
+    const $btn = $(btn).prop('disabled', true);
+    const fd = new FormData(form);
+
+    $.ajax({
+      url: $(form).attr('action'),
+      type: 'POST',
+      processData: false,
+      contentType: false,
+      data: fd
+    }).done(function(resp){
+      if(resp && resp.success){
+        showSuccessModalById('#modalEdicionExitosa', { parentModalSelector: '#editarModal', reload: true, timeout: 900 });
+      } else {
+        showErr((resp && resp.message) || 'No se pudo guardar los cambios.');
+      }
+    }).fail(function(xhr){
+      const msg = (xhr && xhr.responseJSON && xhr.responseJSON.message) || 'Error del servidor.';
+      showErr(msg);
+    }).always(function(){ $btn.prop('disabled', false); });
+  }
+
+  btn?.addEventListener('click', doGuardar);
+  form?.addEventListener('submit', function(e){ e.preventDefault(); doGuardar(e); });
+
+})();
+</script>

@@ -1,0 +1,818 @@
+﻿@using System.Linq
+@model IEnumerable<SistemaControlPNP.Models.Personal>
+
+@{
+    var total = Model?.Count() ?? 0;
+    var inactivos = Model?.Count(p => !p.Estado) ?? 0;
+    var ahora = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+    var esAdmin = User.IsInRole("Administrador");
+    var placeholder = Url.Content("~/Imagenes/sin-perfil.jpg");
+}
+
+<link rel="stylesheet" href="~/Style/form-styles.css" asp-append-version="true" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<style>
+    /* Evitar que la vista se mueva cuando se abre un modal */
+    body.modal-open {
+        padding-right: 0 !important;
+    }
+
+    /* Siempre mostrar scroll vertical para que nunca cambie el ancho */
+    html {
+        overflow-y: scroll;
+    }
+
+    /* MODAL COMPACTO Y SIN ESPACIOS */
+    .modal-foto-tight .modal-dialog {
+        max-width: 340px !important; /* tamaño compacto */
+        margin: 0.4rem auto; /* casi pegado a los bordes */
+    }
+
+    .foto-tight-content {
+        border-radius: 10px;
+        overflow: hidden;
+        padding: 0; /* sin padding interno */
+        border: 0;
+    }
+
+    /* Encabezado ultra delgado */
+    .foto-tight-header {
+        padding: 4px 10px;
+        border-bottom: 1px solid #e6e6e6;
+    }
+
+    .foto-tight-title {
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .foto-tight-close {
+        padding: 0 6px;
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    /* FOTO AJUSTADA SIN DEJAR ESPACIOS */
+    .foto-tight-body {
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #000; /* opcional: fondo negro para que no se noten bordes */
+    }
+
+        .foto-tight-body img,
+        #verFotoImg {
+            display: block;
+            width: 100% !important; /* ocupa todo el ancho */
+            height: auto !important;
+            max-height: calc(100vh - 140px); /* evita que se salga de la pantalla */
+            object-fit: contain; /* se ajusta sin deformarse */
+            margin: 0;
+            padding: 0;
+        }
+
+    /* Información debajo de la foto */
+    .foto-tight-info {
+        padding: 6px 6px 10px;
+    }
+
+        .foto-tight-info strong {
+            font-size: 0.9rem;
+        }
+
+        .foto-tight-info .text-muted {
+            font-size: 0.78rem;
+        }
+
+    /* Footer ultra compacto */
+    .foto-tight-footer {
+        padding: 5px 8px 10px;
+    }
+
+        .foto-tight-footer .btn-sm {
+            padding: 2px 12px;
+            font-size: 0.78rem;
+        }
+
+    /* ============================
+           HUELLA MÁS GRANDE
+           ============================ */
+    .huella-cell .huella-wrap {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .huella-cell .huella-icon-lg {
+        font-size: 1.8rem;
+        line-height: 1;
+    }
+
+    /* Texto oculto para que el filtro siga detectando "Sí" / "No" */
+    .huella-text-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+    }
+</style>
+
+<div id="vista-personal" class="container page-wrap content-stretch print-scope vista-crud">
+    <!-- ===== Header (misma lógica que Usuarios) ===== -->
+    <div class="header-card mb-3">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+                <h4 class="page-title">
+                    <i class="fas fa-user-tie"></i> Personal
+                </h4>
+                <div class="page-subtle">Administra, crea y edita el personal.</div>
+            </div>
+
+            <div class="header-actions">
+                <!-- Pastillas con tooltip, igual que Usuarios -->
+                <span class="stat-pill" title="Total de personal" data-toggle="tooltip">
+                    <i class="fas fa-database"></i> @total
+                </span>
+
+                <span class="stat-pill" title="Inactivos" data-toggle="tooltip">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="headerInactivos">@inactivos</span>
+                </span>
+
+                <span class="stat-pill" title="Activos" data-toggle="tooltip">
+                    <i class="fas fa-user-check"></i>
+                    <span id="headerActivos">@(@total - @inactivos)</span>
+                </span>
+
+                <div class="search-wrap search-wrap--one-line">
+                    <div class="input-ico">
+                        <i class="fas fa-search"></i>
+                        <input id="busqueda" type="text" class="form-control form-control-sm"
+                               placeholder="Selecciona un filtro..." disabled aria-disabled="true" />
+                    </div>
+
+                    <select id="filtro" class="form-control form-control-sm">
+                        <option value="" selected>Filtrar</option>
+                        <option value="nombre">Nombres y apellidos</option>
+                        <option value="dni">DNI</option>
+                        <option value="cip">CIP</option>
+                        <option value="grado">Grado</option>
+                        <option value="sexo">Sexo</option>
+                        <option value="unidad">Unidad</option>
+                        <option value="fechanac">Fecha nacimiento</option>
+                        <option value="direccion">Dirección</option>
+                        <option value="telefono">Teléfono</option>
+                        <option value="correo">Correo</option>
+                        <option value="activo">Estado</option>
+                        <option value="huella">Huella</option>
+                    </select>
+
+                    @if (esAdmin)
+                    {
+                        <a href="#" id="registroLink" class="btn btn-success btn-sm"
+                           title="Nuevo personal" data-toggle="tooltip">
+                            <i class="fas fa-plus-circle"></i> Nuevo
+                        </a>
+                    }
+
+                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                            onclick="window.print()" title="Imprimir" data-toggle="tooltip">
+                        <i class="fas fa-print"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Tabla (misma base que Usuarios, con scroll-x) ===== -->
+    <div class="table-card table-fixed-head">
+        <div class="table-scroll table-scroll-x">
+            <table id="personalTable"
+                   class="table table-bordered table-hover table-sm row-selectable mb-0 table-ultra-compact table-wide tabla-crud">
+                <colgroup>
+                    <col style="width:9%">
+                    <col style="width:10%">
+                    <col style="width:12%">
+                    <col style="width:12%">
+                    <col style="width:9%">
+                    <col style="width:9%">
+                    <col style="width:10%"> @* Huella más grande *@
+                    <col style="width:8%">
+                    <col style="width:10%">
+                    <col style="width:10%">
+                    <col style="width:14%">
+                    <col style="width:10%">
+                    <col style="width:14%">
+                    <col style="width:11%">
+                    @if (esAdmin)
+                    {
+                        <col class="col-accion" style="width:120px" />
+                    }
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="text-center">Foto</th>
+                        <th class="text-center">Grado</th>
+                        <th class="text-center">Nombres</th>
+                        <th class="text-center">Apellidos</th>
+                        <th class="text-center">CIP</th>
+                        <th class="text-center">DNI</th>
+                        <th class="text-center" title="¿Tiene dato biométrico?">Huella</th>
+                        <th class="text-center">Sexo</th>
+                        <th class="text-center">Unidad</th>
+                        <th class="text-center">F. nacimiento</th>
+                        <th class="text-center">Dirección</th>
+                        <th class="text-center">Teléfono</th>
+                        <th class="text-center">Correo institucional</th>
+                        <th class="text-center">Estado</th>
+                        @if (esAdmin)
+                        {
+                            <th class="text-center col-accion">Acción</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody id="personalTableBody">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            var fotoItem = string.IsNullOrWhiteSpace(item.Foto) ? placeholder : item.Foto;
+                            var tieneHuella = item.Huella != null && item.Huella.Length > 0;
+                            var estaActivo = item.Estado;
+
+                            <tr id="row-@item.IdPersonal" class="@(item.Estado ? "" : "row-inactive")">
+                                <td class="avatar-cell">
+                                    <button type="button" class="btn-icon-plain ver-foto"
+                                            data-src="@fotoItem"
+                                            data-grado="@item.Grado"
+                                            data-nombres="@item.Nombres"
+                                            data-apellidos="@item.Apellidos"
+                                            data-area="@item.Unidad"
+                                            data-sexo="@(item.Sexo == "F" ? "Femenino" : "Masculino")"
+                                            title="Ver foto"
+                                            aria-label="Ver foto">
+                                        <span class="avatar-frame">
+                                            <img src="@fotoItem" class="avatar-sm"
+                                                 alt="Foto de @item.Nombres @item.Apellidos"
+                                                 loading="lazy" decoding="async"
+                                                 onerror="this.onerror=null;this.src='@placeholder';" />
+                                            <span class="avatar-overlay">Ver foto</span>
+                                        </span>
+                                    </button>
+                                </td>
+                                <td class="text-center">@item.Grado</td>
+                                <td class="text-center">@item.Nombres</td>
+                                <td class="text-center">@item.Apellidos</td>
+                                <td class="text-center nowrap">@item.NumeroCip</td>
+                                <td class="text-center nowrap">@item.Dni</td>
+
+                                @* ===== COLUMNA HUELLA MODIFICADA ===== *@
+                                <td class="text-center huella-cell">
+                                    @if (tieneHuella)
+                                    {
+                                        <span class="huella-wrap" title="Con huella">
+                                            <i class="fas fa-fingerprint huella-icon-lg"></i>
+                                            <span class="huella-text-hidden">Sí</span> @* Solo para filtro, no visible *@
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-soft inactive">No</span>
+                                    }
+                                </td>
+
+                                <td class="text-center">@(item.Sexo == "F" ? "Femenino" : "Masculino")</td>
+                                <td class="text-center">@item.Unidad</td>
+                                <td class="text-center nowrap">@item.FechaNacimiento.ToString("dd/MM/yyyy")</td>
+                                <td class="text-center">@item.Direccion</td>
+                                <td class="text-center nowrap">@item.Telefono</td>
+                                <td class="text-center">@item.CorreoInstitucional</td>
+                                <td class="text-center">
+                                    @* ICONO ESTADO: VERDE ACTIVO / ROJO INACTIVO *@
+                                    @if (estaActivo)
+                                    {
+                                        <span class="estado-pill">
+                                            <i class="fas fa-circle text-success"></i>
+                                            <span class="estado-text">Activo</span>
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="estado-pill">
+                                            <i class="fas fa-circle text-danger"></i>
+                                            <span class="estado-text">Inactivo</span>
+                                        </span>
+                                    }
+                                </td>
+                                @if (esAdmin)
+                                {
+                                    <td class="text-center col-accion">
+                                        <div class="action-buttons">
+                                            <a href="#"
+                                               class="btn-icon-box btn-icon--xs text-primary btn-editar"
+                                               data-id="@item.IdPersonal"
+                                               title="Editar"
+                                               data-toggle="tooltip">
+                                                <i class="fas fa-user-edit"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="btn-icon-box btn-icon--xs @(estaActivo ? "text-danger" : "text-success") btn-toggle-estado"
+                                                    data-id="@item.IdPersonal"
+                                                    data-display="@($"{item.Grado} {item.Nombres} {item.Apellidos}")"
+                                                    data-estado="@(estaActivo ? "A" : "I")"
+                                                    title="@(estaActivo ? "Desactivar" : "Activar")"
+                                                    data-toggle="tooltip">
+                                                <i class="fas @(estaActivo ? "fa-user-slash" : "fa-user-check")"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="@(esAdmin ? 15 : 14)">
+                                <div class="empty-box">
+                                    <i class="fas fa-inbox"></i>
+                                    <div>No hay registros disponibles.</div>
+                                    @if (esAdmin)
+                                    {
+                                        <div class="mt-2">
+                                            <a href="#" id="registroLinkEmpty" class="btn btn-success btn-sm"
+                                               title="Nuevo" data-toggle="tooltip">
+                                                <i class="fas fa-user-plus"></i> Crear mi primer registro
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===== Footer ===== -->
+        <div class="table-footer">
+            <div aria-live="polite">
+                Mostrando <strong><span id="countVisibles">@total</span></strong>
+                <span id="wordRegs">@((total == 1) ? "registro" : "registros")</span>
+                <span id="inactivosWrap" style="display:@(inactivos > 0 ? "inline" : "none")">
+                    · <strong><span id="countInactivos">@inactivos</span></strong>
+                    inactivo@(inactivos == 1 ? "" : "s")
+                </span>
+            </div>
+            <div>Actualizado: @ahora</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Modales ===== -->
+<!-- Ver foto (usa modal-slim para tu estilo global) -->
+<div class="modal fade modal-center modal-foto-tight" id="verFotoModal" tabindex="-1" role="dialog"
+     aria-hidden="true" data-backdrop="static" data-keyboard="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content foto-tight-content">
+
+            <div class="modal-header foto-tight-header">
+                <h5 class="modal-title foto-tight-title">
+                    <i class="fas fa-id-badge"></i> Foto
+                </h5>
+                <button type="button" class="close foto-tight-close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body foto-tight-body">
+                <img id="verFotoImg"
+                     src="@placeholder"
+                     alt="Foto"
+                     onerror="this.onerror=null;this.src='@placeholder';" />
+            </div>
+
+            <div class="foto-tight-info">
+                <strong id="verFotoNombre" class="d-block text-center">—</strong>
+                <span id="verFotoGrado" class="text-muted d-block text-center">—</span>
+                <span id="verFotoArea" class="text-muted d-block text-center">—</span>
+            </div>
+
+            <div class="modal-footer foto-tight-footer justify-content-center">
+                <button class="btn btn-primary btn-sm" data-dismiss="modal">Aceptar</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Confirmar activar/desactivar (usa tu estilo modal-crud-confirm) -->
+<div id="confirmarToggleModal"
+     class="modal fade modal-center modal-crud-confirm"
+     tabindex="-1" role="dialog"
+     aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="toggleModalTitle">Confirmar acción</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="mb-2" id="toggleModalText">¿Seguro que deseas continuar?</p>
+                <p class="mb-0"><strong id="toggleName"></strong></p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarToggle" data-enter-default>
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Registrar / Editar (usan tus modales CRUD compactos) -->
+<div class="modal fade modal-center modal-crud-registroPersonal" id="registroModal" tabindex="-1"
+     role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Registrar Personal</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="registroFormContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modal-center modal-crud-editarPersnal" id="editarModal" tabindex="-1"
+     role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Personal</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="editarFormContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form style="display:none;">@Html.AntiForgeryToken()</form>
+
+@section Scripts {
+    <script>
+        (function () {
+          function csrf() {
+            return $('input[name="__RequestVerificationToken"]').first().val();
+          }
+          function norm(s) {
+            return (s || '').toString().toLowerCase()
+                     .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+          }
+
+          // ===== Tooltips =====
+          $(function () {
+            const $tips = $('[data-toggle="tooltip"]');
+            try { $tips.tooltip('dispose'); } catch (e) { }
+            $tips.tooltip({
+              trigger: 'hover',
+              container: 'body',
+              boundary: 'window',
+              placement: 'top'
+            });
+            $(document).on('click focus', '[data-toggle="tooltip"]', function () {
+              $(this).tooltip('hide').blur();
+            });
+            $(window).on('beforeprint', function () { $tips.tooltip('hide'); });
+          });
+
+          // ===== Cargar Registrar / Editar =====
+          $('#registroLink, #registroLinkEmpty').on('click', function (e) {
+            e.preventDefault();
+            $.get('@Url.Action("RegistrarPersonal", "Personal")')
+              .done(function (html) {
+                $('#registroFormContainer').html(html);
+                $('#registroModal').modal('show');
+              })
+              .fail(function () { alert('No se pudo cargar el formulario.'); });
+          });
+
+          $(document).on('click', '.btn-editar', function (e) {
+            e.preventDefault();
+            $.get('@Url.Action("EditarPersonal", "Personal")', { id: $(this).data('id') })
+              .done(function (html) {
+                $('#editarFormContainer').html(html);
+                $('#editarModal').modal('show');
+              })
+              .fail(function () { alert('No se pudo cargar el formulario de edición.'); });
+          });
+
+          // ===== Ver foto =====
+          $(document).on('click', '.ver-foto', function (e) {
+            e.preventDefault();
+            const $b = $(this);
+
+            const $img = $('#verFotoImg');
+            $img
+              .removeAttr('width')
+              .removeAttr('height')
+              .css({ width: '100%', height: 'auto' })   // fuerza css por si acaso
+              .attr('src', $b.data('src') || '@placeholder')
+              .off('error')
+              .on('error', function () {
+                  this.onerror = null;
+                  this.src = '@placeholder';
+              });
+
+            $('#verFotoNombre').text(
+              ((($b.data('nombres') || '') + ' ' + ($b.data('apellidos') || '')).trim()) || '—'
+            );
+            $('#verFotoGrado').text($b.data('grado') || '—');
+            $('#verFotoArea').text($b.data('area') || '—');
+
+            $('#verFotoModal').modal('show');
+          });
+
+
+          // ===== Toggle estado (Activar / Desactivar) =====
+          let toggleId = null, toggleAccion = 'desactivar', toggleDisplay = '';
+
+          $(document).on('click', '.btn-toggle-estado', function () {
+            const $btn = $(this);
+            toggleId = $btn.data('id');
+            toggleDisplay = $btn.data('display') || '';
+            const estado = ($btn.data('estado') || 'A');
+            toggleAccion = (estado === 'A' ? 'desactivar' : 'activar');
+
+            $('#toggleName').text(toggleDisplay);
+
+            if (toggleAccion === 'desactivar') {
+              $('#toggleModalTitle').text('Confirmar desactivación');
+              $('#toggleModalText').html('¿Seguro que deseas <strong>desactivar</strong> este personal?');
+              $('#btnConfirmarToggle').text('Desactivar');
+            } else {
+              $('#toggleModalTitle').text('Confirmar activación');
+              $('#toggleModalText').html('¿Seguro que deseas <strong>activar</strong> este personal?');
+              $('#btnConfirmarToggle').text('Activar');
+            }
+            $('#confirmarToggleModal').modal('show');
+          });
+
+          $('#btnConfirmarToggle').on('click', function () {
+            if (toggleId == null) return;
+            const $ok = $(this).prop('disabled', true);
+            const url = (toggleAccion === 'desactivar')
+                ? '@Url.Action("DesactivarPersonal", "Personal")'
+                : '@Url.Action("ActivarPersonal", "Personal")';
+
+            $.ajax({
+              url: url,
+              type: 'POST',
+              headers: { 'RequestVerificationToken': csrf() },
+              data: { id: toggleId }
+            })
+            .done(function (resp) {
+              $('#confirmarToggleModal').modal('hide');
+              if (resp && resp.success) {
+                const $row = $('#row-' + toggleId);
+                const $btn = $row.find('.btn-toggle-estado').first();
+
+                // Columna Estado usando headers
+                const headerThs = Array.from(document.querySelectorAll('#personalTable thead th'));
+                const headers = headerThs.map(th => (th.textContent || '').trim().toLowerCase());
+                const estadoIdx = headers.indexOf('estado');
+                const $tdEstado = $row.find('td').eq(estadoIdx);
+
+                if (toggleAccion === 'desactivar') {
+                  // ICONO ROJO + texto Inactivo
+                  $tdEstado.html(
+                    '<span class="estado-pill">' +
+                      '<i class="fas fa-circle text-danger"></i> ' +
+                      '<span class="estado-text">Inactivo</span>' +
+                    '</span>'
+                  );
+                  $row.addClass('row-inactive').removeClass('row-selected is-selected');
+                  $btn.removeClass('text-danger').addClass('text-success')
+                      .attr('title', 'Activar')
+                      .data('estado', 'I')
+                      .find('i').attr('class', 'fas fa-user-check');
+                } else {
+                  // ICONO VERDE + texto Activo
+                  $tdEstado.html(
+                    '<span class="estado-pill">' +
+                      '<i class="fas fa-circle text-success"></i> ' +
+                      '<span class="estado-text">Activo</span>' +
+                    '</span>'
+                  );
+                  $row.removeClass('row-inactive');
+                  $btn.removeClass('text-success').addClass('text-danger')
+                      .attr('title', 'Desactivar')
+                      .data('estado', 'A')
+                      .find('i').attr('class', 'fas fa-user-slash');
+                }
+
+                try { $btn.tooltip('dispose'); } catch (e) { }
+                $btn.tooltip({
+                  trigger: 'hover',
+                  container: 'body',
+                  boundary: 'window',
+                  placement: 'top'
+                });
+
+                updateFooterCounts();
+                updateHeaderPills();
+              } else {
+                alert((resp && resp.message) || 'Error al procesar la acción.');
+              }
+            })
+            .fail(function () {
+              $('#confirmarToggleModal').modal('hide');
+              alert('Error al procesar la acción.');
+            })
+            .always(function () { $ok.prop('disabled', false); });
+          });
+
+          // ===== Selección de fila =====
+          $(document).on('click', '#personalTable tbody tr', function (e) {
+            if ($(e.target).closest('.btn, .btn-icon-box, a, i, .ver-foto').length) return;
+            $(this).toggleClass('row-selected is-selected');
+          });
+
+          // ===== Filtros + contador =====
+          const headerThs = Array.from(document.querySelectorAll('#personalTable thead th'));
+          const headers = headerThs.map(th => (th.textContent || '').trim().toLowerCase());
+          const COL = {
+            grado: headers.indexOf('grado'),
+            nombres: headers.indexOf('nombres'),
+            apellidos: headers.indexOf('apellidos'),
+            cip: headers.indexOf('cip'),
+            dni: headers.indexOf('dni'),
+            huella: headers.indexOf('huella'),
+            sexo: headers.indexOf('sexo'),
+            unidad: headers.indexOf('unidad'),
+            fechanac: headers.indexOf('f. nacimiento'),
+            direccion: headers.indexOf('dirección'),
+            telefono: headers.indexOf('teléfono'),
+            correo: headers.indexOf('correo institucional'),
+            estado: headers.indexOf('estado')
+          };
+
+          const $filtro = $('#filtro'), $busqueda = $('#busqueda');
+
+          const placeholderFor = v => {
+            switch (v) {
+              case 'nombre':    return 'Buscar por nombres o apellidos...';
+              case 'dni':       return 'Buscar DNI...';
+              case 'cip':       return 'Buscar CIP...';
+              case 'grado':     return 'Buscar por grado...';
+              case 'sexo':      return 'Escribe masculino / femenino...';
+              case 'unidad':    return 'Buscar por unidad...';
+              case 'fechanac':  return 'Buscar fecha (dd/mm/aaaa o año)...';
+              case 'direccion': return 'Buscar por dirección...';
+              case 'telefono':  return 'Buscar teléfono...';
+              case 'correo':    return 'Buscar correo...';
+              case 'activo':    return 'Escribe activo / inactivo...';
+              case 'huella':    return 'Escribe sí / no...';
+              default:          return 'Selecciona un filtro...';
+            }
+          };
+
+          function filtrar() {
+            const by = $filtro.val();
+            const q  = norm(($busqueda.val() || '').trim());
+
+            $('#personalTableBody tr').each(function () {
+              const tds = this.cells;
+              let ok = true;
+
+              if (!by) {
+                ok = true;
+              } else if (by === 'nombre' && COL.nombres > -1 && COL.apellidos > -1) {
+                const txt = norm(
+                  (tds[COL.nombres].textContent || '') + ' ' +
+                  (tds[COL.apellidos].textContent || '')
+                );
+                ok = txt.includes(q);
+              } else if (by === 'dni' && COL.dni > -1) {
+                ok = norm(tds[COL.dni].textContent || '').includes(q);
+              } else if (by === 'cip' && COL.cip > -1) {
+                ok = norm(tds[COL.cip].textContent || '').includes(q);
+              } else if (by === 'grado' && COL.grado > -1) {
+                ok = norm(tds[COL.grado].textContent || '').includes(q);
+              } else if (by === 'sexo' && COL.sexo > -1) {
+                const txt = norm(tds[COL.sexo].textContent || '');
+                ok = q ? txt.includes(q) : true;
+              } else if (by === 'unidad' && COL.unidad > -1) {
+                ok = norm(tds[COL.unidad].textContent || '').includes(q);
+              } else if (by === 'fechanac' && COL.fechanac > -1) {
+                const txt = norm(tds[COL.fechanac].textContent || '');
+                ok = q ? txt.includes(q) : true;
+              } else if (by === 'direccion' && COL.direccion > -1) {
+                ok = norm(tds[COL.direccion].textContent || '').includes(q);
+              } else if (by === 'telefono' && COL.telefono > -1) {
+                ok = norm(tds[COL.telefono].textContent || '').includes(q);
+              } else if (by === 'correo' && COL.correo > -1) {
+                ok = norm(tds[COL.correo].textContent || '').includes(q);
+              } else if (by === 'activo' && COL.estado > -1) {
+                const est = norm(tds[COL.estado].textContent || '');
+                ok = q ? est.includes(q) : true;
+              } else if (by === 'huella' && COL.huella > -1) {
+                const hv = norm(tds[COL.huella].textContent || '');
+                ok = q ? hv.includes(q) : true;
+              }
+
+              this.style.display = ok ? '' : 'none';
+            });
+
+            updateFooterCounts();
+          }
+
+          function updateFooterCounts() {
+            const $rows = $('#personalTableBody tr:visible');
+            const visibles = $rows.length;
+            const estadoCol = headers.indexOf('estado');
+            let inactivosVis = 0;
+
+            if (estadoCol > -1) {
+              $rows.each(function () {
+                const td = this.cells[estadoCol]; if (!td) return;
+                // ahora se basa en el texto "Inactivo"
+                const txt = (td.textContent || '').toLowerCase();
+                if (txt.includes('inactivo')) inactivosVis++;
+              });
+            }
+
+            $('#countVisibles').text(visibles);
+            $('#wordRegs').text(visibles === 1 ? 'registro' : 'registros');
+            $('#countInactivos').text(inactivosVis);
+            $('#inactivosWrap').css('display', inactivosVis > 0 ? 'inline' : 'none');
+          }
+
+          // Recalcular píldoras de header (Activos/Inactivos)
+          function updateHeaderPills() {
+            const totalRows = $('#personalTableBody tr').length;
+            const estadoCol = headers.indexOf('estado');
+            let inactivos = 0;
+
+            if (estadoCol > -1) {
+              $('#personalTableBody tr').each(function () {
+                const td = this.cells[estadoCol]; if (!td) return;
+                const txt = (td.textContent || '').toLowerCase();
+                if (txt.includes('inactivo')) inactivos++;
+              });
+            }
+
+            const activos = Math.max(0, totalRows - inactivos);
+            $('#headerInactivos').text(inactivos);
+            $('#headerActivos').text(activos);
+          }
+
+          $('#busqueda').prop('disabled', true)
+                        .attr('placeholder', 'Selecciona un filtro...');
+          $('#filtro').on('change', function () {
+            const v = this.value;
+            $('#busqueda').val('');
+            if (!v) {
+              $('#busqueda').prop('disabled', true)
+                            .attr('placeholder', placeholderFor(''));
+              $('#personalTableBody tr').show();
+            } else {
+              $('#busqueda').prop('disabled', false)
+                            .attr('placeholder', placeholderFor(v)).focus();
+            }
+            filtrar();
+          });
+
+          let t;
+          const debounce = (fn, ms) => (...a) => {
+            clearTimeout(t);
+            t = setTimeout(() => fn(...a), ms);
+          };
+
+          $('#busqueda').on('input', debounce(filtrar, 120));
+          $('#busqueda').on('keydown', function (e) {
+            if (e.key === 'Escape') { $(this).val(''); filtrar(); }
+          });
+
+          // Estado inicial
+          $(function () {
+            filtrar();
+            updateHeaderPills();
+          });
+
+        })();
+    </script>
+}
